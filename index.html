@@ -1,0 +1,3624 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>时代少年团 · 经纪人模拟器</title>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'PingFang SC','Microsoft YaHei','Segoe UI',sans-serif;}
+  body{background:radial-gradient(1200px 800px at 15% -10%, #3a2470 0%, transparent 60%),
+               radial-gradient(1000px 700px at 110% 5%, #0f2c5c 0%, transparent 55%), #0e1024;
+       color:#eef; min-height:100vh; padding:14px 16px 40px;}
+  .wrap{max-width:1400px;margin:0 auto;}
+
+  /* ===== 顶部 ===== */
+  header{position:sticky;top:0;z-index:50;background:rgba(14,16,36,.88);backdrop-filter:blur(10px);
+    border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:12px 18px;margin-bottom:14px;
+    display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;box-shadow:0 4px 24px rgba(0,0,0,.35);}
+  .brand{font-size:19px;font-weight:800;letter-spacing:1px;
+    background:linear-gradient(90deg,#ffd93d,#ff6b6b,#a66cff);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .modeTag{font-size:11px;padding:2px 8px;border-radius:99px;background:rgba(255,217,61,.18);color:#ffd93d;border:1px solid rgba(255,217,61,.4);}
+  .hstat{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.06);}
+  .debt{color:#ff6b6b;}
+  .daybar{flex:1;min-width:110px;height:8px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden;}
+  .daybar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#4ecdc4,#ffd93d);transition:width .4s;}
+  .hbtn{border:none;cursor:pointer;color:#fff;font-size:13px;font-weight:700;padding:7px 14px;border-radius:10px;
+    background:linear-gradient(135deg,#6a5cff,#4ecdc4);transition:transform .15s,filter .15s;}
+  .hbtn:hover{transform:translateY(-2px);filter:brightness(1.15);}
+  .hbtn:disabled{opacity:.4;cursor:not-allowed;transform:none;filter:none;}
+  .loanbtn{background:linear-gradient(135deg,#ff8c42,#ff6b6b);font-size:11px;padding:5px 10px;}
+  .repaybtn{background:linear-gradient(135deg,#4ecdc4,#6bcb77);font-size:11px;padding:5px 10px;}
+  .clearbtn{background:rgba(255,255,255,.12);font-size:11px;padding:5px 10px;}
+  .restbtn{background:linear-gradient(135deg,#6bcb77,#4ecdc4);font-size:11px;padding:5px 10px;}
+  .homebtn{background:linear-gradient(135deg,#a66cff,#6a5cff);font-size:11px;padding:5px 10px;}
+  .execReady{animation:breathe2 1.6s ease-in-out infinite;}
+  @keyframes breathe2{0%,100%{box-shadow:0 0 6px rgba(106,92,255,.4);}50%{box-shadow:0 0 20px rgba(106,92,255,.95);}}
+
+  /* ===== 成员卡片 ===== */
+  .members{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px;}
+  .mcard{position:relative;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:16px;
+    padding:12px 10px 10px;cursor:pointer;transition:transform .18s,box-shadow .18s;overflow:hidden;}
+  .mcard:hover{transform:translateY(-4px) scale(1.02);box-shadow:0 8px 20px rgba(0,0,0,.4);}
+  .mcard.gray{filter:grayscale(1);opacity:.62;cursor:not-allowed;}
+  .mcard.gray:hover{transform:none;box-shadow:none;}
+  .avatar{width:50px;height:50px;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;
+    font-size:25px;border:3px solid rgba(255,255,255,.25);box-shadow:0 4px 14px rgba(0,0,0,.4);transition:transform .25s;}
+  .mcard:hover .avatar{transform:scale(1.12) rotate(-6deg);}
+  .mname{text-align:center;font-weight:800;font-size:14px;margin-bottom:6px;}
+  .stat{display:flex;align-items:center;gap:5px;font-size:10.5px;margin:3px 0;}
+  .stat .lb{width:40px;color:#aab;flex:none;}
+  .bar{flex:1;height:6px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden;}
+  .bar i{display:block;height:100%;border-radius:99px;transition:width .5s;}
+  .b-stam{background:linear-gradient(90deg,#6bcb77,#4ecdc4);}
+  .b-mood{background:linear-gradient(90deg,#ffd93d,#ff8c42);}
+  .b-skill{background:linear-gradient(90deg,#4d96ff,#a66cff);}
+  .b-fame{background:linear-gradient(90deg,#ff6b6b,#ffd93d);}
+  .stat .val{width:24px;text-align:right;color:#dde;flex:none;}
+  .fans{font-size:11px;color:#ffd93d;text-align:center;margin-top:4px;}
+  .mbonus{font-size:10.5px;color:#c9a8ff;text-align:center;margin-top:2px;}
+  .fatigue{font-size:10.5px;color:#ff8c42;text-align:center;margin-top:2px;}
+  .cnt{position:absolute;top:8px;right:8px;font-size:10px;padding:2px 7px;border-radius:99px;background:rgba(0,0,0,.45);color:#ffd93d;border:1px solid rgba(255,217,61,.4);animation:popIn .3s;}
+  @keyframes popIn{from{transform:scale(0);}to{transform:scale(1);}}
+  .tired{position:absolute;top:8px;left:8px;font-size:14px;animation:blink 1s infinite;}
+  @keyframes blink{50%{opacity:.3;}}
+  .soloTag{position:absolute;top:8px;right:8px;font-size:10px;padding:2px 8px;border-radius:99px;background:rgba(255,217,61,.2);color:#ffd93d;border:1px solid rgba(255,217,61,.5);}
+  .hospTag{position:absolute;top:8px;right:8px;font-size:10px;padding:2px 8px;border-radius:99px;background:rgba(255,107,107,.25);color:#ffb3b3;border:1px solid rgba(255,107,107,.55);}
+
+  /* ===== 流程图 ===== */
+  .sec-title{font-size:15px;font-weight:800;margin:12px 0 8px;color:#cdd;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .sec-title span{font-size:12px;color:#899;font-weight:500;}
+  .flow{display:flex;align-items:stretch;gap:8px;overflow-x:auto;padding:8px 4px 14px;margin-bottom:6px;}
+  .flow::-webkit-scrollbar{height:6px;} .flow::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:99px;}
+  .fslot{position:relative;flex:none;min-width:112px;max-width:150px;background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:8px 6px 6px;text-align:center;transition:all .2s;}
+  .fslot.filled{border-color:rgba(106,92,255,.55);background:linear-gradient(160deg, rgba(106,92,255,.16), rgba(255,255,255,.04));animation:popIn .3s;}
+  .fslot.empty{border-style:dashed;cursor:pointer;}
+  .fslot.empty:hover{border-color:#ffd93d;background:rgba(255,217,61,.08);transform:translateY(-3px);}
+  .fslot.empty.target{border-color:#ffd93d;background:rgba(255,217,61,.14);box-shadow:0 0 14px rgba(255,217,61,.3);}
+  .fnum{position:absolute;top:4px;left:7px;font-size:10px;color:#899;}
+  .femoji{font-size:24px;display:block;margin-top:4px;}
+  .fname{font-size:12px;font-weight:700;display:block;margin:2px 0 4px;}
+  .fplus{font-size:26px;color:#667;display:block;margin-top:6px;font-weight:800;}
+  .fava{display:inline-block;width:22px;height:22px;border-radius:50%;font-size:12px;line-height:22px;text-align:center;
+    border:1px solid rgba(255,255,255,.5);margin:1px;}
+  .fdel{position:absolute;top:2px;right:3px;border:none;background:rgba(255,107,107,.25);color:#ff9;font-size:10px;
+    width:18px;height:18px;border-radius:50%;cursor:pointer;line-height:1;}
+  .fdel:hover{background:#ff6b6b;color:#fff;}
+  .farrow{flex:none;align-self:center;color:#667;font-size:16px;padding:0 1px;}
+
+  /* ===== 预估面板（呼吸灯） ===== */
+  .predict{border:2px solid rgba(255,217,61,.45);border-radius:18px;padding:14px;background:rgba(255,217,61,.05);margin-bottom:14px;
+    animation:breathe 1.8s ease-in-out infinite;}
+  @keyframes breathe{
+    0%,100%{box-shadow:0 0 8px rgba(255,217,61,.25);border-color:rgba(255,217,61,.45);}
+    50%{box-shadow:0 0 28px rgba(255,217,61,.8);border-color:#ffd93d;}
+  }
+  .pcoins{font-size:13px;font-weight:800;color:#ffd93d;text-align:center;margin-bottom:10px;letter-spacing:1px;}
+  .pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;}
+  .pcell{background:rgba(0,0,0,.3);border-radius:12px;padding:10px;font-size:11px;text-align:center;}
+  .pava{width:34px;height:34px;border-radius:50%;margin:0 auto 4px;display:flex;align-items:center;justify-content:center;font-size:17px;border:2px solid rgba(255,255,255,.3);}
+  .pcell b{display:block;margin-bottom:5px;font-size:12px;}
+  .prow{display:flex;align-items:center;gap:4px;margin:3px 0;}
+  .prow span{width:28px;color:#aab;flex:none;}
+  .ptrack{flex:1;height:5px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;}
+  .ptrack i{display:block;height:100%;border-radius:99px;}
+  .prow em{min-width:74px;text-align:right;font-style:normal;color:#6bcb77;flex:none;}
+  .pfans{font-size:10.5px;color:#ffd93d;margin-top:4px;}
+
+  /* ===== 日程卡片 ===== */
+  .acts{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:14px;}
+  .acard{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:12px;
+    cursor:pointer;transition:transform .18s,box-shadow .18s;position:relative;overflow:hidden;}
+  .acard:hover{transform:translateY(-4px) scale(1.02);box-shadow:0 8px 26px rgba(0,0,0,.4);}
+  .acard .aemoji{font-size:26px;display:block;text-align:center;margin-bottom:4px;transition:transform .25s;}
+  .acard:hover .aemoji{transform:scale(1.25) rotate(8deg);}
+  .acard .aname{font-weight:800;font-size:14px;text-align:center;}
+  .acard .adesc{font-size:10.5px;color:#9ab;text-align:center;margin:2px 0 6px;}
+  .acard .aeff{font-size:10.5px;color:#cde;display:flex;flex-wrap:wrap;gap:3px;justify-content:center;}
+  .aeff em{font-style:normal;padding:1px 5px;border-radius:6px;background:rgba(255,255,255,.08);}
+  .aeff em.up{color:#6bcb77;} .aeff em.down{color:#ff6b6b;}
+  .atag{position:absolute;top:6px;left:6px;font-size:9.5px;padding:2px 7px;border-radius:99px;}
+  .atag.grp{background:rgba(166,108,255,.25);color:#c9a8ff;border:1px solid rgba(166,108,255,.5);}
+  .atag.per{background:rgba(78,205,196,.2);color:#7fe0da;border:1px solid rgba(78,205,196,.5);}
+  .atag.rest{background:rgba(107,203,119,.2);color:#8fe0a0;border:1px solid rgba(107,203,119,.5);}
+  .acost{position:absolute;top:6px;right:6px;font-size:10px;padding:2px 7px;border-radius:99px;background:rgba(0,0,0,.4);}
+  .acard.off{opacity:.4;cursor:not-allowed;filter:grayscale(.6);}
+  .acard.off:hover{transform:none;box-shadow:none;}
+
+  /* ===== 投资市场 ===== */
+  .invest{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:14px;margin-bottom:14px;}
+  .inv-summary{font-size:13px;font-weight:800;text-align:center;margin-bottom:12px;color:#ffd93d;letter-spacing:1px;}
+  .inv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;}
+  .invcard{background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:12px;}
+  .inv-top{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .inv-emoji{font-size:28px;}
+  .inv-info{flex:1;min-width:0;}
+  .inv-info b{font-size:14px;display:block;}
+  .inv-info small{font-size:10.5px;color:#9ab;}
+  .inv-price{text-align:right;font-size:11.5px;line-height:1.7;}
+  .inv-price b{font-size:15px;color:#fff;}
+  .inv-price em{font-style:normal;font-weight:800;}
+  .inv-price em.up{color:#6bcb77;} .inv-price em.down{color:#ff6b6b;}
+  .inv-op{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+  .inv-hold{font-size:11px;color:#c9a8ff;}
+  .inv-btns{display:flex;gap:5px;}
+  .inv-btns button{border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.07);color:#eef;font-size:11px;
+    font-weight:700;padding:4px 9px;border-radius:8px;cursor:pointer;transition:all .12s;}
+  .inv-btns button:hover{border-color:#ffd93d;background:rgba(255,217,61,.2);}
+  .inv-btns button.sell:hover{border-color:#ff6b6b;background:rgba(255,107,107,.2);}
+
+  /* ===== 日志 ===== */
+  .logbox{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:12px 16px;
+    max-height:260px;overflow-y:auto;margin-bottom:14px;font-size:13px;line-height:1.9;}
+  .logbox::-webkit-scrollbar{width:6px;} .logbox::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:99px;}
+  .lg{display:flex;gap:8px;border-bottom:1px dashed rgba(255,255,255,.05);padding:3px 0;animation:logIn .35s;}
+  @keyframes logIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:none;}}
+  .lg:last-child{border-bottom:none;} .lg .t{color:#667;flex:none;}
+  .lg.normal{color:#cde;} .lg.good{color:#6bcb77;} .lg.bad{color:#ff6b6b;} .lg.warn{color:#ffd93d;}
+
+  /* ===== 弹窗通用 ===== */
+  .overlay{position:fixed;inset:0;background:rgba(5,6,18,.82);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px;animation:fadein .3s;}
+  /* v1.0.7-fix2：首页全屏化（不透出下层游戏界面），开始游戏后才跳转到游戏界面 */
+  .overlay#home{background:linear-gradient(160deg,#16142e,#0c0d1f);backdrop-filter:none;}
+  body.theme-light .overlay#home{background:radial-gradient(1200px 800px at 15% -10%, #d9c9f5 0%, transparent 60%),radial-gradient(1000px 700px at 110% 5%, #c6d9ff 0%, transparent 55%),#e9edf7;}
+  .modal{background:linear-gradient(160deg,#1c1a3d,#12122b);border:1px solid rgba(255,255,255,.15);border-radius:22px;
+    max-width:660px;width:100%;padding:26px;max-height:92vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.7);animation:pop .35s;}
+  @keyframes pop{from{transform:scale(.75);opacity:0;}to{transform:scale(1);opacity:1;}}
+  @keyframes fadein{from{opacity:0;}to{opacity:1;}}
+  .modal h2{text-align:center;font-size:22px;margin-bottom:4px;}
+  .modal .sub{text-align:center;color:#9ab;font-size:13px;margin-bottom:14px;}
+  .scoreline{display:flex;align-items:center;gap:10px;margin:8px 0;font-size:13px;}
+  .scoreline .lb{width:64px;color:#cde;flex:none;}
+  .scoreline .bar{flex:1;} .scoreline .pt{width:54px;text-align:right;font-weight:800;flex:none;}
+  .bigscore{font-size:56px;font-weight:900;text-align:center;margin:8px 0;background:linear-gradient(90deg,#ffd93d,#ff6b6b,#a66cff);-webkit-background-clip:text;background-clip:text;color:transparent;animation:scorePop .8s;}
+  @keyframes scorePop{0%{transform:scale(0);opacity:0;}60%{transform:scale(1.2);}100%{transform:scale(1);}}
+  .rank{text-align:center;font-size:18px;font-weight:800;margin-bottom:16px;animation:popIn .6s .2s both;}
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:12px;}
+  .mini{background:rgba(255,255,255,.05);border-radius:12px;padding:10px;font-size:12px;}
+  .mini b{display:block;margin-bottom:6px;}
+  .mini div{display:flex;justify-content:space-between;color:#bcd;}
+  .btnrow{display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap;}
+  .modal .restart{border:none;cursor:pointer;font-size:15px;font-weight:800;color:#111;padding:11px 34px;border-radius:12px;
+    background:linear-gradient(90deg,#ffd93d,#ff8c42);transition:transform .15s;}
+  .modal .restart:hover{transform:scale(1.05);}
+  .modal .savebtn{background:linear-gradient(90deg,#6bcb77,#4ecdc4);}
+  .ruin{text-align:center;font-size:44px;margin-bottom:6px;animation:shake .6s;}
+  .vtag{text-align:center;color:#667;font-size:10.5px;margin-top:18px;letter-spacing:1px;}
+
+  /* ===== 突发事件弹窗 ===== */
+  .evtitle{text-align:center;font-size:20px;font-weight:900;margin-bottom:6px;color:#ffd93d;animation:popIn .4s;}
+  .opt{display:block;width:100%;text-align:left;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);
+    border-radius:12px;padding:12px 14px;margin:8px 0;cursor:pointer;font-size:13px;color:#eef;transition:all .18s;opacity:0;animation:popLine .45s forwards;}
+  .opt:hover{border-color:#ffd93d;background:rgba(255,217,61,.12);transform:translateX(6px);box-shadow:0 6px 18px rgba(255,217,61,.15);}
+  .opt b{display:block;color:#ffd93d;font-size:14px;margin-bottom:3px;}
+  .opt small{color:#9ab;font-size:11.5px;line-height:1.6;}
+  .rline{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;margin:6px 0;border-radius:10px;
+    background:rgba(255,255,255,.05);font-size:14px;font-weight:700;opacity:0;animation:popLine .45s forwards;}
+  @keyframes popLine{from{opacity:0;transform:translateX(-16px);}to{opacity:1;transform:none;}}
+  .rline.up b{color:#6bcb77;} .rline.down b{color:#ff6b6b;}
+  .shake{animation:shake .55s;}
+  @keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-10px);}40%{transform:translateX(10px);}60%{transform:translateX(-7px);}80%{transform:translateX(7px);}}
+
+  /* ===== 暴击动画 / 浮动数字 / 彩带 / 执行条 ===== */
+  .critpop{position:fixed;top:18%;left:50%;transform:translateX(-50%);z-index:350;pointer-events:none;text-align:center;
+    animation:critPop 1.4s forwards;text-shadow:0 2px 16px rgba(0,0,0,.8);}
+  @keyframes critPop{0%{opacity:0;transform:translate(-50%,-40px) scale(.4);}15%{opacity:1;transform:translate(-50%,0) scale(1.2);}30%{transform:translate(-50%,0) scale(1);}80%{opacity:1;}100%{opacity:0;transform:translate(-50%,-30px) scale(.95);}}
+  .critp-title{font-size:30px;font-weight:900;color:#ffd93d;}
+  .critpop.good .critp-title{color:#6bcb77;}
+  .critp-msg{font-size:15px;font-weight:700;color:#fff;margin-top:4px;}
+  .floatbox{position:fixed;left:50%;top:34%;transform:translateX(-50%);z-index:300;pointer-events:none;
+    font-size:22px;font-weight:900;animation:floatUp 1.15s forwards;text-shadow:0 2px 10px rgba(0,0,0,.7);}
+  .floatbox.good{color:#6bcb77;} .floatbox.bad{color:#ff6b6b;} .floatbox.warn{color:#ffd93d;}
+  @keyframes floatUp{0%{opacity:0;transform:translate(-50%,14px) scale(.5);}15%{opacity:1;transform:translate(-50%,0) scale(1.2);}100%{opacity:0;transform:translate(-50%,-90px) scale(1);}}
+  .confetti{position:fixed;top:-22px;width:10px;height:14px;z-index:400;pointer-events:none;animation:fall linear forwards;}
+  @keyframes fall{to{transform:translateY(112vh) rotate(760deg);}}
+  .exectoast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:150;background:rgba(20,20,45,.94);
+    border:1px solid rgba(255,217,61,.5);border-radius:14px;padding:10px 20px;display:flex;align-items:center;gap:10px;
+    font-size:13px;font-weight:700;pointer-events:none;box-shadow:0 8px 30px rgba(0,0,0,.5);animation:popIn .3s;}
+  .spinner{width:22px;height:22px;border:3px solid rgba(255,255,255,.15);border-top-color:#ffd93d;border-radius:50%;animation:spin 1s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* ===== 成员选择弹窗 ===== */
+  .chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:8px;margin:14px 0;}
+  .chip{border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);border-radius:12px;padding:8px 4px;
+    text-align:center;cursor:pointer;transition:all .15s;}
+  .chip:hover{border-color:#8af;transform:translateY(-2px);}
+  .chip.on{border-color:#ffd93d;background:rgba(255,217,61,.16);box-shadow:0 0 12px rgba(255,217,61,.25);}
+  .chip.dim{opacity:.35;cursor:not-allowed;}
+  .chip.gray{filter:grayscale(1);}
+  .chip .cava{width:34px;height:34px;border-radius:50%;margin:0 auto 4px;display:flex;align-items:center;justify-content:center;font-size:17px;border:2px solid rgba(255,255,255,.3);}
+  .chip .cn{font-size:11px;font-weight:700;}
+  .minfo{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;font-size:12px;margin-bottom:6px;}
+  .minfo em{font-style:normal;padding:2px 8px;border-radius:8px;background:rgba(255,255,255,.08);}
+  .minfo em.up{color:#6bcb77;} .minfo em.down{color:#ff6b6b;}
+  .confirm{display:block;margin:10px auto 0;border:none;cursor:pointer;font-size:15px;font-weight:800;color:#111;
+    padding:11px 30px;border-radius:12px;background:linear-gradient(90deg,#ffd93d,#ff8c42);transition:transform .15s;}
+  .confirm:hover{transform:scale(1.05);}
+  .cancel{position:absolute;top:12px;right:14px;border:none;background:rgba(255,255,255,.1);color:#fff;font-size:13px;width:28px;height:28px;border-radius:50%;cursor:pointer;}
+
+  /* ===== 首页 ===== */
+  .home{max-width:820px;text-align:center;}
+  .htitle{font-size:44px;font-weight:900;letter-spacing:6px;line-height:1.3;
+    background:linear-gradient(90deg,#ffd93d,#ff6b6b,#a66cff,#4ecdc4);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:2px;}
+  .hsub{color:#9ab;font-size:14px;margin-bottom:14px;letter-spacing:2px;}
+  .havas{display:flex;justify-content:center;gap:6px;margin-bottom:20px;flex-wrap:wrap;}
+  .havas span{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;border:2px solid rgba(255,255,255,.25);box-shadow:0 4px 14px rgba(0,0,0,.4);animation:bob 2.4s ease-in-out infinite;}
+  .havas span:nth-child(2){animation-delay:.2s}.havas span:nth-child(3){animation-delay:.4s}.havas span:nth-child(4){animation-delay:.6s}.havas span:nth-child(5){animation-delay:.8s}.havas span:nth-child(6){animation-delay:1s}.havas span:nth-child(7){animation-delay:1.2s}
+  @keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+  .hmode{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px;}
+  @media (max-width:1000px){.hmode{grid-template-columns:1fr 1fr;}}
+  @media (max-width:720px){.hmode{grid-template-columns:1fr;}.htitle{font-size:32px;}}
+  .modecard{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:20px 16px;cursor:pointer;transition:all .2s;}
+  .modecard:hover{border-color:#ffd93d;transform:translateY(-4px);box-shadow:0 12px 30px rgba(0,0,0,.4);}
+  .modecard .mico{font-size:34px;margin-bottom:8px;}
+  .modecard b{font-size:18px;display:block;margin-bottom:6px;}
+  .modecard .md{font-size:12.5px;color:#9ab;line-height:1.8;margin-bottom:10px;}
+  .modecard .go{border:none;cursor:pointer;font-size:13px;font-weight:800;color:#111;padding:8px 22px;border-radius:10px;background:linear-gradient(90deg,#ffd93d,#ff8c42);}
+  .quickdays{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+  .quickdays button{border:1px solid rgba(255,217,61,.5);background:rgba(255,217,61,.1);color:#ffd93d;font-size:12.5px;font-weight:700;padding:6px 12px;border-radius:10px;cursor:pointer;transition:all .15s;}
+  .quickdays button:hover{background:rgba(255,217,61,.3);}
+  .soloPicks{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin:6px 0 10px;}
+  .soloPick{width:38px;height:38px;border-radius:50%;border:2px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05);
+    font-size:18px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;}
+  .soloPick:hover{transform:scale(1.15);}
+  .soloPick.on{border-color:#ffd93d;background:rgba(255,217,61,.2);box-shadow:0 0 10px rgba(255,217,61,.45);}
+  .hrules{background:rgba(255,255,255,.04);border:1px dashed rgba(255,255,255,.15);border-radius:14px;padding:12px 16px;font-size:12px;color:#bcd;line-height:2;text-align:left;margin-bottom:14px;}
+  .hrules b{color:#ffd93d;}
+  .updbox{background:rgba(166,108,255,.06);border:1px solid rgba(166,108,255,.35);border-radius:14px;padding:12px 16px;font-size:12px;color:#d5c6ff;line-height:2;text-align:left;margin-bottom:14px;}   /* v1.0.8：板块间补间距 */
+  .updbox b{color:#a66cff;font-size:13px;}
+  .upd-head{cursor:pointer;font-size:13.5px;color:#a66cff;font-weight:800;margin-bottom:2px;user-select:none;}
+  .upd-head:hover{opacity:.8;}
+  /* v1.0.7：存档与图鉴 */
+  .savebox{background:rgba(78,205,196,.07);border:1px solid rgba(78,205,196,.35);border-radius:14px;padding:12px 16px;margin-bottom:14px;text-align:left;}
+  .savebox>b{color:#4ecdc4;font-size:14px;display:block;margin-bottom:8px;}
+  .save-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px 10px;font-size:12.5px;color:#cde;margin-bottom:8px;}
+  .save-grid b{color:#ffd93d;}
+  .hist-title{font-size:12px;color:#9ab;margin-bottom:4px;}
+  .hist-row{font-size:12px;color:#7fe0da;cursor:pointer;padding:3px 6px;border-radius:6px;}
+  .hist-row:hover{background:rgba(78,205,196,.15);}
+  .save-btns{display:flex;gap:8px;margin:8px 0;flex-wrap:wrap;}
+  .save-warn{font-size:11px;color:#d9a0a0;line-height:1.7;margin-top:4px;}
+  .encyc{background:rgba(166,108,255,.06);border:1px solid rgba(166,108,255,.35);border-radius:14px;padding:12px 16px;margin-bottom:14px;text-align:left;max-height:300px;overflow-y:auto;}
+  .encyc>b{color:#a66cff;font-size:14px;}
+  .encyc-sub{font-size:11px;color:#9ab;margin:2px 0 8px;}
+  .enc-head{font-size:12.5px;color:#c9a8ff;font-weight:700;cursor:pointer;padding:4px 6px;border-radius:6px;user-select:none;}
+  .enc-head:hover{background:rgba(166,108,255,.15);opacity:.8;}   /* v1.0.7-fix2：hover 与公告折叠一致 */
+  .enc-head.lock{color:#667;cursor:default;}
+  .enc-head.lock:hover{background:none;}
+  .enc-opt{font-size:12px;padding:2px 6px 2px 18px;color:#bcd;}
+  .enc-opt.chosen{color:#8fe0a0;}
+  .enc-opt.lock{color:#667;}
+  .enc-desc{color:#9ab;font-size:11px;}
+  .enc-num{display:block;color:#ffd93d;font-size:11.5px;font-weight:700;margin-top:2px;line-height:1.7;}
+  body.theme-light .enc-num{color:#8a6d00;}
+  /* v1.0.7-fix1：图鉴独立界面排版 */
+  .enc-modal{max-width:900px;}
+  .enc-progress{display:flex;align-items:center;gap:10px;margin:10px 0 14px;font-size:12.5px;color:#c9a8ff;font-weight:700;}
+  .enc-bar{flex:1;height:10px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden;}
+  .enc-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#a66cff,#ffd93d);transition:width .4s;}
+  .enc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;max-height:56vh;overflow-y:auto;padding-right:4px;}
+  .enc-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:8px 10px;}
+  .enc-card.locked{opacity:.55;}
+  .enc-options{display:flex;flex-direction:column;gap:2px;padding-top:4px;}
+  body.theme-light .enc-modal .enc-progress{color:#6a3fd8;}
+  body.theme-light .enc-bar{background:rgba(40,55,100,.12);}
+  body.theme-light .enc-card{background:rgba(40,55,100,.06);border-color:rgba(40,55,100,.14);}
+  body.theme-light .enc-opt{color:#4a5470;}
+  body.theme-light .enc-opt.chosen{color:#2e8b4f;}
+  body.theme-light .enc-head{color:#6a3fd8;}
+  body.theme-light .enc-opt.lock{color:#8a92a8;}
+  body.theme-light .savebox{background:rgba(46,158,91,.07);border-color:rgba(46,158,91,.35);}
+  body.theme-light .savebox>b{color:#2e9e5b;}
+  body.theme-light .save-grid{color:#4a5470;}
+  body.theme-light .save-grid b{color:#8a6d00;}
+  body.theme-light .hist-row{color:#1d7f7a;}
+  body.theme-light .hist-title{color:#5a6480;}
+  body.theme-light .save-warn{color:#a0605a;}
+  body.theme-light .encyc{border-color:rgba(120,80,220,.4);background:rgba(120,80,220,.07);}
+  body.theme-light .encyc>b{color:#6a3fd8;}
+  body.theme-light .enc-head{color:#6a3fd8;}
+  body.theme-light .enc-opt{color:#4a5470;}
+  body.theme-light .enc-opt.chosen{color:#2e8b4f;}
+  .footer{text-align:center;color:#667;font-size:12px;margin-top:8px;}
+  .home .footer{margin-top:14px;}
+
+  /* ===== 主题 / 难度（v1.0.1） ===== */
+  .themeRow{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;font-size:13px;color:#9ab;}
+  .themebtn{border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.07);color:#eef;font-size:12.5px;font-weight:700;
+    padding:5px 14px;border-radius:10px;cursor:pointer;transition:all .15s;}
+  .themebtn:hover{border-color:#ffd93d;background:rgba(255,217,61,.2);}
+  .themebtn.on{border-color:#ffd93d;background:rgba(255,217,61,.25);color:#ffd93d;box-shadow:0 0 10px rgba(255,217,61,.3);}
+  .diffRow{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:14px;font-size:13px;color:#9ab;}
+  .diffbtn{border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.07);color:#eef;font-size:13px;font-weight:800;
+    padding:6px 18px;border-radius:10px;cursor:pointer;transition:all .15s;}
+  .diffbtn:hover{border-color:#ff6b6b;background:rgba(255,107,107,.15);}
+  .diffbtn.on{border-color:#ff6b6b;background:rgba(255,107,107,.28);color:#ffb3b3;box-shadow:0 0 10px rgba(255,107,107,.35);}
+  .diffpanel{background:rgba(255,107,107,.07);border:1px solid rgba(255,107,107,.35);border-radius:14px;padding:14px 18px;
+    margin-bottom:14px;font-size:13px;color:#ffd9d9;text-align:left;line-height:2;}
+  .diffpanel b{color:#ffb3b3;font-size:14px;display:block;text-align:center;margin-bottom:6px;}
+  .diffrow{display:flex;align-items:center;gap:10px;margin:4px 0;}
+  .diffrow .dlb{width:110px;color:#ffd9d9;flex:none;font-size:12.5px;}
+  .diffrow input[type=range]{flex:1;accent-color:#ff6b6b;}
+  .diffrow .dval{width:64px;text-align:right;color:#ffd93d;font-weight:800;flex:none;}
+  .diffnote{font-size:11.5px;color:#d9a0a0;text-align:center;margin-top:4px;}
+
+  /* ===== 浅色主题（追加覆盖，不改变默认深色） ===== */
+  body.theme-light{background:radial-gradient(1200px 800px at 15% -10%, #d9c9f5 0%, transparent 60%),
+    radial-gradient(1000px 700px at 110% 5%, #c6d9ff 0%, transparent 55%), #e9edf7;color:#232a3e;}
+  body.theme-light header{background:rgba(240,243,250,.92);border-color:rgba(40,55,100,.15);}
+  body.theme-light .hstat{background:rgba(40,55,100,.08);color:#39415a;}
+  body.theme-light .mcard{background:rgba(40,55,100,.06);border-color:rgba(40,55,100,.16);}
+  body.theme-light .mcard:hover{box-shadow:0 8px 20px rgba(30,45,90,.18);}
+  body.theme-light .bar{background:rgba(40,55,100,.12);}
+  body.theme-light .stat .val{color:#39415a;}
+  body.theme-light .sec-title{color:#3c4560;}
+  body.theme-light .sec-title span{color:#6a748f;}
+  body.theme-light .fslot{background:rgba(40,55,100,.05);border-color:rgba(40,55,100,.14);}
+  body.theme-light .fslot.filled{background:linear-gradient(160deg, rgba(106,92,255,.16), rgba(255,255,255,.55));border-color:rgba(106,92,255,.5);}
+  body.theme-light .fnum{color:#6a748f;}
+  body.theme-light .fplus{color:#8a92a8;}
+  body.theme-light .farrow{color:#8a92a8;}
+  body.theme-light .predict{background:rgba(255,217,61,.12);}
+  body.theme-light .pcell{background:rgba(40,55,100,.06);}
+  body.theme-light .prow span{color:#5a6480;}
+  body.theme-light .pcoins{color:#b8860b;}
+  body.theme-light .acard{background:rgba(40,55,100,.06);border-color:rgba(40,55,100,.16);}
+  body.theme-light .acard:hover{box-shadow:0 8px 26px rgba(30,45,90,.18);}
+  body.theme-light .acard .adesc{color:#5a6480;}
+  body.theme-light .aeff{color:#39415a;}
+  body.theme-light .aeff em{background:rgba(40,55,100,.1);}
+  body.theme-light .acost{background:rgba(40,55,100,.22);color:#232a3e;}
+  body.theme-light .invest{background:rgba(40,55,100,.05);border-color:rgba(40,55,100,.12);}
+  body.theme-light .invcard{background:rgba(40,55,100,.06);border-color:rgba(40,55,100,.14);}
+  body.theme-light .inv-info small{color:#5a6480;}
+  body.theme-light .inv-price em{color:#39415a;}
+  body.theme-light .inv-btns button{background:rgba(40,55,100,.08);border-color:rgba(40,55,100,.2);color:#232a3e;}
+  body.theme-light .inv-hold{color:#7a5cff;}
+  body.theme-light .logbox{background:rgba(40,55,100,.05);border-color:rgba(40,55,100,.12);}
+  body.theme-light .lg.normal{color:#39415a;}
+  body.theme-light .lg.good{color:#2e9e5b;}
+  body.theme-light .lg.bad{color:#d8433a;}
+  body.theme-light .lg.warn{color:#c99700;}
+  body.theme-light .lg .t{color:#8a92a8;}
+  body.theme-light .modal{background:linear-gradient(160deg,#ffffff,#e6ebf7);border-color:rgba(40,55,100,.18);}
+  body.theme-light .modal .sub{color:#5a6480;}
+  body.theme-light .scoreline .lb{color:#39415a;}
+  body.theme-light .mini{background:rgba(40,55,100,.06);}
+  body.theme-light .mini div{color:#4a5470;}
+  body.theme-light .opt{background:rgba(40,55,100,.06);border-color:rgba(40,55,100,.16);color:#232a3e;}
+  body.theme-light .opt small{color:#5a6480;}
+  body.theme-light .opt b{color:#b8860b;}
+  body.theme-light .rline{background:rgba(40,55,100,.06);}
+  body.theme-light .chip{background:rgba(40,55,100,.06);border-color:rgba(40,55,100,.18);}
+  body.theme-light .chip .cn{color:#232a3e;}
+  body.theme-light .minfo em{background:rgba(40,55,100,.1);}
+  body.theme-light .cancel{background:rgba(40,55,100,.12);color:#232a3e;}
+  body.theme-light .modecard{background:rgba(40,55,100,.06);border-color:rgba(40,55,100,.16);}
+  body.theme-light .modecard .md{color:#5a6480;}
+  body.theme-light .soloPick{background:rgba(40,55,100,.06);border-color:rgba(40,55,100,.2);}
+  body.theme-light .hrules{background:rgba(40,55,100,.05);border-color:rgba(40,55,100,.2);color:#4a5470;}
+  body.theme-light .hrules b{color:#b8860b;}
+  body.theme-light .updbox{background:rgba(120,80,220,.08);border-color:rgba(120,80,220,.32);color:#4a3a80;}
+  body.theme-light .footer{color:#8a92a8;}
+  body.theme-light .fans{color:#8a6d00;}
+  body.theme-light .mbonus{color:#7a5cff;}
+  body.theme-light .fatigue{color:#c05a20;}
+  body.theme-light .debt{color:#d8433a;}
+  body.theme-light .evtitle{color:#8a6d00;}
+  body.theme-light .themeRow{color:#5a6480;}
+  body.theme-light .diffRow{color:#5a6480;}
+  body.theme-light .themebtn{background:rgba(40,55,100,.08);border-color:rgba(40,55,100,.2);color:#232a3e;}
+  body.theme-light .themebtn.on{background:rgba(255,217,61,.3);border-color:#c99700;color:#8a6d00;}
+  body.theme-light .diffbtn{background:rgba(40,55,100,.08);border-color:rgba(40,55,100,.2);color:#232a3e;}
+  body.theme-light .diffbtn.on{background:rgba(255,107,107,.25);border-color:#d8433a;color:#a03028;}
+  body.theme-light .diffpanel{background:rgba(255,107,107,.08);border-color:rgba(216,67,58,.4);color:#7a3a35;}
+  body.theme-light .diffpanel b{color:#a03028;}
+  body.theme-light .diffpanel .dlb{color:#7a3a35;}
+  body.theme-light .diffpanel .dval{color:#8a6d00;}
+  /* v1.0.6：投资区贷款板块 */
+  .loanarea{margin-top:12px;padding:12px;border:1px solid rgba(255,107,107,.35);border-radius:12px;background:rgba(255,107,107,.06);display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;}
+  .loaninfo{font-size:13px;color:#d9a0a0;font-weight:700;}
+  .loanbtns{display:flex;gap:6px;flex-wrap:wrap;}
+  /* v1.0.6：基建卡片 */
+  .infra-card{background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:12px;}
+  .infra-top{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+  .infra-emoji{font-size:26px;}
+  .infra-info{flex:1;min-width:0;}
+  .infra-info b{font-size:14px;display:block;}
+  .infra-info small{font-size:10.5px;color:#9ab;}
+  .infra-lvl{font-size:12px;font-weight:800;color:#ffd93d;}
+  .infra-bar{height:6px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden;margin-bottom:8px;}
+  .infra-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#a66cff,#ffd93d);transition:width .4s;}
+  .infra-btns{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+  .infra-eff{font-size:11.5px;color:#c9a8ff;font-weight:700;}
+  .infra-max{font-size:12px;color:#6bcb77;font-weight:800;}
+  body.theme-light .infra-card{background:rgba(40,55,100,.06);border-color:rgba(40,55,100,.14);}
+  body.theme-light .infra-info small{color:#5a6480;}
+  body.theme-light .infra-lvl{color:#8a6d00;}
+  body.theme-light .infra-eff{color:#6a3fd8;}
+  body.theme-light .infra-max{color:#2e9e5b;}
+  body.theme-light .loanarea{background:rgba(216,67,58,.06);border-color:rgba(216,67,58,.3);}
+  body.theme-light .loaninfo{color:#7a3a35;}
+  body.theme-light .diffnote{color:#a0605a;}
+  body.theme-light .vtag{color:#8a92a8;}
+  body.theme-light .exectoast{background:rgba(245,247,252,.96);border-color:rgba(201,151,0,.55);color:#232a3e;}
+  body.theme-light .brand, body.theme-light .htitle{background:linear-gradient(90deg,#d99000,#d8433a,#7a5cff,#2fa3a3);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  /* v1.0.1-fix1：浅色模式下亮色文字统一加深保证可读 */
+  body.theme-light .modeTag{color:#8a6d00;border-color:rgba(201,151,0,.5);}
+  body.theme-light .quickdays button{color:#8a6d00;border-color:rgba(201,151,0,.55);}
+  body.theme-light .soloTag{color:#8a6d00;border-color:rgba(201,151,0,.5);}
+  body.theme-light .hospTag{color:#a03028;border-color:rgba(160,48,40,.55);}
+  body.theme-light .atag.grp{color:#6a3fd8;border-color:rgba(106,63,216,.55);}
+  body.theme-light .atag.per{color:#1d7f7a;border-color:rgba(29,127,122,.55);}
+  body.theme-light .atag.rest{color:#2e8b4f;border-color:rgba(46,139,79,.55);}
+  body.theme-light .aeff em.up{color:#2e9e5b;}
+  body.theme-light .aeff em.down{color:#d8433a;}
+  body.theme-light .prow em{color:#2e9e5b;}
+  body.theme-light .pfans{color:#8a6d00;}
+  body.theme-light .inv-summary{color:#8a6d00;}
+  body.theme-light .inv-price em.up{color:#2e9e5b;}
+  body.theme-light .inv-price em.down{color:#d8433a;}
+  body.theme-light .floatbox.good{color:#2e9e5b;}
+  body.theme-light .floatbox.bad{color:#d8433a;}
+  body.theme-light .floatbox.warn{color:#8a6d00;}
+  body.theme-light .critp-title{color:#8a6d00;}
+  body.theme-light .critp-msg{color:#232a3e;}
+  body.theme-light .updbox b{color:#6a3fd8;}
+  /* v1.0.1-fix2：浅色下按钮/现价/进度条/天数可读性 */
+  body.theme-light .clearbtn{background:rgba(40,55,100,.14);color:#232a3e;border:1px solid rgba(40,55,100,.28);}
+  body.theme-light .inv-price b{color:#232a3e;}
+  body.theme-light .daybar{background:rgba(40,55,100,.18);box-shadow:inset 0 0 0 1px rgba(40,55,100,.45);}
+  body.theme-light .daynum{color:#8a6d00;}
+  .daynum{color:#ffd93d;}
+  /* v1.0.5-fix1：状态板块 */
+  .statusbox{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;min-height:24px;}
+  .sttag{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:99px;font-size:12.5px;font-weight:700;background:rgba(166,108,255,.14);border:1px solid rgba(166,108,255,.45);color:#c9a8ff;}
+  .sttag.bad{background:rgba(255,107,107,.14);border-color:rgba(255,107,107,.45);color:#ffb3b3;}
+  body.theme-light .sttag{color:#6a3fd8;background:rgba(120,80,220,.12);border-color:rgba(120,80,220,.4);}
+  body.theme-light .sttag.bad{color:#a03028;background:rgba(255,107,107,.12);border-color:rgba(216,67,58,.4);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header id="header"></header>
+
+  <div class="sec-title">👥 成员卡片</div>
+  <div class="members" id="members"></div>
+
+  <div class="sec-title">✨ 状态</div>
+  <div class="statusbox" id="statusBox"></div>
+
+  <div class="sec-title">🗺️ 今日档期预览 <span id="planInfo"></span></div>
+  <div class="flow" id="flow"></div>
+
+  <div class="sec-title" id="predictTitle" style="display:none">🔮 全稳定预估面板</div>
+  <div class="predict" id="predict" style="display:none"></div>
+
+  <div class="sec-title" style="text-align:center">🗓️ 可选行动</div>
+  <div id="acts"></div>
+
+  <div class="sec-title">📈 投资市场</div>
+  <div class="invest" id="invest"></div>
+
+  <div class="sec-title">🏗️ 基建</div>
+  <div class="invest" id="infraWrap"><div id="infra"></div></div>
+
+  <div class="sec-title">📜 经纪人日志</div>
+  <div class="logbox" id="log"></div>
+  <div class="footer">时代少年团 · 经纪人模拟器 —— 档期排得好，股票炒得妙 🎤　·　v1.0.9</div>
+</div>
+
+<div id="modalRoot"></div>
+
+<div class="overlay" id="home">
+  <div class="modal home">
+    <div class="htitle">时代少年团</div>
+    <div class="hsub">经 纪 人 养 成 模 拟 器</div>
+    <div class="havas">
+      <span style="background:linear-gradient(135deg,#ff6b6b,#2a1a3a)">🎤</span>
+      <span style="background:linear-gradient(135deg,#4ecdc4,#1a3a3a)">🎧</span>
+      <span style="background:linear-gradient(135deg,#ffd93d,#3a331a)">🎹</span>
+      <span style="background:linear-gradient(135deg,#ff8c42,#3a221a)">🔥</span>
+      <span style="background:linear-gradient(135deg,#6bcb77,#1a3a22)">🎸</span>
+      <span style="background:linear-gradient(135deg,#a66cff,#2a1a3a)">🎵</span>
+      <span style="background:linear-gradient(135deg,#4d96ff,#1a2a3a)">🎭</span>
+    </div>
+    <div class="themeRow">🎨 主题：
+      <button class="themebtn on" data-t="dark" onclick="applyTheme('dark')">🌙 深色</button>
+      <button class="themebtn" data-t="light" onclick="applyTheme('light')">☀️ 浅色</button>
+    </div>
+    <div class="diffRow">难度：
+      <button class="diffbtn on" id="diffStd" onclick="setDifficulty('标准')">标准模式</button>
+      <button class="diffbtn" id="diffHard" onclick="setDifficulty('困难')">困难模式</button>
+      <button class="diffbtn" id="diffFree" onclick="setDifficulty('随心所欲')">随心所欲模式</button>
+    </div>
+    <div class="diffpanel" id="diffPanel" style="display:none">
+      <b id="diffTitle">⚙️ 难度调节（困难模式专属）</b>
+      <div class="diffrow"><span class="dlb">⚡ 体力消耗倍率</span>
+        <input type="range" id="dStam" min="1.2" max="3" step="0.1" value="1.5" oninput="setDiff()">
+        <span class="dval" id="dStamV">1.5x</span></div>
+      <div class="diffrow"><span class="dlb">😊 心情消耗倍率</span>
+        <input type="range" id="dMood" min="1.2" max="3" step="0.1" value="1.5" oninput="setDiff()">
+        <span class="dval" id="dMoodV">1.5x</span></div>
+      <div class="diffrow"><span class="dlb">💰 行动收益倍率</span>
+        <input type="range" id="dInc" min="0.5" max="1" step="0.05" value="0.8" oninput="setDiff()">
+        <span class="dval" id="dIncV">0.8x</span></div>
+      <div class="diffrow"><span class="dlb">🗓️ 每日档期次数</span>
+        <input type="range" id="dSlots" min="4" max="7" step="1" value="5" oninput="setDiff()">
+        <span class="dval" id="dSlotsV">5 个</span></div>
+      <div class="diffrow"><span class="dlb">📈 成本随时间增加</span>
+        <input type="range" id="dCost" min="0" max="2" step="0.05" value="0.1" oninput="setDiff()">
+        <span class="dval" id="dCostV">0.10x</span></div>
+      <div class="diffrow"><span class="dlb">🌦️ 天气周期</span>
+        <input type="range" id="dWx" min="3" max="20" step="1" value="5" oninput="setDiff()">
+        <span class="dval" id="dWxV">5 天</span></div>
+      <div class="diffnote">收益倍率最终乘算，作用于演出收入与涨粉；档期次数仅团体模式生效（单人特训固定 3 档）。成本倍率 p：第 y 天开销 = 基础×(1+p×(y-1))；困难封顶 2 倍，随心所欲无上限。</div>
+    </div>
+    <div class="hmode">
+      <div class="modecard" onclick="startGame(30,80000,'标准')">
+        <div class="mico">🎬</div><b>标准模式</b>
+        <div class="md">团体运营 · 30 天 · 资金 8 万<br>7 档/天，完整养成体验</div>
+        <button class="go">开始运营 →</button>
+      </div>
+      <div class="modecard" onclick="startGame(10,60000,'团体')">
+        <div class="mico">⚡</div><b>团体模式</b>
+        <div class="md">团体运营 · 10~15 天 · 资金 6 万<br>选择天数后开跑：</div>
+        <div class="quickdays">
+          <button onclick="event.stopPropagation();startGame(10,60000,'团体')">10 天</button>
+          <button onclick="event.stopPropagation();startGame(12,60000,'团体')">12 天</button>
+          <button onclick="event.stopPropagation();startGame(15,60000,'团体')">15 天</button>
+          <button onclick="event.stopPropagation();startGame(Infinity,60000,'无尽')">♾️ 无尽</button>
+        </div>
+      </div>
+      <div class="modecard">
+        <div class="mico">🎯</div><b>单人特训</b>
+        <div class="md">只管理 1 人 · 3 档/天<br>先选成员：</div>
+        <div class="soloPicks" id="soloPicks"></div>
+        <div class="md" style="margin-bottom:6px">再选模式：</div>
+        <div class="quickdays">
+          <button onclick="startSolo(30,40000,'特训·标准')">标准 30天</button>
+          <button onclick="startSolo(10,30000,'特训·快速')">10天</button>
+          <button onclick="startSolo(12,30000,'特训·快速')">12天</button>
+          <button onclick="startSolo(15,30000,'特训·快速')">15天</button>
+          <button onclick="startSolo(Infinity,30000,'特训·无尽')">♾️ 无尽</button>
+        </div>
+      </div>
+    </div>
+    <div class="hrules">
+      <b>📖 玩法说明：</b><br>
+      ① 每天排满档位才能执行，排满后出现预估面板。<br>
+      ② 活动各有定位：演出赚钱、训练涨实力、休息恢复；收益随实力与名气成长。<br>
+      ③ 无档期成员自动休息；连排多档消耗递增（训练除外）。<br>
+      ④ 贷款三档、5 天还清，逾期或资金归零直接破产；体力归零会被送医。<br>
+      ⑤ 突发事件、天气、临时效果都会影响养成，结局按五维评分（60 分及格）。<br>
+      ⑥ 更多机制请在游玩中自行探索。<br>
+    </div>
+    <div class="updbox">
+      <div class="upd-head" onclick="toggleUpd()">📢 更新公告 · v1.0.9 <span id="updArrow">▼</span></div>
+      <div id="updBody" style="display:none">
+      · 结算过程中<b>实时刷新</b>成员卡片与资金——突发事件的「全员取平均」「资金翻倍」等均基于当天结算后的最新数据；<br>
+      · 修复：流动资金不足但持有股票时不再直接破产，<b>自动卖出部分股票解围</b>；<br>
+      · 首页「更新公告」板块默认折叠；<br>
+      · 删除前面的档期后，后续档期<b>自动前移补位</b>；<br>
+      · 吸金倍率改为 <b>75% 实力 + 25% 名气</b>；<br>
+      · iOS「保存我的战绩」重构：同步打开新窗口展示截图，长按即可保存到相册；<br>
+      · 存档支持<b>编号导出/导入</b>：一键复制一串字母数字编号，跨设备粘贴即可还原完整存档（含全部历史）。<br>
+      <b>—— v1.0.8 历史 ——</b><br>
+      · 修复：点击「回到首页」放弃本局后，存档游戏次数不再 +1（改为完成结算或破产时才计数）；<br>
+      · 成员选择弹窗改为<b>不重绘切换</b>（点选成员不再闪屏、不再跳转，与图鉴折叠一致）；<br>
+      · 历史结算回顾图：若本局并非困难模式默认难度，将显示提示小字；<br>
+      · 首页「更新公告」与「存档数据」板块之间补齐间距；<br>
+      · 突发事件出现率提升至 <b>60%</b>（每 3 天保底一次）；<br>
+      · 突发事件扩充至 <b>102 个</b>（新增 20 个涉及临时效果/状态的事件）；<br>
+      · 新增<b>「一体两面」状态系统</b>：暴击时有概率获得可无限叠加的状态——<br>
+      &nbsp;&nbsp;休息暴击 → 深度睡眠（休息×1.1）/ 过度睡眠（休息×0.9）；<br>
+      &nbsp;&nbsp;舞蹈暴击 → 舞感迸发（训练×1.1）/ 肌肉酸痛（训练×0.9）；<br>
+      &nbsp;&nbsp;演出大成功 → 高光时刻（赚钱×1.1）/ 用力过猛（赚钱×0.9）；<br>
+      &nbsp;&nbsp;巡演暴击 → 巡演神迹（涨粉×1.1）/ 巡演透支（涨粉×0.9）；<br>
+      &nbsp;&nbsp;每次暴击最多出现 1 个状态，状态在「✨ 状态」板块显示层数与剩余天数（天气除外，可无限叠加）。<br>
+      <b>—— v1.0.7-fix2 历史 ——</b><br>
+      · 图鉴事件改为<b>公告式折叠/展开</b>（可同时展开多个事件，带箭头指示）；<br>
+      · 首页改为<b>全屏界面</b>（不再透出下层游戏界面），开始游戏后才进入游戏界面。<br>
+      · 图鉴改为<b>独立界面</b>（首页「查看图鉴」进入，图鉴内「回到首页」返回），重新排版、增加解锁进度条；<br>
+      · 修复历史结算回顾弹窗被首页遮挡的问题（打开回顾时自动关闭首页，并增加「回到首页」按钮）。<br>
+      <b>—— v1.0.7 历史 ——</b><br>
+      · 新增<b>💾 存档系统</b>：记录游戏次数/各模式均分/最爱成员/历史结算回顾/事件图鉴，支持导出导入；<br>
+      · 首页新增<b>📖 图鉴</b>：收录全部突发事件，遇到才能解锁查看；<br>
+      · 「快速模式」更名为<b>「团体模式」</b>；玩法说明精简；更新公告支持折叠。<br>
+      <b>—— v1.0.6 历史 ——</b><br>
+      · 贷款/还款按钮移入<b>投资市场</b>板块，顶栏大幅瘦身（修复移动端顶栏占半屏问题）；<br>
+      · 新增<b>「🏗️ 基建」后期花钱玩法</b>：练习室/休息区/录音棚/场馆合作 4 类设施各 5 级，永久加成训练/休息/演出赚钱/涨粉，造价 5000→150万 逐级递增；<br>
+      · 快速模式与单人特训新增<b>「♾️ 无尽模式」</b>：无天数限制，运营超过 5 天后出现「🏁 结算本局」按钮，随时可结束并进入最终结算。<br>
+      <b>—— v1.0.5-fix2 历史 ——</b><br>
+      · 修复声乐/舞蹈训练在经纪人日志中显示 <b>+0</b> 的问题（改为显示实际实力提升，如 🎯+15）；<br>
+      · 训练浮动数字同步改为显示实力提升。<br>
+      <b>—— v1.0.5-fix1 历史 ——</b><br>
+      · 新增<b>负面 buff（debuff）</b>事件与「先投入再得 buff」选项，buff 前置投入整体下调；事件总数增至 <b>80+</b>；<br>
+      · buff/debuff 从顶栏移到独立的<b>「✨ 状态」板块</b>（成员卡片与今日档期预览之间）；<br>
+      · 新增<b>天气系统</b>：每局开局随机一个天气，持续影响全局；困难/随心所欲可调<b>天气周期</b>（3~20 天，默认 8 天）；<br>
+      · 结算界面隐藏「现金 / 持仓市值」两项，标题改为「🏆 xx 天养成结束！」。<br>
+      <b>—— v1.0.5 历史 ——</b><br>
+      · 突发事件扩充至 <b>60+ 个</b>（原 13 个），新增大量<b>赚钱/亏钱/养成/整活</b>事件；<br>
+      · 事件效果支持<b>暂时性 buff</b>：演出赚钱×、涨粉×、成本×、训练效果×、休息效果× 等（持续数天，顶栏可见）；<br>
+      · 新增<b>特殊效果</b>：全员属性取均值、明天股市必涨、金币翻倍/减半、全员状态拉满等；<br>
+      · 声乐/舞蹈训练改为稳定成长（不再随机事故），训练 buff 直接作用于实力提升；<br>
+      · 修复 iOS 上「保存我的战绩」不可用的问题。<br>
+      <b>—— v1.0.4 历史 ——</b><br>
+      · 贷款改为<b>三档固定额度 2万/5万/10万</b>，有欠款时必须还清才能再次借贷（防止无上限梭哈股市）；<br>
+      · 事故改为<b>先按正常收益结算、再额外扣钱</b>（扣款加大，更符合实际）；<br>
+      · 困难/随心所欲模式下活动卡片直接显示<b>倍率后</b>的体力/心情消耗；<br>
+      · 结算五维评分分两栏：左侧分数条 + 右侧<b>五维雷达图</b>；<br>
+      · 训练系统调整：声乐训练改<b>1~7 人</b>，舞蹈训练 <b>+15</b> 且 25% 概率 <b>×1.5 暴击</b>；<br>
+      · 除休息外所有行动<b>心情均为负</b>（容易触发心情低谷机制）；<br>
+      · 休息板块新增「调整心情」行动（1~5 人，总恢复 30 点均分）；<br>
+      · 预测面板直接显示模拟后的<b>最终数值</b>（如 20（-60））；<br>
+      · 大幅精简游戏界面小字说明，改为定位式描述。<br>
+      <b>—— v1.0.3 历史 ——</b><br>
+      · 最终结算界面显示<b>难度模式与具体参数</b>（标准 / 困难 / 随心所欲；困难/随心所欲若为默认值则标注「默认难度」）；<br>
+      · 「保存我的战绩」改为<b>长截图</b>，移动端不再截不全。<br>
+      <b>—— v1.0.2-fix1 历史 ——</b><br>
+      · 新增 3 个<b>赚钱型突发事件</b>（品牌续约 / 单曲爆火 / 综艺高价邀约）；<br>
+      · 最后一天行程结算后<b>自动卖出全部股票、还清贷款</b>，再进入最终结算；<br>
+      · 修复持仓不足时点「-5」无法卖出的问题（改为卖出全部持仓）；<br>
+      · 股票机制重设计：影视股随团体平均名气提高<b>上涨概率</b>；稳健基金每天<b>稳赚 1%</b>；黄金<b>总体看涨</b>、中等波动；科技股波动约 <b>±10%~20%</b>。<br>
+      · 平衡赚钱事件金额：全部控制在 <b>5 万</b> 以下，与亏钱事件量级相当；<br>
+      <b>—— v1.0.2 历史 ——</b><br>
+      · 新增<b>心情影响机制</b>：心情 &lt;30 时实力/名气<b>永久 -5</b> 且表现 <b>×0.5</b>（恢复后不再返还 -5）；心情归零时吸金率与吸粉率<b>固定 50%</b>；<br>
+      · 新增 4 个突发事件（共 10 个），事件数值整体加大；<br>
+      · 困难/随心所欲模式新增<b>「成本随时间增加」</b>滑块（0.00~2.00x，默认 0.20x）：第 y 天每人开销 = 基础值 ×(1+p×(y-1))；<br>
+      · 结算界面新增显示「突发事件总分修正」。<br>
+      <b>—— v1.0.1-fix3 历史 ——</b><br>
+      · 修复快速模式「12 天」「15 天」按钮实际开启 10 天的问题（事件冒泡冲突）；<br>
+      · 新增<b>「随心所欲模式」</b>：体力/心情消耗倍率 <b>0.1~4.0 倍</b>、行动收益倍率 <b>0.1~20 倍</b>、每日档期 <b>1~20 个</b> 自由调节；<br>
+      · 修复标准模式收益被困难模式收益倍率误伤的问题（标准模式收益恢复恒 1 倍）。<br>
+      <b>—— v1.0.1-fix2 历史 ——</b><br>
+      · 修复浅色模式下「清空安排」「主题」按钮与投资市场现价白字看不清的问题；<br>
+      · 点击「执行本日行程」后<b>先自动滚动到日志区</b>，再开始逐条结算；<br>
+      · 日期进度条在浅色模式下加深色描边，天数数字改为可读的深金色。<br>
+      <b>—— v1.0.1-fix1 历史 ——</b><br>
+      · 修复困难模式下成员体力/心情/实力/名气出现小数的问题（一律取整显示）；<br>
+      · 突发事件改为<b>每 3 天保底出现一个</b>；事件选项只显示黄字标题，详细说明改为选择后展示；<br>
+      · 结算界面不再显示「经纪人评分揭晓」与「总分调整」两行；<br>
+      · 修复「保存我的战绩」图片里大字评分过小的问题；<br>
+      · 浅色主题下亮色文字（黄/亮绿/亮青/浅紫等）改为更清晰的深色。<br>
+      <b>—— v1.0.1 历史 ——</b><br>
+      · 新增<b>浅色/深色主题</b>切换（首页与游戏顶栏均可切，自动记忆选择）；<br>
+      · 新增<b>困难模式</b>：可调体力/心情消耗倍率（1.2~3 倍）、行动收益倍率（0.5~1 倍，对钱与涨粉最终乘算）、每日档期次数（4~7 个）；<br>
+      · 国际巡演收入调整为 <b>12000</b>/人；各团体活动提升实力改为 +1~+2；<br>
+      · 重新平衡各团体活动：商演最赚钱但最耗体力、见面会涨粉最多但倒贴钱、广告省体力赚小钱、团播便宜但收益低、巡演赌暴击换高名气——<b>各有长短，不再有通杀选择</b>；<br>
+      · 股票价格整体 <b>×10</b>、每日波动加大；<br>
+      · 结算页<b>财富评分标准上调</b>（目标金额翻倍），金额项更难拿高分；<br>
+      · 修复「保存我的战绩」图片灰蒙、大字评分丢失的问题；修复日志自动滚动失效的问题。<br>
+      <b>—— v1.0.0 历史 ——</b><br>
+      · 演出类活动改为 <b>1~3 人同台</b>；舞蹈训练实力提升改为 <b>+9</b>；<br>
+      · 个人行动（声乐/舞蹈训练）的体力与心情消耗倍数<b>恒定为 1</b>，不再随连排递增；团体演出维持连排递增；<br>
+      · 国际巡演收益随机化：<b>25%×1.5 / 25%×0.8 / 50% 正常</b>；<br>
+      · 任何暴击（休息暴击 / 演出大成功 / 巡演暴击）都会<b>弹出动画</b>提示；<br>
+      · 每天结算后界面<b>自动滚动到日志区</b>，方便查看当天结果；<br>
+      · 每名成员初始实力、粉丝、名气加入<b>小幅随机浮动</b>，每局开局不再完全一样；<br>
+      · 经纪人评分<b>全程保密</b>，只有最终结算才揭晓（60 分为及格线）；<br>
+      · 贷款改为<b>5 天内必须还清</b>，逾期直接破产；公司资金归零也直接破产；<br>
+      · 新增<b>医院机制</b>：当天结束体力为 0 的成员会被送医（花 5000 元），第二天只能安排休息（卡片变黑白、选项不可选）；<br>
+      · 「休息」单独作为一栏板块；修复国际巡演角标与「多人同台」角标重叠的问题；<br>
+      · 新增「回到主页」按钮与「保存我的战绩」（结算页一键截图）；<br>
+      · 评分参考：30 天标准模式正常运营约 <b>60~80 分</b>；完美运营可达 95+（100 分需五维几乎全满，极难）；开局基础分约 35 分，除非刻意摆烂或破产，否则很难跌破 30 分。
+    </div>
+    </div>
+    <div class="savebox" id="saveBox" style="display:none"></div>
+    <div class="footer">时代少年团 · 经纪人模拟器　v1.0.9</div>
+  </div>
+</div>
+
+<script>
+/* ================= 数据 ================= */
+const MEMBERS = [
+  {name:'马嘉祺', emoji:'🎤', color:'#ff6b6b', baseSkill:62, baseFame:32, baseFans:15000, stamina:100, mood:100, skill:62, fame:32, fans:15000, hospital:false, moodHit:false},
+  {name:'丁程鑫', emoji:'🎧', color:'#4ecdc4', baseSkill:58, baseFame:30, baseFans:14000, stamina:100, mood:100, skill:58, fame:30, fans:14000, hospital:false, moodHit:false},
+  {name:'宋亚轩', emoji:'🎹', color:'#ffd93d', baseSkill:60, baseFame:28, baseFans:13000, stamina:100, mood:100, skill:60, fame:28, fans:13000, hospital:false, moodHit:false},
+  {name:'刘耀文', emoji:'🔥', color:'#ff8c42', baseSkill:57, baseFame:27, baseFans:12500, stamina:100, mood:100, skill:57, fame:27, fans:12500, hospital:false, moodHit:false},
+  {name:'张真源', emoji:'🎸', color:'#6bcb77', baseSkill:59, baseFame:26, baseFans:12000, stamina:100, mood:100, skill:59, fame:26, fans:12000, hospital:false, moodHit:false},
+  {name:'严浩翔', emoji:'🎵', color:'#a66cff', baseSkill:61, baseFame:28, baseFans:13000, stamina:100, mood:100, skill:61, fame:28, fans:13000, hospital:false, moodHit:false},
+  {name:'贺峻霖', emoji:'🎭', color:'#4d96ff', baseSkill:55, baseFame:25, baseFans:11500, stamina:100, mood:100, skill:55, fame:25, fans:11500, hospital:false, moodHit:false}
+];
+
+/* 活动差异化：演出类(1~3人，连排消耗递增) / 训练类(声乐1~7人·舞蹈1人，连排消耗恒1倍) / 休息类(独立板块) */
+const ACTIVITIES = [
+  {id:'show', name:'综艺录制', emoji:'📺', cost:5000, type:'group', max:3, desc:'均衡发展',      effects:{stamina:-12, mood:-5,  skill:1, fame:7,  fans:2200}, money:6000},
+  {id:'com',  name:'大型商演', emoji:'🎪', cost:7000, type:'group', max:3, desc:'赚钱主力·最耗体力',effects:{stamina:-28, mood:-8, skill:1, fame:5,  fans:1500}, money:10500},
+  {id:'ad',   name:'广告拍摄', emoji:'📸', cost:6000, type:'group', max:3, desc:'省体力·赚小钱+名气',effects:{stamina:-10, mood:-3,  skill:1, fame:8,  fans:900}, money:8500},
+  {id:'fan',  name:'粉丝见面会',emoji:'💖', cost:4500, type:'group', max:3, desc:'涨粉主力·倒贴钱',effects:{stamina:-15, mood:-2, skill:0, fame:4,  fans:5000}, money:3500},
+  {id:'live', name:'团播互动', emoji:'📱', cost:1500, type:'group', max:3, desc:'低成本·涨粉性价比',effects:{stamina:-6,  mood:-2,  skill:0, fame:2,  fans:2600}, money:2000},
+  {id:'tour', name:'国际巡演', emoji:'🎫', cost:12000,type:'group', max:3, desc:'高投入·收益随机',effects:{stamina:-30, mood:-12, skill:2, fame:9,  fans:3200}, money:12000, risky:true},
+  {id:'vocal',name:'声乐训练', emoji:'🎵', cost:1000, type:'personal', max:7, desc:'提升唱功',effects:{stamina:-15, mood:-5, skill:6, fame:1,  fans:0}, money:0},
+  {id:'dance',name:'舞蹈训练', emoji:'💃', cost:1000, type:'personal', max:1, desc:'提升舞技',effects:{stamina:-20, mood:-8, skill:15, fame:1, fans:0}, money:0},
+  {id:'rest', name:'休息',    emoji:'😴', cost:0,    type:'rest', max:1, desc:'恢复体力与心情',effects:{stamina:30, mood:15, skill:0, fame:0,  fans:0}, money:0},
+  {id:'mood', name:'调整心情', emoji:'💆', cost:0,    type:'rest', max:5, desc:'舒缓压力，恢复心情',effects:{stamina:10, mood:30, skill:0, fame:0,  fans:0}, money:0}
+];
+const GRP = ACTIVITIES.filter(a=>a.type==='group');
+const TRAIN = ACTIVITIES.filter(a=>a.type==='personal');
+const REST = ACTIVITIES.filter(a=>a.type==='rest');
+
+/* 投资市场：4 支股票，价格 ×10，波动加大 */
+const INVEST_ASSETS = [
+  {id:'safe',  name:'稳健基金', emoji:'🏦', initPrice:1000, vol:0.05, desc:'低波动 · 保值'},
+  {id:'gold',  name:'黄金',     emoji:'🥇', initPrice:8000, vol:0.08, desc:'中波动 · 避险'},
+  {id:'movie', name:'影视娱乐股',emoji:'🎬', initPrice:5000, vol:0.14, desc:'随团体热度波动'},
+  {id:'tech',  name:'科技股',   emoji:'🚀', initPrice:3000, vol:0.20, desc:'高波动 · 刺激'}
+];
+
+const ACCIDENTS = [
+  {text:'舞台事故！扭伤脚踝，损失不小', effects:{stamina:-25, mood:-15, skill:0, fame:-2, fans:-2000}, moneyLoss:8000},
+  {text:'被拍到绯闻，公关危机爆发',     effects:{stamina:-10, mood:-20, skill:0, fame:-4, fans:-9000}, moneyLoss:10000},
+  {text:'设备故障演出取消，赔偿违约金', effects:{stamina:-10, mood:-15, skill:0, fame:-1, fans:-1000}, moneyLoss:12000},
+  {text:'连轴转导致生病，状态大跌',     effects:{stamina:-30, mood:-15, skill:0, fame:0,  fans:0},    moneyLoss:5000}
+];
+const CRIT_TEXTS = [
+  '舞台表现炸裂，全场沸腾！🔥','金句出圈，微博热搜登顶！📈',
+  '被品牌方加钱续约，财源滚滚！💰','路透视频爆火，一夜圈粉无数！✨',
+  '导师高度评价，实力获认可！🏆'
+];
+const DAILY = [
+  {text:'团综《我们的时代》爆火，全员粉丝大涨！', cls:'good', fans:60000, mood:5,  stamina:-3},
+  {text:'品牌方追加代言费，公司收入增加！',       cls:'good', money:30000, mood:3},
+  {text:'机场暖心互动被拍，路人缘飙升！',         cls:'good', fans:20000, mood:4},
+  {text:'遭遇网络黑粉造谣，粉丝小幅流失。',       cls:'bad',  fans:-15000, mood:-6},
+  {text:'公司突击体检，全员被要求减少通告。',     cls:'bad',  stamina:-10, mood:-4},
+  {text:'深夜练习被粉丝偶遇，感动刷屏！',         cls:'good', fans:18000, mood:6, stamina:-5}
+];
+
+const CHOICE_EVENTS = [
+  {
+    title:'机场遭私生饭围堵', emoji:'🚨',
+    desc:'七人落地就被私生饭围得水泄不通，镜头全拍到了，场面一度失控。',
+    options:[
+      {label:'立刻报警并公开谴责', desc:'强硬果断，但粉丝圈会吵翻天，还要花诉讼费', fans:-15000, coins:-25000, player:+8, mood:-3},
+      {label:'加派安保悄悄护送出机场', desc:'破财消灾，谁都不得罪，但钱包大出血', coins:-50000, player:0, stamina:-2},
+      {label:'让成员冷脸快速离场', desc:'不花钱，但"黑脸照"全网疯传', fans:-40000, mood:-8, player:-5},
+      {label:'硬扛，让粉丝拍个够', desc:'不花钱但观感差', fans:-8000, buffs:[{type:'fans', value:0.85, days:3, label:'涨粉×0.85'}], player:-3}
+    ]
+  },
+  {
+    title:'品牌方深夜加塞代言直播', emoji:'📱',
+    desc:'大客户临时要求今晚全员加播 2 小时，报酬翻倍，可成员们刚结束一天通告。',
+    options:[
+      {label:'接下，全员加班直播', desc:'赚得多，但严重透支身体', coins:+50000, stamina:-25, mood:-12, player:-4},
+      {label:'婉拒，坚持让成员休息', desc:'以人为本，但错失曝光，品牌方不悦', mood:+6, fame:-3, player:+6},
+      {label:'只派状态最好的 3 人上播', desc:'折中方案，兼顾口碑与收入', coins:+45000, stamina:-8, mood:-2, player:+2},
+      {label:'只让一人上播', desc:'省力但品牌不满', coins:+15000, buffs:[{type:'income', value:0.9, days:2, label:'演出赚钱×0.9'}], mood:-2, player:-4}
+    ]
+  },
+  {
+    title:'成员疑似恋情绯闻上热搜', emoji:'💘',
+    desc:'狗仔放出模糊照片，"疑似恋爱"冲上热搜，评论区已经吵起来了。',
+    options:[
+      {label:'发律师函强硬辟谣', desc:'威慑狗仔，但花大钱、路人不买账', coins:-50000, fans:-12000, player:+6, mood:-2},
+      {label:'冷处理，不回应', desc:'不花公关费，但粉丝持续流失', fans:-30000, mood:-5, player:-4},
+      {label:'用自黑梗幽默化解', desc:'效果看运气：可能出圈圈粉，也可能翻车',
+        outcomes:[
+          {label:'自黑梗出圈', fans:+40000, player:+5, mood:+3},
+          {label:'翻车遭群嘲', fans:-20000, player:-5, mood:-4}
+        ]}
+    ]
+  },
+  {
+    title:'师弟团来公司参观求指导', emoji:'🎓',
+    desc:'新出道的师弟团来公司拜访，7 位成员要不要放下手头的事去接待？',
+    options:[
+      {label:'倾囊相授，亲自示范', desc:'前辈人设立住，但很耗精力', stamina:-10, mood:+2, fame:+1, player:+7},
+      {label:'各忙各的，简单寒暄', desc:'省事省力，但被拍到态度冷淡', mood:+2, fame:-1, player:-5},
+      {label:'借机拍合拍视频发官号', desc:'蹭一波热度赚点流量钱', coins:+40000, fans:+10000, stamina:-8, player:+2}
+    ]
+  },
+  {
+    title:'黄牛炒票，粉丝实名举报', emoji:'🎫',
+    desc:'见面会门票被黄牛炒到天价，真粉丝买不到票，集体在超话维权。',
+    options:[
+      {label:'加强实名制+给真粉补票', desc:'口碑拉满，但退款成本高昂', coins:-60000, fans:+30000, mood:+2, player:+7},
+      {label:'不作为，静观其变', desc:'不花钱，但粉丝寒心', fans:-25000, mood:-2, player:-6},
+      {label:'联合平台搞抽奖补偿', desc:'成本折中，安抚一部分粉丝', coins:-30000, fans:+15000, stamina:-3, player:+2}
+    ]
+  },
+  {
+    title:'深夜有成员偷偷加练受伤', emoji:'🩹',
+    desc:'某成员凌晨偷偷加练，被发现在练习室扭伤了脚。他恳求你别说出去，继续登台。',
+    options:[
+      {label:'强制停演，送去医院', desc:'花大钱，但保障健康、赢得人心', coins:-40000, mood:+5, stamina:+8, player:+8},
+      {label:'尊重意愿，带伤坚持', desc:'不花钱还能刷"敬业"人设，但风险极大', stamina:-12, skill:+3, mood:-6, player:-6},
+      {label:'公开表扬加练，请队医随行', desc:'花点小钱，人设立住，粉丝感动', coins:-15000, fans:+12000, stamina:-3, player:+2}
+    ]
+  },
+  {
+    title:'塌房谣言冲上热搜', emoji:'🌀',
+    desc:'营销号放出"成员耍大牌"的剪辑视频，真假难辨，热搜挂了一整天。',
+    options:[
+      {label:'报警辟谣并起诉营销号', desc:'砸钱打官司，杀鸡儆猴', coins:-60000, fans:-10000, mood:-3, player:+8},
+      {label:'冷处理不回应', desc:'不花钱，但谣言越传越广', fans:-30000, mood:-8, player:-6},
+      {label:'发声明+粉丝抽奖安抚', desc:'折中处理，挽回部分路人缘', coins:-30000, fans:+15000, mood:+3, player:+3},
+      {label:'拖延处理', desc:'谣言继续发酵', fans:-15000, buffs:[{type:'income', value:0.85, days:2, label:'演出赚钱×0.85'}], player:-5}
+    ]
+  },
+  {
+    title:'爆款舞台视频全网出圈', emoji:'🔥',
+    desc:'一段舞台直拍突然爆火，播放量一夜破千万，全网都在刷。',
+    options:[
+      {label:'趁热买热搜+全平台推广', desc:'烧钱推一波，粉丝暴涨', coins:-50000, fans:+40000, fame:+4, player:+6},
+      {label:'顺势发幕后花絮', desc:'低成本接住这波热度', coins:-10000, fans:+15000, mood:+4, player:+2},
+      {label:'不操作等自然发酵', desc:'错过最佳热度窗口', fans:+6000, player:-3}
+    ]
+  },
+  {
+    title:'代言合作被对家截胡', emoji:'💼',
+    desc:'谈了很久的国际大牌代言，临签约被对家以低价截胡，品牌方摇摆不定。',
+    options:[
+      {label:'加价抢回代言', desc:'烧钱保下大牌资源', coins:-80000, fans:+10000, fame:+5, player:+4},
+      {label:'放弃代言改接综艺', desc:'止损转型，换个赛道', coins:+30000, fans:+5000, fame:+3, player:+1},
+      {label:'曝光对家压价黑幕', desc:'鱼死网破，风评两败俱伤', fans:-20000, fame:-3, player:-7}
+    ]
+  },
+  {
+    title:'成员生日应援募捐', emoji:'🎂',
+    desc:'粉丝自发为成员生日组织应援募捐，金额不小，需要公司表态。',
+    options:[
+      {label:'公司全额出资办生日会', desc:'大投入换死忠粉与好感', coins:-50000, fans:+25000, mood:+10, player:+6},
+      {label:'官方祝福+送小礼物', desc:'花小钱表达心意', coins:-10000, fans:+8000, mood:+4, player:+2},
+      {label:'不参与让粉丝自行组织', desc:'省事，但伤了粉丝的心', mood:-6, fans:-5000, player:-4}
+    ]
+  },
+  {
+    title:'品牌方主动上门续约三年', emoji:'💰',
+    desc:'合作多年的金主主动提出续约三年，开出的条件非常优厚，就等签字。',
+    options:[
+      {label:'直接签约锁定长约', desc:'落袋为安，公司进账一笔', coins:+50000, mood:+5, player:+5},
+      {label:'借机再谈更高报价', desc:'贪心一把：谈成血赚，谈崩也不亏太多',
+        outcomes:[
+          {label:'谈判成功，报价上涨', coins:+50000, player:+7, mood:+4},
+          {label:'对方压价，勉强签约', coins:+30000, player:+1, mood:-3}
+        ]},
+      {label:'婉拒，把档期留给其他通告', desc:'不接长约，保持档期灵活', coins:+30000, fame:+2, player:+2}
+    ]
+  },
+  {
+    title:'成员原创单曲意外爆火', emoji:'🎵',
+    desc:'成员自创的单曲 demo 被粉丝疯传，播放量飙升，平台纷纷来谈合作。',
+    options:[
+      {label:'火速发行数字单曲', desc:'趁热变现，收益不错', coins:+50000, fans:+30000, player:+6},
+      {label:'先免费试听积累口碑', desc:'放弃短期收益换长期路人缘', coins:+20000, fans:+50000, mood:+5, player:+4},
+      {label:'独家授权给音乐平台', desc:'拿一笔独家授权费', coins:+40000, fans:+10000, player:+2}
+    ]
+  },
+  {
+    title:'头部综艺高价邀约', emoji:'📺',
+    desc:'现象级综艺向团体抛出橄榄枝，通告费是平时的好几倍，但录制很耗时间。',
+    options:[
+      {label:'全员常驻整季', desc:'曝光和收入双丰收，但很累', coins:+50000, fame:+4, stamina:-15, mood:+4, player:+5},
+      {label:'只派 2 人飞行嘉宾', desc:'少赚一点，不占太多档期', coins:+50000, fame:+2, player:+2},
+      {label:'要求加价后再上', desc:'搏一把更高的通告费',
+        outcomes:[
+          {label:'节目组接受加价', coins:+50000, player:+5, fame:+3},
+          {label:'被换人，错失机会', coins:-20000, fame:-2, player:-4}
+        ]}
+    ]
+  },
+  {
+    title:'代言费提前到账', emoji:'💸',
+    desc:'品牌方把明年第一季度的代言费提前打款了，公司账户进了一笔横财。',
+    options:[
+      {label:'收下，作为储备金', desc:'稳一手，后面更从容', coins:+50000, player:+2},
+      {label:'立刻分红给成员', desc:'收买人心，但公司没钱了', coins:+20000, mood:+8, player:+3},
+      {label:'拿去加仓股票', desc:'钱生钱，也可能打水漂', coins:+50000, player:-2, special:'stockUp'}
+    ]
+  },
+  {
+    title:'周边产品卖爆了', emoji:'🧸',
+    desc:'新出的应援周边三小时售罄，补货都来不及。',
+    options:[
+      {label:'紧急加印补货', desc:'趁热多赚一波', coins:+40000, player:+2},
+      {label:'限量不补，保值炒作', desc:'饥饿营销，粉丝又爱又恨', fans:+15000, mood:-3, player:+4},
+      {label:'加印+抽签名款', desc:'赚了钱还圈粉', coins:+30000, fans:+10000, player:+3}
+    ]
+  },
+  {
+    title:'音乐节压轴邀约', emoji:'🎪',
+    desc:'知名音乐节邀请团体压轴表演，报酬丰厚但舞台强度大。',
+    options:[
+      {label:'接下压轴', desc:'大场面大收入，体力告急', coins:+50000, fame:+4, stamina:-18, player:+4},
+      {label:'只演下午场', desc:'强度低一些，钱也少一些', coins:+30000, fame:+2, stamina:-8, player:+2},
+      {label:'借机谈下一季专场', desc:'把合作谈深', coins:+20000, player:+5, buffs:[{type:'income', value:1.2, days:2, label:'演出赚钱×1.2'}]}
+    ]
+  },
+  {
+    title:'直播带货合作找上门', emoji:'🛒',
+    desc:'头部主播邀请成员做客直播间，一场能卖很多货。',
+    options:[
+      {label:'全员上播', desc:'卖得多但累瘫', coins:+50000, stamina:-15, mood:-4, player:+3},
+      {label:'派 2 人上播', desc:'兼顾曝光与休息', coins:+25000, stamina:-5, player:+1},
+      {label:'要更高的坑位费', desc:'赌一把',
+        outcomes:[
+          {label:'谈成，坑位费翻倍', coins:+60000, player:+5},
+          {label:'谈崩，机会溜走', coins:-10000, player:-3}
+        ]}
+    ]
+  },
+  {
+    title:'电影主题曲演唱机会', emoji:'🎬',
+    desc:'大制作电影想请团体演唱主题曲，录歌不累但宣传期很耗档期。',
+    options:[
+      {label:'接下并全程宣传', desc:'名气大涨，档期被占', fame:+6, coins:+30000, stamina:-10, player:+4},
+      {label:'只录歌不跑宣传', desc:'省事但曝光少', fame:+3, coins:+15000, player:+1},
+      {label:'要求署名创作', desc:'有风险但格调更高',
+        outcomes:[
+          {label:'片方同意', fame:+7, skill:+2, player:+6},
+          {label:'片方拒绝', fame:+2, player:-2}
+        ]}
+    ]
+  },
+  {
+    title:'主题乐园年度代言', emoji:'🎡',
+    desc:'大型主题乐园抛来年度代言，签约费很高，但要求全年多次站台。',
+    options:[
+      {label:'签一年', desc:'细水长流', coins:+50000, fame:+3, stamina:-6, player:+3},
+      {label:'签三年长约', desc:'锁死高额代言费', coins:+60000, fame:+5, stamina:-10, player:+5, buffs:[{type:'cost', value:0.8, days:5, label:'活动成本×0.8'}]},
+      {label:'只接单次活动', desc:'灵活但钱少', coins:+20000, fame:+2, player:+1}
+    ]
+  },
+  {
+    title:'跨年晚会压轴邀请', emoji:'🎆',
+    desc:'卫视跨年晚会希望团体压轴表演，排练强度大但全国曝光。',
+    options:[
+      {label:'压轴演出', desc:'全国曝光，累到虚脱', fame:+7, stamina:-20, mood:-5, player:+4},
+      {label:'常规时段演出', desc:'曝光一般，相对轻松', fame:+4, stamina:-10, player:+2},
+      {label:'拒绝，专注年末专辑', desc:'放弃曝光保质量', skill:+3, fame:-2, player:+2}
+    ]
+  },
+  {
+    title:'杂志封面大片邀约', emoji:'📷',
+    desc:'时尚杂志邀约团体拍摄开年刊封面，格调高但拍摄很耗精力。',
+    options:[
+      {label:'拍摄开年刊封面', desc:'逼格拉满', fame:+5, coins:+20000, stamina:-8, mood:-2, player:+3},
+      {label:'只上内页专访', desc:'低成本曝光', fame:+3, coins:+8000, player:+1},
+      {label:'蹭热点拍双封面', desc:'加钱加戏份',
+        outcomes:[
+          {label:'双封面大爆', fame:+7, coins:+30000, player:+4},
+          {label:'被喷蹭热度', fame:+1, fans:-5000, player:-3}
+        ]}
+    ]
+  },
+  {
+    title:'排练室设备被盗', emoji:'🚨',
+    desc:'夜里排练室遭窃，音响设备被搬空，监控只拍到一个背影。',
+    options:[
+      {label:'报案并升级安保', desc:'花钱买平安', coins:-30000, stamina:-3, player:+3},
+      {label:'自认倒霉先凑合用', desc:'省下钱但士气低落', mood:-8, stamina:-5, player:-4},
+      {label:'借机换全套顶级设备', desc:'一步到位，还能宣传', coins:-30000, skill:+2, buffs:[{type:'train', value:1.3, days:3, label:'训练效果×1.3'}], player:+4}
+    ]
+  },
+  {
+    title:'成员彩排扭伤', emoji:'🩼',
+    desc:'彩排时一名成员从舞台上踩空，脚踝肿得厉害，离演出还有三天。',
+    options:[
+      {label:'及时治疗，减少他的舞台部分', desc:'健康第一', coins:-20000, stamina:-2, player:+6},
+      {label:'打封闭硬撑上台', desc:'敬业人设但风险大', stamina:-15, fame:+2, mood:-8, player:-5},
+      {label:'全员重新编排躲过受伤位', desc:'费时费力但稳妥', stamina:-10, coins:-8000, player:+3}
+    ]
+  },
+  {
+    title:'直播口误翻车', emoji:'😅',
+    desc:'团播时一名成员把品牌名念错成竞品，弹幕瞬间爆炸。',
+    options:[
+      {label:'火速道歉+补一场直播', desc:'诚恳补救', fans:-5000, coins:-10000, mood:-3, player:+3},
+      {label:'用自嘲梗化解', desc:'赌一把观众缘',
+        outcomes:[
+          {label:'自嘲出圈', fans:+10000, player:+4},
+          {label:'被骂不专业', fans:-15000, player:-5}
+        ]},
+      {label:'冷处理', desc:'不回应，让热度过去', fans:-8000, player:-2}
+    ]
+  },
+  {
+    title:'团体名被抢注商标', emoji:'⚖️',
+    desc:'有人抢注了团名商标还反向索赔，法务部建议花钱摆平。',
+    options:[
+      {label:'高价买回商标', desc:'破财消灾', coins:-40000, player:+4},
+      {label:'打官司硬刚', desc:'耗时长、费钱多',
+        outcomes:[
+          {label:'胜诉，赢回商标', coins:-50000, player:+7},
+          {label:'败诉，赔偿更多', coins:-70000, player:-5}
+        ]},
+      {label:'换新名字重新注册', desc:'一劳永逸但伤粉丝感情', fans:-20000, coins:-10000, player:-4}
+    ]
+  },
+  {
+    title:'演唱会场地临时违约', emoji:'🏟️',
+    desc:'签好的万人场馆突然被更贵的演出抢走，要么换场地要么赔违约金。',
+    options:[
+      {label:'换小场地硬开', desc:'少赚但如期开唱', coins:-20000, fans:-8000, player:+2},
+      {label:'赔违约金换档期', desc:'延期保面子', coins:-50000, fans:-5000, mood:-4, player:+3},
+      {label:'加价抢回原场地', desc:'砸钱保场',
+        outcomes:[
+          {label:'抢回大场馆', coins:-60000, fans:+10000, player:+5},
+          {label:'对方加价更狠', coins:-80000, fans:-5000, player:-4}
+        ]}
+    ]
+  },
+  {
+    title:'经纪人档期排错', emoji:'🗓️',
+    desc:'助理把两个通告排到了同一天，两个品牌方都等着给答复。',
+    options:[
+      {label:'赔付推掉小通告', desc:'损失小', coins:-15000, player:+3},
+      {label:'两边都硬撑', desc:'得罪人且状态崩', stamina:-20, mood:-8, player:-6},
+      {label:'让成员分成两队赶场', desc:'勉强都满足但很累', stamina:-15, coins:-5000, player:+1}
+    ]
+  },
+  {
+    title:'台风取消全部行程', emoji:'🌀',
+    desc:'强台风过境，航班停飞，后天之前的行程全部作废。',
+    options:[
+      {label:'就地休息恢复状态', desc:'被迫放假，因祸得福', stamina:+25, mood:+10, coins:-10000, player:+2},
+      {label:'改录线上内容', desc:'减少损失', coins:-5000, fans:+8000, stamina:-5, player:+2},
+      {label:'找保险理赔', desc:'能赔多少是多少',
+        outcomes:[
+          {label:'理赔顺利', coins:+20000, player:+3},
+          {label:'保险拒赔', coins:-15000, player:-3}
+        ]}
+    ]
+  },
+  {
+    title:'流感在团内传染', emoji:'🤒',
+    desc:'一名成员发烧了，紧接着又有两人开始咳嗽，眼看要传染开。',
+    options:[
+      {label:'全员停工隔离', desc:'健康第一，损失可控', stamina:-5, coins:-30000, mood:-3, player:+5},
+      {label:'轻症成员带病工作', desc:'不耽误行程但恶化风险', stamina:-15, coins:-15000, mood:-6, player:-4},
+      {label:'只隔离病号，其余照常', desc:'折中方案', stamina:-8, coins:-20000, mood:-2, player:+2}
+    ]
+  },
+  {
+    title:'粉丝应援团内讧', emoji:'💥',
+    desc:'两家粉丝应援团因为应援顺序吵起来了，超话一片乌烟瘴气。',
+    options:[
+      {label:'官方发声劝和', desc:'主持公道', fans:-3000, mood:+3, player:+4},
+      {label:'冷处理', desc:'让她们自己吵完', fans:-10000, player:-2},
+      {label:'安排联合应援活动', desc:'花钱转移注意力', coins:-10000, fans:+8000, mood:+3, player:+3}
+    ]
+  },
+  {
+    title:'大粉站姐宣布退圈', emoji:'💔',
+    desc:'跟了几年的顶流站姐突然宣布退圈，还删光了所有照片，粉丝圈震动。',
+    options:[
+      {label:'私信挽留', desc:'试试能不能劝回', fans:-5000, mood:-2, player:+2},
+      {label:'公开感谢她的付出', desc:'体面送别，稳住其他粉丝', fans:+5000, player:+4},
+      {label:'不管，随她走', desc:'冷处理', fans:-12000, player:-3}
+    ]
+  },
+  {
+    title:'粉丝公益应援被点赞', emoji:'💝',
+    desc:'粉丝以团名捐建的乡村小学落成，公益应援上了热搜，全网好评。',
+    options:[
+      {label:'官方认领并追加捐款', desc:'做实事换口碑', coins:-20000, fans:+20000, mood:+5, player:+5},
+      {label:'低调转发感谢', desc:'不出钱只出力', fans:+8000, player:+2},
+      {label:'不回应', desc:'避免被说炒作', fans:-3000, player:-2}
+    ]
+  },
+  {
+    title:'路人盘突然暴涨', emoji:'🌈',
+    desc:'一段练习室日常被路人疯狂转发，路人好感度直线上升。',
+    options:[
+      {label:'趁势放送更多日常', desc:'留住路人粉', fans:+20000, stamina:-6, player:+3},
+      {label:'保持神秘', desc:'吊胃口，可能流失', fans:+6000, player:-1},
+      {label:'安排一次街头快闪', desc:'线下圈粉', fans:+25000, stamina:-10, player:+4, buffs:[{type:'fans', value:1.3, days:2, label:'涨粉×1.3'}]}
+    ]
+  },
+  {
+    title:'黑粉剪辑带节奏', emoji:'🎭',
+    desc:'有人把成员多年前的旧视频恶意剪辑成"耍大牌"，评论区开始发酵。',
+    options:[
+      {label:'发完整原视频澄清', desc:'用事实说话', fans:-5000, coins:-8000, player:+4},
+      {label:'律师函警告', desc:'杀鸡儆猴', coins:-20000, fans:-3000, player:+3},
+      {label:'不管，等热度过去', desc:'省事但掉粉', fans:-15000, player:-4}
+    ]
+  },
+  {
+    title:'见面会门票秒空', emoji:'🎟️',
+    desc:'新一轮见面会门票开售十秒售罄，超话一片哀嚎求加场。',
+    options:[
+      {label:'加开一场', desc:'皆大欢喜', coins:+25000, fans:+10000, stamina:-8, player:+3},
+      {label:'安排线上直播场', desc:'省事又圈钱', coins:+30000, fans:+8000, player:+2},
+      {label:'不加场，保持稀缺', desc:'饥饿营销', fans:-6000, mood:-3, player:-1}
+    ]
+  },
+  {
+    title:'成员手写信刷屏', emoji:'✉️',
+    desc:'一名成员晒出手写的感谢信，字迹工整情真意切，粉丝直呼破防。',
+    options:[
+      {label:'官号转发加精选', desc:'把流量接住', fans:+12000, mood:+4, player:+3},
+      {label:'让全员都写一封', desc:'集体营业', fans:+20000, stamina:-4, mood:+2, player:+5},
+      {label:'不加营销，顺其自然', desc:'真实感更强', fans:+6000, player:+1}
+    ]
+  },
+  {
+    title:'海外粉丝暴涨', emoji:'🌍',
+    desc:'成员翻唱的外语歌在海外平台爆火，评论区涌入大量外语留言。',
+    options:[
+      {label:'开海外账号运营', desc:'布局国际市场', coins:-10000, fans:+20000, fame:+4, player:+5},
+      {label:'安排海外直播', desc:'和海外粉互动', fans:+15000, stamina:-6, player:+3},
+      {label:'先观望', desc:'错过窗口期', fans:+5000, player:-2}
+    ]
+  },
+  {
+    title:'成员深夜失眠', emoji:'🌙',
+    desc:'一名成员连续几晚失眠，白天排练明显不在状态。',
+    options:[
+      {label:'安排心理疏导', desc:'治本', coins:-8000, mood:+8, player:+4},
+      {label:'放一天假', desc:'休息治愈', mood:+6, stamina:+10, player:+3},
+      {label:'硬扛', desc:'压力会累积', stamina:-8, mood:-8, player:-3}
+    ]
+  },
+  {
+    title:'成员过劳亮红灯', emoji:'🚦',
+    desc:'体检报告显示一名成员多项指标超标，医生建议强制休息。',
+    options:[
+      {label:'强制休息一周', desc:'健康第一', stamina:+20, coins:-15000, mood:-2, player:+5},
+      {label:'减少一半行程', desc:'折中', stamina:+10, coins:-8000, player:+3},
+      {label:'无视报告继续冲', desc:'榨干身体换业绩', stamina:-20, coins:+10000, mood:-6, player:-6}
+    ]
+  },
+  {
+    title:'成员情绪低谷', emoji:'🌧️',
+    desc:'一名成员这几天总是闷闷不乐，问也不说，排练时频频走神。',
+    options:[
+      {label:'单独谈心', desc:'打开心结', mood:+10, stamina:-2, player:+5},
+      {label:'安排他做喜欢的事', desc:'转移注意力', mood:+8, coins:-5000, player:+3},
+      {label:'不管，过几天就好', desc:'可能越来越糟', mood:-8, player:-4}
+    ]
+  },
+  {
+    title:'成员增肌成功', emoji:'💪',
+    desc:'舞蹈担当苦练三个月，身材线条明显，舞台上更有力量感了。',
+    options:[
+      {label:'安排力量型舞台', desc:'放大优势', skill:+3, fans:+8000, player:+3},
+      {label:'低调发育', desc:'藏一手', skill:+2, player:+1},
+      {label:'拍健身vlog引流', desc:'健康人设圈粉', fans:+10000, stamina:-4, player:+2}
+    ]
+  },
+  {
+    title:'成员嗓音沙哑', emoji:'🗣️',
+    desc:'主唱嗓子哑了，医生说是声带小结前兆，建议休声一周。',
+    options:[
+      {label:'休声一周保嗓子', desc:'长远考虑', stamina:+8, coins:-8000, mood:-3, player:+5},
+      {label:'减少高音部分', desc:'带病坚持', stamina:-5, skill:-1, mood:-3, player:+2},
+      {label:'强撑全开麦', desc:'风险极大',
+        outcomes:[
+          {label:'撑过去了，敬业出圈', fans:+8000, fame:+3, player:+3},
+          {label:'声带受伤', stamina:-25, skill:-4, mood:-8, player:-6}
+        ]}
+    ]
+  },
+  {
+    title:'成员吃坏肚子', emoji:'🤢',
+    desc:'聚餐后两名成员上吐下泻，明天还有一场重要演出。',
+    options:[
+      {label:'立即就医', desc:'花钱买平安', coins:-10000, stamina:-5, player:+4},
+      {label:'喝点药硬扛', desc:'风险自担', stamina:-12, mood:-5, player:-2},
+      {label:'调整舞台走位', desc:'避开剧烈动作', stamina:-4, coins:-5000, player:+2}
+    ]
+  },
+  {
+    title:'成员生日惊喜企划', emoji:'🎁',
+    desc:'一名成员生日临近，粉丝已经开始自发筹备应援，公司要不要也准备点什么。',
+    options:[
+      {label:'办小型生日会', desc:'花钱买开心', coins:-20000, mood:+10, fans:+8000, player:+4},
+      {label:'全员合拍祝福视频', desc:'低成本暖心', mood:+6, fans:+4000, player:+2},
+      {label:'发张合影了事', desc:'略显敷衍', mood:-4, fans:-2000, player:-3}
+    ]
+  },
+  {
+    title:'大师课名额', emoji:'🎓',
+    desc:'业内传奇编舞师来开三天大师课，名额有限，费用不低。',
+    options:[
+      {label:'全员报名', desc:'投资未来', coins:-20000, skill:+3, stamina:-8, player:+4, buffs:[{type:'train', value:1.2, days:3, label:'训练效果×1.2'}]},
+      {label:'只派 2 人参加', desc:'精打细算', coins:-12000, skill:+2, stamina:-4, player:+2},
+      {label:'放弃，自己练', desc:'省钱但没长进', skill:-1, player:-2}
+    ]
+  },
+  {
+    title:'舞蹈大赛夺冠', emoji:'🏆',
+    desc:'团体参加青年舞蹈大赛一路闯进决赛，今晚是总决赛。',
+    options:[
+      {label:'全力一搏', desc:'压力拉满', stamina:-12, skill:+3, fame:+3, player:+3},
+      {label:'编排保守求稳', desc:'求稳不求出彩', stamina:-6, skill:+1, fame:+1, player:+1},
+      {label:'临时放大招', desc:'赌一把炸场',
+        outcomes:[
+          {label:'大招炸场夺冠', fame:+6, skill:+3, fans:+15000, player:+5},
+          {label:'失误错失冠军', stamina:-10, mood:-6, fame:-2, player:-4}
+        ]}
+    ]
+  },
+  {
+    title:'声乐训练遇瓶颈', emoji:'🎵',
+    desc:'主唱的高音卡在同一个音上两周了，越练越急，状态下滑。',
+    options:[
+      {label:'请声乐大师辅导', desc:'砸钱突破', coins:-15000, skill:+3, mood:+2, player:+4},
+      {label:'暂停高音改练低音', desc:'曲线救国', skill:+1, stamina:-3, player:+2},
+      {label:'死磕到底', desc:'可能突破也可能伤嗓',
+        outcomes:[
+          {label:'突破瓶颈', skill:+4, player:+3},
+          {label:'嗓子疲劳', stamina:-12, skill:-2, mood:-4, player:-3}
+        ]}
+    ]
+  },
+  {
+    title:'练习室全面升级', emoji:'🛠️',
+    desc:'老练习室地板开裂了，趁机大装修，还能装上新设备。',
+    options:[
+      {label:'豪华装修', desc:'一步到位', coins:-25000, mood:+5, buffs:[{type:'train', value:1.4, days:4, label:'训练效果×1.4'}]},
+      {label:'简单翻新', desc:'能用就行', coins:-15000, mood:+2, player:+1},
+      {label:'只换地板', desc:'最小投入', coins:-8000, stamina:-2, player:+1}
+    ]
+  },
+  {
+    title:'知名制作人抛出橄榄枝', emoji:'🎧',
+    desc:'拿过格莱美的制作人想给团体做一张专辑，档期和费用都很高。',
+    options:[
+      {label:'合作一整张专辑', desc:'国际水准', coins:-30000, skill:+4, fame:+5, player:+5, buffs:[{type:'income', value:1.2, days:3, label:'演出赚钱×1.2'}]},
+      {label:'先合作一首单曲', desc:'试水', coins:-20000, skill:+2, fame:+3, player:+3},
+      {label:'婉拒', desc:'控制预算', coins:+10000, player:-2}
+    ]
+  },
+  {
+    title:'成员自作曲被老师称赞', emoji:'✍️',
+    desc:'成员写的新 demo 被制作人夸奖"很有灵气"，建议正式发行。',
+    options:[
+      {label:'正式发行单曲', desc:'让作品见光', coins:-15000, skill:+3, fans:+12000, player:+4},
+      {label:'先内部打磨', desc:'慢工出细活', skill:+2, stamina:-4, player:+2},
+      {label:'先压着，等好时机', desc:'怕被埋没', mood:-3, player:-2}
+    ]
+  },
+  {
+    title:'爆款综艺邀约常驻', emoji:'📺',
+    desc:'现象级综艺想请两名成员常驻一季，曝光巨大但每周都要录。',
+    options:[
+      {label:'安排主力成员常驻', desc:'曝光换人气', fame:+6, coins:+40000, stamina:-15, player:+4},
+      {label:'轮流常驻', desc:'雨露均沾', fame:+4, coins:+30000, stamina:-10, player:+3},
+      {label:'婉拒，专心音乐', desc:'保作品质量', skill:+2, fame:-2, player:+2, buffs:[{type:'train', value:1.3, days:2, label:'训练效果×1.3'}]}
+    ]
+  },
+  {
+    title:'全网宣传期启动', emoji:'📣',
+    desc:'新专辑进入宣传期，各平台流量倾斜，是圈粉黄金窗口。',
+    options:[
+      {label:'加大投放', desc:'烧钱买曝光', coins:-20000, fame:+4, player:+3, buffs:[{type:'fans', value:1.5, days:3, label:'涨粉×1.5'}]},
+      {label:'精准投放', desc:'性价比优先', coins:-15000, fame:+3, player:+2},
+      {label:'自然发酵', desc:'不花钱，看命', fame:+1, player:-1}
+    ]
+  },
+  {
+    title:'合作场馆给出优惠', emoji:'🏢',
+    desc:'长期合作的场馆主动降价，还愿意在空档期给团体免费用排练。',
+    options:[
+      {label:'签下优惠套餐', desc:'锁定福利', coins:-6000, player:+2, buffs:[{type:'cost', value:0.75, days:4, label:'活动成本×0.75'}]},
+      {label:'只谈单次优惠', desc:'灵活', coins:-5000, player:+1},
+      {label:'再压价', desc:'贪心可能谈崩',
+        outcomes:[
+          {label:'谈到更低', coins:-8000, player:+3, buffs:[{type:'cost', value:0.7, days:4, label:'活动成本×0.7'}]},
+          {label:'对方不干了', player:-2}
+        ]}
+    ]
+  },
+  {
+    title:'营养师随行建议', emoji:'🥗',
+    desc:'营养师评估后建议调整饮食，能明显改善成员的体力和状态。',
+    options:[
+      {label:'全员定制营养餐', desc:'健康投资', coins:-12000, stamina:+8, mood:+3, player:+3, buffs:[{type:'rest', value:1.3, days:3, label:'休息效果×1.3'}]},
+      {label:'只给重点成员配', desc:'小范围试水', coins:-8000, stamina:+4, player:+2},
+      {label:'不信这套', desc:'省下钱', coins:+5000, stamina:-3, player:-2}
+    ]
+  },
+  {
+    title:'健身教练特训营', emoji:'🏋️',
+    desc:'健身教练提议带全员练一个月体能，能明显提升舞台耐力。',
+    options:[
+      {label:'全员参训', desc:'痛并快乐着', coins:-10000, stamina:+10, player:+3, buffs:[{type:'train', value:1.25, days:4, label:'训练效果×1.25'}]},
+      {label:'派 3 人先练', desc:'试试效果', coins:-7000, stamina:+5, player:+2},
+      {label:'不参加', desc:'保持现状', stamina:-2, player:-2}
+    ]
+  },
+  {
+    title:'品牌热度周期到来', emoji:'📈',
+    desc:'多品牌同时进入推广期，广告投放预算充足，正是接单好时候。',
+    options:[
+      {label:'趁机多接广告', desc:'赚一波', coins:+40000, stamina:-8, player:+3, buffs:[{type:'income', value:1.15, days:3, label:'演出赚钱×1.15'}]},
+      {label:'选择性接精品', desc:'挑好的', coins:+25000, fame:+3, player:+2},
+      {label:'不追热度', desc:'错过行情', player:-3}
+    ]
+  },
+  {
+    title:'媒体空窗期', emoji:'📰',
+    desc:'最近没什么新闻热点，媒体想约团体做深度访谈，价格开得很高。',
+    options:[
+      {label:'接受专访', desc:'钱多事少', coins:+30000, fame:+2, stamina:-3, player:+2},
+      {label:'索要更高采访费', desc:'趁火打劫',
+        outcomes:[
+          {label:'谈成高价', coins:+40000, player:+4},
+          {label:'对方放弃', coins:+5000, player:-2}
+        ]},
+      {label:'婉拒，专注训练', desc:'避开镜头', skill:+2, stamina:-4, player:+1}
+    ]
+  },
+  {
+    title:'全员状态大洗牌', emoji:'🔀',
+    desc:'风水师朋友开玩笑说"该让全员状态平均一下"，你居然认真考虑了这个建议。',
+    options:[
+      {label:'全员取平均', desc:'均衡发展', special:'avgAll', player:+2},
+      {label:'粉丝也平均一下', desc:'共同富裕', special:'avgFans', player:+2},
+      {label:'当没听见', desc:'保持现状', player:-1}
+    ]
+  },
+  {
+    title:'神秘股神来信', emoji:'📈',
+    desc:'一封匿名邮件声称"明天股市必涨"，还附了一份专业的分析报告。',
+    options:[
+      {label:'相信他，明天加仓', desc:'赌一把', coins:-30000, player:-1, special:'stockUp'},
+      {label:'卖出所有股票避险', desc:'落袋为安', coins:+10000, player:+2},
+      {label:'删掉邮件', desc:'不信玄学', player:0}
+    ]
+  },
+  {
+    title:'天降神秘投资人', emoji:'🤵',
+    desc:'一位神秘富商表示很欣赏团体，想注资，但提出了一些奇怪的条件。',
+    options:[
+      {label:'接受注资', desc:'资金翻倍，但自由度下降', special:'coinsDouble', fame:+2, player:-3},
+      {label:'婉拒并保持独立', desc:'穷但自由', player:+4},
+      {label:'讨价还价', desc:'谈崩就啥都没有',
+        outcomes:[
+          {label:'谈成一半注资', coins:+30000, player:+2},
+          {label:'对方拂袖而去', player:-2}
+        ]}
+    ]
+  },
+  {
+    title:'公司资金告急', emoji:'🆘',
+    desc:'财务紧急报告：下月工资快发不出了，必须立刻想办法。',
+    options:[
+      {label:'出售部分股票', desc:'割肉保工资', coins:+30000, player:-2},
+      {label:'全员降薪一个月', desc:'共渡难关', coins:+50000, mood:-8, player:-4},
+      {label:'找银行谈过桥贷款', desc:'拆东墙补西墙',
+        outcomes:[
+          {label:'贷到过桥款', coins:+50000, debt:+30000, player:-3},
+          {label:'被银行拒绝', player:-4}
+        ]}
+    ]
+  },
+  {
+    title:'神秘好运降临', emoji:'🍀',
+    desc:'前台捡到一个信封，里面是一张匿名支票和一张纸条："加油，看好你们"。',
+    options:[
+      {label:'收下支票', desc:'天上掉馅饼', coins:+30000, player:+2},
+      {label:'捐给公益', desc:'传递好运', fans:+10000, player:+4, mood:+5},
+      {label:'报警处理', desc:'怕有诈', coins:-5000, player:+1}
+    ]
+  },
+  {
+    title:'全员满血复活的机会', emoji:'⚡',
+    desc:'经纪公司拿到一批顶级理疗师资源，能让全员状态瞬间拉满，但只够用一次。',
+    options:[
+      {label:'现在就用', desc:'立刻满状态', special:'healAll', coins:-10000, player:+3},
+      {label:'留着关键时候用', desc:'储备起来', player:+2},
+      {label:'转卖给同行', desc:'变现', coins:+20000, player:-2}
+    ]
+  },
+  {
+    title:'圈内前辈突然提携', emoji:'🤝',
+    desc:'圈内德高望重的前辈公开夸赞团体"未来可期"，还主动邀约合作。',
+    options:[
+      {label:'接住人脉', desc:'多多走动', fame:+4, coins:-5000, player:+4, buffs:[{type:'income', value:1.1, days:3, label:'演出赚钱×1.1'}]},
+      {label:'发帖感谢', desc:'体面回应', fame:+3, player:+2},
+      {label:'低调不回应', desc:'怕被说蹭热度', fame:+1, player:-2}
+    ]
+  },
+  {
+    title:'全员名气大涨的好事', emoji:'🌟',
+    desc:'团体入选年度青年偶像榜，官方背书，正是宣传的好时机。',
+    options:[
+      {label:'大张旗鼓宣传', desc:'把荣誉用足', special:'fameBoost', fans:+15000, player:+4},
+      {label:'低调感谢', desc:'避免招黑', fame:+3, player:+2},
+      {label:'不宣传', desc:'白白浪费', player:-2}
+    ]
+  },
+  {
+    title:'一次实力跃升的集训', emoji:'🧗',
+    desc:'公司决定安排一次封闭式集训，冲刺下个月的考核。',
+    options:[
+      {label:'高强度集训', desc:'实力飞跃', special:'skillBoost', stamina:-15, player:+3, buffs:[{type:'train', value:1.2, days:2, label:'训练效果×1.2'}]},
+      {label:'中等强度', desc:'稳扎稳打', skill:+3, stamina:-8, player:+2},
+      {label:'不集训', desc:'保持状态', stamina:-3, player:-2}
+    ]
+  },
+  {
+    title:'黑粉网暴升级', emoji:'🌋',
+    desc:'恶意剪辑视频被推上热门，评论区和私信开始沦陷，舆情持续升温。',
+    options:[
+      {label:'砸钱请公关团队', desc:'花钱灭火', coins:-30000, fans:-5000, player:+4},
+      {label:'硬扛，等热度过去', desc:'省下公关费但损失收益', buffs:[{type:'fans', value:0.8, days:3, label:'涨粉×0.8'}], fans:-10000, player:-4},
+      {label:'反手起诉造谣者', desc:'赌一把',
+        outcomes:[
+          {label:'胜诉，口碑逆转', fans:+15000, player:+6},
+          {label:'取证困难，不了了之', coins:-20000, player:-3}
+        ]}
+    ]
+  },
+  {
+    title:'行业淡季来袭', emoji:'📉',
+    desc:'演出市场进入淡季，通告明显减少，各家都在抢有限的资源。',
+    options:[
+      {label:'加大营销投入', desc:'淡季抢市场', coins:-20000, buffs:[{type:'income', value:1.1, days:3, label:'演出赚钱×1.1'}], player:+3},
+      {label:'硬扛过去', desc:'收益缩水', buffs:[{type:'income', value:0.85, days:4, label:'演出赚钱×0.85'}], player:-2},
+      {label:'转型线上内容', desc:'换个赛道', coins:-10000, fans:+8000, buffs:[{type:'income', value:0.9, days:3, label:'演出赚钱×0.9'}]}
+    ]
+  },
+  {
+    title:'排练场馆维修', emoji:'🏗️',
+    desc:'常去的排练场馆要封闭维修一个月，找新场地的成本不低。',
+    options:[
+      {label:'花钱租专业新场地', desc:'贵但舒心', coins:-15000, buffs:[{type:'train', value:1.15, days:3, label:'训练效果×1.15'}], player:+2},
+      {label:'挤在旧场地凑合', desc:'省钱但效率低', buffs:[{type:'cost', value:1.2, days:3, label:'活动成本×1.2'}], mood:-5, player:-3},
+      {label:'延期排练', desc:'拖到场馆修好', stamina:-8, coins:-30000, skill:-1, player:-3}
+    ]
+  },
+  {
+    title:'成员状态集体下滑', emoji:'📉',
+    desc:'连续高强度工作后，全员体力和心情都在下滑，效率肉眼可见变差。',
+    options:[
+      {label:'花钱调理身体', desc:'请理疗师+营养餐', coins:-12000, buffs:[{type:'rest', value:1.15, days:3, label:'休息效果×1.15'}], stamina:+5, player:+3},
+      {label:'硬扛', desc:'状态会更差', buffs:[{type:'rest', value:0.85, days:3, label:'休息效果×0.85'}], mood:-5, player:-3},
+      {label:'全员放假两天', desc:'破财买休整', coins:-20000, stamina:+15, mood:+8, player:+4}
+    ]
+  },
+  {
+    title:'演出审批卡壳', emoji:'📄',
+    desc:'大演出的审批材料被退回，缺一个文件，不补就赶不上档期。',
+    options:[
+      {label:'花钱加急办理', desc:'用钱买时间', coins:-20000, player:+2},
+      {label:'等正常流程', desc:'可能错过演出', buffs:[{type:'income', value:0.8, days:2, label:'演出赚钱×0.8'}], player:-3},
+      {label:'托关系找熟人', desc:'欠人情',
+        outcomes:[
+          {label:'顺利办下', player:+3},
+          {label:'人情不够硬', coins:-10000, buffs:[{type:'income', value:0.85, days:2, label:'演出赚钱×0.85'}], player:-2}
+        ]}
+    ]
+  },
+  {
+    title:'竞品组团发新歌', emoji:'🎼',
+    desc:'对家团体赶在新歌发布前官宣了同风格专辑，正面撞车。',
+    options:[
+      {label:'砸钱打歌宣传', desc:'正面硬刚', coins:-25000, buffs:[{type:'fans', value:1.2, days:3, label:'涨粉×1.2'}], player:+3},
+      {label:'硬扛，正常发布', desc:'可能被分流', buffs:[{type:'fans', value:0.8, days:4, label:'涨粉×0.8'}], player:-3},
+      {label:'蹭对方热度炒话题', desc:'剑走偏锋',
+        outcomes:[
+          {label:'话题出圈', fans:+15000, player:+4},
+          {label:'被嘲碰瓷', fans:-10000, player:-4}
+        ]}
+    ]
+  },
+  {
+    title:'媒体集体唱衰', emoji:'🗞️',
+    desc:'几家营销号联动发稿，预测团体"流量见顶"，唱衰文章满天飞。',
+    options:[
+      {label:'买正面通稿对冲', desc:'用钱洗舆论', coins:-15000, player:+3},
+      {label:'硬扛，用成绩说话', desc:'真相最有力', buffs:[{type:'income', value:0.9, days:3, label:'演出赚钱×0.9'}], fans:-8000, player:+1},
+      {label:'反向营销自嘲', desc:'黑红也是红',
+        outcomes:[
+          {label:'自嘲出圈', fans:+12000, player:+4},
+          {label:'被说破罐破摔', fans:-8000, player:-3}
+        ]}
+    ]
+  },
+  {
+    title:'排练场地被占', emoji:'🚧',
+    desc:'预定的排练室被别的团队加价抢走，今晚的训练没地方去。',
+    options:[
+      {label:'临时租高价场地', desc:'破费但训练不断', coins:-10000, buffs:[{type:'train', value:1.1, days:2, label:'训练效果×1.1'}]},
+      {label:'硬扛，改到天台练', desc:'艰苦但省心', buffs:[{type:'train', value:0.85, days:3, label:'训练效果×0.85'}], stamina:-6, player:-2},
+      {label:'线上视频训练', desc:'效率打折', buffs:[{type:'train', value:0.9, days:2, label:'训练效果×0.9'}]}
+    ]
+  },
+  {
+    title:'神秘商人卖好运符', emoji:'🔮',
+    desc:'一个神秘人拦下你，说他的"好运符"能让团体演出翻倍，开价不低。',
+    options:[
+      {label:'买一个试试', desc:'先花钱后见效', coins:-15000, buffs:[{type:'income', value:1.15, days:3, label:'演出赚钱×1.15'}], player:-2},
+      {label:'砍价再买', desc:'赌一把',
+        outcomes:[
+          {label:'半价买到', coins:-8000, buffs:[{type:'income', value:1.15, days:3, label:'演出赚钱×1.15'}], player:-1},
+          {label:'对方不卖', player:0}
+        ]},
+      {label:'不理他', desc:'封建迷信', player:+1}
+    ]
+  },
+  {
+    title:'朋友劝你投资新项目', emoji:'📊',
+    desc:'圈内朋友拉你投资一个演唱会制作项目，回报高但周期长。',
+    options:[
+      {label:'投大钱', desc:'高风险高回报', coins:-20000, buffs:[{type:'income', value:1.2, days:4, label:'演出赚钱×1.2'}], player:-1},
+      {label:'投小钱', desc:'意思意思', coins:-8000, buffs:[{type:'income', value:1.1, days:3, label:'演出赚钱×1.1'}]},
+      {label:'不投', desc:'稳字当头', player:+1}
+    ]
+  },
+  {
+    title:'天气之子预兆', emoji:'🌦️',
+    desc:'某成员突然很笃定地说"接下来训练会很顺"，还让全员一起冥想。',
+    options:[
+      {label:'陪他冥想，心情先波动', desc:'先抑后扬', mood:-10, buffs:[{type:'rest', value:1.3, days:3, label:'休息效果×1.3'}], player:+2},
+      {label:'配合但不认真', desc:'半信半疑', mood:-3, buffs:[{type:'rest', value:1.1, days:2, label:'休息效果×1.1'}]},
+      {label:'别搞玄学', desc:'按部就班', buffs:[{type:'cost', value:1.1, days:2, label:'活动成本×1.1'}], player:-2}
+    ]
+  },
+  {
+    title:'透支下月广告预算', emoji:'💳',
+    desc:'财务建议预支下个月的广告预算补这个月的缺口，下月就得勒紧裤腰带。',
+    options:[
+      {label:'预支', desc:'先花未来的钱', coins:+30000, buffs:[{type:'income', value:0.85, days:3, label:'演出赚钱×0.85'}], player:-3},
+      {label:'预支一半', desc:'折中', coins:+15000, buffs:[{type:'income', value:0.92, days:2, label:'演出赚钱×0.92'}], player:-2},
+      {label:'不预支', desc:'自己想办法', player:+2}
+    ]
+  },
+  {
+    title:'粉丝流失预警', emoji:'⚠️',
+    desc:'数据后台显示近一周活跃粉丝明显减少，再不行动就要被"取关潮"了。',
+    options:[
+      {label:'砸钱办回馈活动', desc:'花钱留人', coins:-20000, buffs:[{type:'fans', value:1.3, days:3, label:'涨粉×1.3'}], player:+3},
+      {label:'硬扛，等风头过去', desc:'流失会加剧', buffs:[{type:'fans', value:0.85, days:3, label:'涨粉×0.85'}], fans:-8000, player:-4},
+      {label:'紧急出新物料', desc:'低成本止损', coins:-10000, fans:+8000, player:+1}
+    ]
+  },
+  {
+    title:'全员海边拍片晒伤', emoji:'🥵',
+    desc:'广告拍摄在海边暴晒一天，全员晒伤，又痒又痛，状态堪忧。',
+    options:[
+      {label:'花钱做晒后护理', desc:'及时补救', coins:-8000, buffs:[{type:'rest', value:1.2, days:2, label:'休息效果×1.2'}], player:+2},
+      {label:'硬扛', desc:'又痒又累', stamina:-10, buffs:[{type:'rest', value:0.9, days:2, label:'休息效果×0.9'}], mood:-6, player:-3},
+      {label:'停工休整一天', desc:'养伤为主', stamina:+10, coins:-15000, player:+2}
+    ]
+  },
+  {
+    title:'录音棚档期冲突', emoji:'🎚️',
+    desc:'约好的录音棚被大牌明星临时续约，要么换棚要么等着。',
+    options:[
+      {label:'花钱换高级棚', desc:'多花点但效率高', coins:-15000, buffs:[{type:'train', value:1.15, days:3, label:'训练效果×1.15'}], player:+1},
+      {label:'硬扛等空档', desc:'进度拖慢', buffs:[{type:'train', value:0.85, days:3, label:'训练效果×0.85'}], skill:-1, player:-3},
+      {label:'改期录制', desc:'档期全乱', coins:-10000, stamina:-5, player:-2}
+    ]
+  },
+  {
+    title:'低价商单找上门', emoji:'🏷️',
+    desc:'一个口碑不太好的品牌想低价请团体带货，钱不少但可能伤名声。',
+    options:[
+      {label:'接单，钱先赚了', desc:'透支口碑', coins:+20000, buffs:[{type:'income', value:0.9, days:3, label:'演出赚钱×0.9'}], fans:-8000, player:-4},
+      {label:'婉拒', desc:'保名声', player:+3},
+      {label:'要求加价才接', desc:'赌品牌方急用',
+        outcomes:[
+          {label:'品牌加价', coins:+30000, player:+2},
+          {label:'品牌换人', player:-2}
+        ]}
+    ]
+  },
+  {
+    title:'代言物料拍摄改期', emoji:'📅',
+    desc:'品牌方临时把广告拍摄提前了两天，打乱了整周排练计划。',
+    options:[
+      {label:'协调补拍，加钱保档', desc:'花钱买顺', coins:-10000, buffs:[{type:'income', value:1.15, days:3, label:'演出赚钱×1.15'}], player:+2},
+      {label:'硬挤出时间去拍', desc:'两边硬撑', stamina:-8, buffs:[{type:'cost', value:1.1, days:2, label:'活动成本×1.1'}], player:-2},
+      {label:'拒绝改期', desc:'守住原计划', buffs:[{type:'train', value:1.1, days:2, label:'训练效果×1.1'}], player:-1}
+    ]
+  },
+  {
+    title:'音乐节电子票平台崩了', emoji:'📱',
+    desc:'音乐节开票瞬间售票平台全线崩溃，粉丝抢不到票在超话炸锅。',
+    options:[
+      {label:'官方补偿延期购票', desc:'安抚粉丝', coins:-8000, buffs:[{type:'fans', value:1.15, days:3, label:'涨粉×1.15'}], player:+3},
+      {label:'等平台自己修复', desc:'被动挨骂', buffs:[{type:'income', value:0.9, days:2, label:'演出赚钱×0.9'}], fans:-5000, player:-3},
+      {label:'联合平台发声明', desc:'甩锅给平台', coins:-5000, buffs:[{type:'fans', value:1.05, days:2, label:'涨粉×1.05'}], player:-1}
+    ]
+  },
+  {
+    title:'新专预告片爆火', emoji:'🎬',
+    desc:'新专辑预告片发布三小时播放量破千万，全网都在讨论。',
+    options:[
+      {label:'趁热追加宣发物料', desc:'接住这波流量', coins:-12000, buffs:[{type:'fans', value:1.2, days:3, label:'涨粉×1.2'}], player:+4},
+      {label:'追加一支拍摄花絮', desc:'低成本加料', coins:-5000, buffs:[{type:'fans', value:1.1, days:2, label:'涨粉×1.1'}], player:+2},
+      {label:'保持神秘不营业', desc:'吊胃口', buffs:[{type:'fans', value:0.9, days:2, label:'涨粉×0.9'}], player:-2}
+    ]
+  },
+  {
+    title:'成员口播说错季节', emoji:'🗣️',
+    desc:'推广口播里成员把"春季限定"说成了"冬季限定"，弹幕一片问号。',
+    options:[
+      {label:'重录补拍', desc:'花小钱保口碑', coins:-6000, buffs:[{type:'income', value:1.1, days:2, label:'演出赚钱×1.1'}], player:+3},
+      {label:'自嘲玩梗回应', desc:'把失误变梗', buffs:[{type:'fans', value:1.1, days:2, label:'涨粉×1.1'}], player:+2},
+      {label:'冷处理', desc:'等热度过去', buffs:[{type:'income', value:0.9, days:2, label:'演出赚钱×0.9'}], player:-3}
+    ]
+  },
+  {
+    title:'品牌方追加年度合作', emoji:'🤝',
+    desc:'合作品牌对销量非常满意，提出追加一整年的深度合作。',
+    options:[
+      {label:'签下年度长约', desc:'绑定长期收入', coins:+30000, buffs:[{type:'income', value:1.15, days:4, label:'演出赚钱×1.15'}], player:+4},
+      {label:'只接季度合作', desc:'留足自由度', coins:+15000, buffs:[{type:'income', value:1.08, days:2, label:'演出赚钱×1.08'}], player:+2},
+      {label:'婉拒，专注内容', desc:'不接商单', buffs:[{type:'train', value:1.15, days:3, label:'训练效果×1.15'}], player:+1}
+    ]
+  },
+  {
+    title:'排练时间被场馆压缩', emoji:'⏱️',
+    desc:'场馆档期被更贵的演出抢走一半，排练时间只剩原来的一半。',
+    options:[
+      {label:'加钱延租排练时间', desc:'花钱买时间', coins:-12000, buffs:[{type:'train', value:1.15, days:3, label:'训练效果×1.15'}], player:+2},
+      {label:'精简排练内容', desc:'挑重点练', buffs:[{type:'train', value:0.9, days:2, label:'训练效果×0.9'}], player:-2},
+      {label:'换到早间低价时段', desc:'早起苦练', stamina:-8, buffs:[{type:'train', value:1.08, days:2, label:'训练效果×1.08'}], player:+1}
+    ]
+  },
+  {
+    title:'师兄团邀约合体舞台', emoji:'🎤',
+    desc:'人气师兄团主动邀约合体舞台，曝光巨大但要求配合排练。',
+    options:[
+      {label:'接下合体舞台', desc:'借师兄的流量', buffs:[{type:'fans', value:1.2, days:3, label:'涨粉×1.2'}], stamina:-6, player:+3},
+      {label:'谈分成再合作', desc:'条件谈清楚', coins:+20000, buffs:[{type:'income', value:1.1, days:2, label:'演出赚钱×1.1'}], player:+2},
+      {label:'婉拒', desc:'专注自身', buffs:[{type:'train', value:1.1, days:2, label:'训练效果×1.1'}], player:-1}
+    ]
+  },
+  {
+    title:'舞担旧伤复发', emoji:'🩹',
+    desc:'舞蹈担当旧伤复发，医生建议要么手术要么长期保守治疗。',
+    options:[
+      {label:'手术彻底治疗', desc:'长痛不如短痛', coins:-20000, buffs:[{type:'train', value:1.2, days:4, label:'训练效果×1.2'}], stamina:-4, player:+5},
+      {label:'保守治疗', desc:'边治边练', buffs:[{type:'train', value:0.92, days:3, label:'训练效果×0.92'}], coins:-8000, player:+2},
+      {label:'硬扛着继续跳', desc:'风险很大', stamina:-12, buffs:[{type:'train', value:0.85, days:2, label:'训练效果×0.85'}], player:-5}
+    ]
+  },
+  {
+    title:'海外打歌节目邀约', emoji:'🌏',
+    desc:'海外一线打歌节目发来邀约，国际化曝光的机会。',
+    options:[
+      {label:'全团赴海外打歌', desc:'国际舞台', coins:-15000, buffs:[{type:'fans', value:1.2, days:4, label:'涨粉×1.2'}], stamina:-6, player:+4},
+      {label:'只谈线上合作', desc:'成本可控', coins:+10000, buffs:[{type:'income', value:1.1, days:2, label:'演出赚钱×1.1'}], player:+1},
+      {label:'拒绝，专心国内', desc:'保守', buffs:[{type:'fans', value:0.92, days:2, label:'涨粉×0.92'}], player:-2}
+    ]
+  },
+  {
+    title:'机场VIP通道谈崩', emoji:'✈️',
+    desc:'机场 VIP 通道续费谈判破裂，下周行程要从普通通道走。',
+    options:[
+      {label:'加钱续VIP通道', desc:'花钱买清净', coins:-8000, buffs:[{type:'rest', value:1.15, days:3, label:'休息效果×1.15'}], player:+2},
+      {label:'走普通通道', desc:'被围堵又累', stamina:-6, buffs:[{type:'rest', value:0.9, days:2, label:'休息效果×0.9'}], player:-2},
+      {label:'找合作方分摊费用', desc:'拉赞助', coins:-3000, buffs:[{type:'rest', value:1.08, days:2, label:'休息效果×1.08'}], player:+1}
+    ]
+  },
+  {
+    title:'粉丝自发放映会', emoji:'🎞️',
+    desc:'粉丝自发组织线下观影会庆祝团体出道周年，规模还不小。',
+    options:[
+      {label:'官方认领并赞助场地', desc:'花小钱办大事', coins:-8000, buffs:[{type:'fans', value:1.15, days:3, label:'涨粉×1.15'}], player:+4},
+      {label:'转发感谢粉丝', desc:'低成本示好', buffs:[{type:'fans', value:1.08, days:2, label:'涨粉×1.08'}], player:+2},
+      {label:'不回应', desc:'寒了粉丝的心', buffs:[{type:'fans', value:0.9, days:2, label:'涨粉×0.9'}], player:-3}
+    ]
+  },
+  {
+    title:'摄影师临时罢拍', emoji:'📸',
+    desc:'约好的封面摄影师因档期纠纷临时罢拍，明天就要拍摄。',
+    options:[
+      {label:'加钱安抚摄影师', desc:'破财消灾', coins:-10000, buffs:[{type:'income', value:1.1, days:2, label:'演出赚钱×1.1'}], player:+2},
+      {label:'紧急换摄影师', desc:'风格要重调', coins:-5000, buffs:[{type:'income', value:0.92, days:2, label:'演出赚钱×0.92'}], player:-1},
+      {label:'改期拍摄', desc:'拖延节奏', stamina:-4, buffs:[{type:'cost', value:1.1, days:2, label:'活动成本×1.1'}], player:-2}
+    ]
+  },
+  {
+    title:'自制团综招商成功', emoji:'📺',
+    desc:'自制团综方案打动了大赞助商，冠名费比预期高出一截。',
+    options:[
+      {label:'扩大制作规模', desc:'钱都投回去', coins:-15000, buffs:[{type:'income', value:1.15, days:3, label:'演出赚钱×1.15'},{type:'fans', value:1.1, days:3, label:'涨粉×1.1'}], player:+4},
+      {label:'稳扎稳打拍完', desc:'落袋为安', coins:+30000, buffs:[{type:'fans', value:1.1, days:2, label:'涨粉×1.1'}], player:+2},
+      {label:'推迟到下一季', desc:'时机不等人', buffs:[{type:'income', value:0.9, days:2, label:'演出赚钱×0.9'}], player:-3}
+    ]
+  },
+  {
+    title:'金牌录音师被挖走', emoji:'🎚️',
+    desc:'合作多年的金牌录音师被对家高薪挖走，新歌录制陷入僵局。',
+    options:[
+      {label:'高价把人留回来', desc:'舍不得人才', coins:-20000, buffs:[{type:'train', value:1.15, days:3, label:'训练效果×1.15'}], player:+3},
+      {label:'启用新人录音师', desc:'给新人机会', buffs:[{type:'train', value:0.92, days:3, label:'训练效果×0.92'}], player:+1},
+      {label:'借设备自己录', desc:'省钱但费劲', coins:-5000, buffs:[{type:'train', value:1.08, days:2, label:'训练效果×1.08'}], stamina:-4, player:+1}
+    ]
+  },
+  {
+    title:'盲盒联名大卖', emoji:'🎁',
+    desc:'与潮玩品牌的盲盒联名上线即售罄，二手市场溢价三倍。',
+    options:[
+      {label:'加急补货再赚一波', desc:'趁热打铁', coins:+40000, buffs:[{type:'fans', value:1.1, days:2, label:'涨粉×1.1'}], player:+3},
+      {label:'限量不补，保值炒作', desc:'饥饿营销', coins:+30000, fans:-3000, player:+2},
+      {label:'不加货不宣传', desc:'佛系运营', buffs:[{type:'income', value:0.95, days:2, label:'演出赚钱×0.95'}], player:-2}
+    ]
+  },
+  {
+    title:'化妆师集体请辞', emoji:'💄',
+    desc:'化妆团队因为加班太多集体递辞呈，明天还有红毯活动。',
+    options:[
+      {label:'涨薪+加人手挽留', desc:'花钱保团队', coins:-15000, buffs:[{type:'rest', value:1.12, days:3, label:'休息效果×1.12'}], player:+3},
+      {label:'临时外包化妆', desc:'风格不稳', buffs:[{type:'rest', value:0.9, days:2, label:'休息效果×0.9'}], mood:-4, player:-2},
+      {label:'成员自己化妆', desc:'硬着头皮上', stamina:-6, buffs:[{type:'rest', value:0.85, days:2, label:'休息效果×0.85'}], player:-3}
+    ]
+  },
+  {
+    title:'慈善晚会公益邀约', emoji:'🕊️',
+    desc:'大型慈善晚会邀约义演，没有出场费但全网直播。',
+    options:[
+      {label:'免费义演', desc:'口碑拉满', fame:+4, stamina:-4, player:+5},
+      {label:'带新歌首唱参演', desc:'既公益又宣传', fame:+3, buffs:[{type:'fans', value:1.1, days:2, label:'涨粉×1.1'}], player:+4},
+      {label:'婉拒', desc:'错失口碑', fame:-2, player:-2}
+    ]
+  },
+  {
+    title:'周边被仿冒', emoji:'🧸',
+    desc:'市面上出现大量仿冒周边，质量粗糙还印着团名，粉丝误购后差评。',
+    options:[
+      {label:'起诉+官方声明', desc:'维权到底', coins:-15000, buffs:[{type:'income', value:1.12, days:3, label:'演出赚钱×1.12'}], player:+3},
+      {label:'官方辟谣+辨别指南', desc:'低成本止损', coins:-5000, buffs:[{type:'fans', value:1.08, days:2, label:'涨粉×1.08'}], player:+2},
+      {label:'不管', desc:'差评继续发酵', buffs:[{type:'income', value:0.9, days:2, label:'演出赚钱×0.9'}], fans:-3000, player:-3}
+    ]
+  },
+  {
+    title:'制作团队获国际大奖', emoji:'🏆',
+    desc:'幕后制作团队凭借一支 MV 拿下国际视觉大奖，全网刷屏。',
+    options:[
+      {label:'借势宣传制作实力', desc:'把荣誉变现', coins:-8000, buffs:[{type:'train', value:1.12, days:3, label:'训练效果×1.12'},{type:'fans', value:1.1, days:2, label:'涨粉×1.1'}], player:+4},
+      {label:'内部庆功', desc:'犒劳团队', coins:-10000, buffs:[{type:'train', value:1.08, days:2, label:'训练效果×1.08'}], mood:+5, player:+3},
+      {label:'低调处理', desc:'错过宣传窗口', buffs:[{type:'fans', value:0.95, days:2, label:'涨粉×0.95'}], player:-2}
+    ]
+  },
+  {
+    title:'公司服务器被黑', emoji:'🖥️',
+    desc:'官网凌晨遭黑客攻击，会员数据页面全部打不开，粉丝急了。',
+    options:[
+      {label:'紧急修复+加强防护', desc:'花钱保安全', coins:-12000, buffs:[{type:'income', value:1.1, days:2, label:'演出赚钱×1.1'}], player:+3},
+      {label:'报案+备份恢复', desc:'按流程走', coins:-5000, buffs:[{type:'income', value:1.05, days:2, label:'演出赚钱×1.05'}], player:+1},
+      {label:'拖延修复', desc:'粉丝持续流失', buffs:[{type:'fans', value:0.88, days:2, label:'涨粉×0.88'}], player:-4}
+    ]
+  }
+];
+
+/* ================= 状态 ================= */
+const state = {
+  day:1, totalDays:30, coins:80000, debt:0, loanDue:null, over:false, mode:'标准',
+  player:50, noEvt:0, executing:false, eventOpen:false,
+  solo:null, slotCount:7,
+  slots:[], target:null, lastMember:0,
+  holdings:{},          // 投资持仓 {assetId: 股数}
+  difficulty:'标准',    // 标准 / 困难
+  diff:{stamMult:1.5, moodMult:1.5, incomeMult:0.8, slots:5, costGrow:0.1, weatherDays:5},  // 困难/随心所欲参数（v1.0.7-fix2：天气周期默认 5 天）
+  buffs:[],             // 暂时性效果 {type,value,days,label}
+  stockUp:0,            // 明天股市必涨（剩余天数）
+  weather:null,         // 天气 {emoji,name,effects}
+  weatherCountdown:0,   // 距下次换天气天数
+  infra:{studio:0, dorm:0, record:0, venue:0}   // 基建等级（练习室/休息区/录音棚/场馆）
+};
+let modal = {actId:null, picked:new Set()};
+let currentEvent = null;
+let soloPick = 0;
+
+const clamp = (v,lo=0,hi=100)=>Math.max(lo,Math.min(hi,v));
+/* 所有玩家可见数值一律整数（千分位），仅最终结算评分保留小数 */
+const fmtI = n => {
+  const sign = n<0 ? '-' : '';
+  const a = Math.abs(Math.round(n));
+  return sign + (a>=1000000 ? Math.round(a/10000)+'万' : a.toLocaleString('zh-CN'));
+};
+const fmtM = fmtI, fmtN = fmtI;
+const rnd = a=>a[Math.floor(Math.random()*a.length)];
+const $ = id=>document.getElementById(id);
+const actives = ()=> state.solo!=null ? [MEMBERS[state.solo]] : MEMBERS;
+const activeN = ()=> state.solo!=null ? 1 : 7;
+const marketValue = ()=> INVEST_ASSETS.reduce((s,a)=>s+(state.holdings[a.id]||0)*a.price,0);
+
+/* ===== 收益成长函数 ===== */
+/* 心情影响（v1.0.2）：心情<30 表现×0.5；心情归零吸金/吸粉固定 50% */
+function perfMult(m){
+  if(m.mood<=0) return 0.5;
+  let fam = m.fame, ski = m.skill;
+  if(m.mood<30){ fam = Math.round(fam*0.5); ski = Math.round(ski*0.5); }
+  return 1 + (ski*0.75 + fam*0.25)/100;          // 吸金 1.0x~2.0x（v1.0.9：75% 实力 + 25% 名气）
+}
+function fanMult(m){
+  if(m.mood<=0) return 0.5;
+  let fam = m.fame;
+  if(m.mood<30) fam = Math.round(fam*0.5);
+  return 1 + fam/100;                          // 吸粉 1.0x~2.0x
+}
+/* 心情<30 时实力/名气永久 -5（每次跌入低谷触发一次，恢复后不返还） */
+function checkMoodPenalty(){
+  actives().forEach(m=>{
+    if(m.mood<30){
+      if(!m.moodHit){ m.moodHit=true; m.skill=clamp(m.skill-5); m.fame=clamp(m.fame-5); }
+    } else {
+      m.moodHit=false;
+    }
+  });
+}
+
+/* ===== 天气系统（v1.0.5-fix1） =====
+   开局随机一个天气持续影响全局；effects 的 type 兼容 buffMult（income/fans/cost/train/rest），tick 为每日固定增减 */
+const WEATHERS = [
+  {emoji:'☀️', name:'晴天', effects:[{type:'mood', tick:2}]},
+  {emoji:'🌧️', name:'雨天', effects:[{type:'mood', tick:-2},{type:'rest', value:0.9}]},
+  {emoji:'🌫️', name:'大雾', effects:[{type:'income', value:0.95},{type:'fans', value:1.1}]},
+  {emoji:'🌪️', name:'台风天', effects:[{type:'income', value:1.1},{type:'stamina', tick:-3}]},
+  {emoji:'❄️', name:'寒潮', effects:[{type:'rest', value:1.15},{type:'train', value:1.1}]},
+  {emoji:'🍂', name:'深秋', effects:[{type:'fans', value:0.9},{type:'train', value:1.1}]},
+  {emoji:'🌤️', name:'多云', effects:[{type:'rest', value:1.1}]},
+  {emoji:'🌈', name:'彩虹', effects:[{type:'fans', value:1.15},{type:'mood', tick:1}]},
+  {emoji:'🌙', name:'月夜', effects:[{type:'train', value:1.2},{type:'income', value:0.95}]},
+  {emoji:'🔥', name:'高温', effects:[{type:'rest', value:0.9},{type:'mood', tick:-1}]},
+  {emoji:'🍀', name:'小幸运', effects:[{type:'income', value:1.08}]},
+  {emoji:'💨', name:'大风', effects:[{type:'income', value:0.95},{type:'fans', value:1.05}]}
+];
+function rollWeather(silent){
+  state.weather = rnd(WEATHERS);
+  state.weatherCountdown = state.diff.weatherDays || 8;
+  if(!silent) addLog(`🌦️ 天气变化：${state.weather.emoji} ${state.weather.name}`,'warn');
+}
+function weatherTick(){
+  if(!state.weather) return;
+  state.weather.effects.forEach(e=>{
+    if(e.tick && e.type==='mood')    actives().forEach(m=>m.mood=clamp(m.mood+e.tick));
+    if(e.tick && e.type==='stamina') actives().forEach(m=>m.stamina=clamp(m.stamina+e.tick));
+  });
+  state.weatherCountdown--;
+  if(state.weatherCountdown<=0) rollWeather(false);
+}
+
+/* ===== 基建系统（v1.0.6 · 后期花钱玩法） =====
+   4 类设施各 5 级，永久加成并入 buffMult；造价 5万→250万 逐级暴涨 */
+const INFRA = [
+  {id:'studio', name:'练习室', emoji:'🎚️', desc:'提升训练效果', base:0.03},
+  {id:'dorm',   name:'休息区', emoji:'🛏️', desc:'提升休息效果', base:0.03},
+  {id:'record', name:'录音棚', emoji:'🎙️', desc:'提升演出赚钱', base:0.04},
+  {id:'venue',  name:'场馆合作', emoji:'🏟️', desc:'提升涨粉', base:0.05}
+];
+const INFRA_COST = [5000, 50000, 200000, 600000, 1500000];
+function infraCost(id){ return INFRA_COST[state.infra[id]||0]; }
+function upgradeInfra(id){
+  if(state.over || state.executing) return;
+  const lvl = state.infra[id]||0;
+  if(lvl>=5){ addLog('🏗️ 该设施已满级','warn'); return; }
+  const cost = INFRA_COST[lvl];
+  if(state.coins < cost){ addLog(`💰 资金不足（需 ${fmtM(cost)}）`,'bad'); return; }
+  state.coins -= cost;
+  state.infra[id] = lvl+1;
+  const it = INFRA.find(i=>i.id===id);
+  addLog(`🏗️ ${it.emoji}${it.name} 升至 ${state.infra[id]} 级！`,'good');
+  renderAll();
+}
+function renderInfra(){
+  const el = $('infra');
+  if(!el) return;
+  const cards = INFRA.map(i=>{
+    const lvl = state.infra[i.id]||0;
+    const cost = lvl<5 ? INFRA_COST[lvl] : 0;
+    const pct = Math.round(lvl/5*100);
+    const buffTxt = (i.id==='record'?'演出赚钱 +':i.id==='venue'?'涨粉 +':i.id==='studio'?'训练效果 +':'休息效果 +') + Math.round(i.base*lvl*100) + '%';
+    return `<div class="infra-card">
+      <div class="infra-top"><span class="infra-emoji">${i.emoji}</span><div class="infra-info"><b>${i.name}</b><small>${i.desc}</small></div><div class="infra-lvl">Lv.${lvl}/5</div></div>
+      <div class="infra-bar"><i style="width:${pct}%"></i></div>
+      <div class="infra-btns">
+        <span class="infra-eff">${buffTxt}</span>
+        ${lvl<5?`<button class="hbtn loanbtn" onclick="upgradeInfra('${i.id}')">升级（${fmtM(cost)}）</button>`:'<span class="infra-max">✅ 已满级</span>'}
+      </div>
+    </div>`;
+  }).join('');
+  el.innerHTML = `<div class="inv-grid">${cards}</div>`;
+}
+
+/* v1.0.8：一体两面的状态对（暴击触发）。1 次暴击最多触发 1 个状态：35% 概率触发，触发后 50/50 正反；
+   效果乘算并入 buffMult，可无限叠加（天气除外） */
+const STATUS_PAIRS = [
+  { good:{name:'😴 深度睡眠', type:'rest',   value:1.1, days:2, label:'休息效果×1.1'},
+    bad :{name:'😫 过度睡眠', type:'rest',   value:0.9, days:2, label:'休息效果×0.9'} },   // 休息暴击
+  { good:{name:'💃 舞感迸发', type:'train',  value:1.1, days:2, label:'训练效果×1.1'},
+    bad :{name:'🦵 肌肉酸痛', type:'train',  value:0.9, days:2, label:'训练效果×0.9'} },   // 舞蹈暴击
+  { good:{name:'🌟 高光时刻', type:'income', value:1.1, days:2, label:'演出赚钱×1.1'},
+    bad :{name:'🌪️ 用力过猛', type:'income', value:0.9, days:2, label:'演出赚钱×0.9'} },  // 演出大成功
+  { good:{name:'🎫 巡演神迹', type:'fans',   value:1.1, days:2, label:'涨粉×1.1'},
+    bad :{name:'🪫 巡演透支', type:'fans',   value:0.9, days:2, label:'涨粉×0.9'} }        // 巡演暴击
+];
+function rollStatus(pairIdx){
+  if(Math.random() > 0.65) return null;              // 65% 概率触发状态
+  const pair = STATUS_PAIRS[pairIdx];
+  return Math.random() < 0.5 ? pair.good : pair.bad;  // 一体两面，只出一个
+}
+
+/* ===== 暂时性 buff 系统（v1.0.5） =====
+   type: income 演出赚钱 / fans 涨粉 / cost 活动成本 / train 训练效果 / rest 休息效果 */
+function addBuff(type, value, days, label, name, ready){
+  state.buffs.push({type, value, days, label, name: name||label, ready: ready!==false});
+  /* v1.0.8：暴击产生的状态在日志中显示状态名；普通事件 buff 保持原格式 */
+  addLog(name ? `✨ 状态「${name}」生效：${label}（持续 ${days} 天）` : `✨ 获得临时效果：${label}（持续 ${days} 天）`,'good');
+}
+function buffMult(type){
+  let m = 1;
+  state.buffs.forEach(b=>{ if(b.type===type) m *= b.value; });
+  if(state.weather) state.weather.effects.forEach(e=>{ if(e.type===type) m *= e.value; });   // 天气并入
+  if(state.infra){                                                                          // 基建永久加成（v1.0.6）
+    if(type==='train')  m *= 1 + (state.infra.studio||0)*0.03;
+    if(type==='rest')   m *= 1 + (state.infra.dorm||0)*0.03;
+    if(type==='income') m *= 1 + (state.infra.record||0)*0.04 + (state.infra.venue||0)*0.05;
+    if(type==='fans')   m *= 1 + (state.infra.venue||0)*0.05;
+  }
+  return m;
+}
+/* v1.0.8：暴击状态——同步加入（参与当天后续结算与当天结束时倒数），日志延迟显示。
+   ⚠️ 修复：不能用 executeDay 的局部 add（会 ReferenceError 导致结算卡死），改用全局 setTimeout */
+function grantStatus(st){
+  state.buffs.push({type:st.type, value:st.value, days:st.days, label:st.label, name:st.name, ready:true});
+  setTimeout(()=>addLog(`✨ 状态「${st.name}」生效：${st.label}（持续 ${st.days} 天）`,'good'), 250);
+}
+function tickBuffs(){
+  /* v1.0.8：剩余天数语义——已参与当天结算的状态当天结束开始倒数（暴击）；
+     当天结算后才获得的状态（如突发事件）次天才开始倒数 */
+  state.buffs = state.buffs.filter(b=>{
+    if(b.ready===false){ b.ready = true; }   // 获得当天不消耗，次日才开始倒数
+    else { b.days--; }
+    return b.days>0;
+  });
+}
+/* 一次性特殊效果 */
+function applySpecial(s){
+  if(s==='avgAll'){                       // 全员体力/心情/实力/名气取均值
+    const list = actives();
+    ['stamina','mood','skill','fame'].forEach(k=>{
+      const avg = Math.round(list.reduce((x,m)=>x+m[k],0)/list.length);
+      list.forEach(m=>m[k]=clamp(avg));
+    });
+  } else if(s==='avgFans'){               // 粉丝全员取均值
+    const avg = Math.max(1000, Math.round(actives().reduce((x,m)=>x+m.fans,0)/activeN()));
+    actives().forEach(m=>m.fans=avg);
+  } else if(s==='coinsDouble'){ state.coins = Math.round(state.coins*2); }
+  else if(s==='coinsHalf'){ state.coins = Math.round(state.coins/2); }
+  else if(s==='stockUp'){ state.stockUp = 1; }
+  else if(s==='healAll'){ actives().forEach(m=>{ m.stamina=100; m.mood=100; m.hospital=false; }); }
+  else if(s==='fameBoost'){ actives().forEach(m=>m.fame=clamp(m.fame+8)); }
+  else if(s==='skillBoost'){ actives().forEach(m=>m.skill=clamp(m.skill+5)); }
+}
+function specialTxt(s){
+  const t = {
+    avgAll:'全员体力/心情/实力/名气变为平均值', avgFans:'全员粉丝变为平均值',
+    coinsDouble:'公司资金翻倍', coinsHalf:'公司资金减半', stockUp:'明天股市必定上涨（涨幅减半）',
+    healAll:'全员状态恢复满', fameBoost:'全员名气 +8', skillBoost:'全员实力 +5'
+  };
+  return t[s]||s;
+}
+/* 个人行动（声乐/舞蹈/休息）连排消耗恒为 1 倍，团体演出连排消耗递增 */
+function drainMultOf(act, cnt){ return act.type==='group' ? Math.min(1+(cnt-1)*0.25, 2.5) : 1; }
+/* 当天每人成本：基础值 ×(1 + costGrow×(day-1))（标准模式恒基础值；困难模式封顶 2 倍，随心所欲无上限） */
+function actCostNow(a){
+  const p = state.difficulty!=='标准' ? (state.diff.costGrow||0) : 0;
+  let mult = 1 + p*(state.day-1);
+  if(state.difficulty==='困难') mult = Math.min(mult, 2);
+  return Math.round(a.cost * mult * buffMult('cost'));
+}
+
+/* ================= 动画工具 ================= */
+function floatText(txt, cls){
+  const d=document.createElement('div');
+  d.className='floatbox '+cls; d.innerHTML=txt;
+  document.body.appendChild(d);
+  setTimeout(()=>d.remove(),1200);
+}
+function showCritPopup(title, msg, cls){
+  const d=document.createElement('div');
+  d.className='critpop '+cls;
+  d.innerHTML=`<div class="critp-title">${title}</div><div class="critp-msg">${msg}</div>`;
+  document.body.appendChild(d);
+  if(cls==='good') burstConfetti(28);
+  setTimeout(()=>d.remove(),1450);
+}
+function burstConfetti(n=55){
+  const colors=['#ffd93d','#ff6b6b','#4ecdc4','#a66cff','#6bcb77','#ff8c42'];
+  for(let i=0;i<n;i++){
+    const c=document.createElement('div');
+    c.className='confetti';
+    c.style.left=Math.random()*100+'vw';
+    c.style.background=colors[i%colors.length];
+    c.style.animationDuration=(1.6+Math.random()*1.4)+'s';
+    c.style.animationDelay=(Math.random()*0.5)+'s';
+    c.style.borderRadius=Math.random()>.5?'50%':'2px';
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),3600);
+  }
+}
+function showExecToast(txt){
+  const d=document.createElement('div');
+  d.className='exectoast'; d.id='execToast';
+  d.innerHTML=`<div class="spinner"></div><span>${txt}</span>`;
+  document.body.appendChild(d);
+}
+function hideExecToast(){ const d=$('execToast'); if(d) d.remove(); }
+
+/* ===== 主题 / 难度控制（v1.0.1） ===== */
+function applyTheme(t){
+  document.body.classList.toggle('theme-light', t==='light');
+  try{ localStorage.setItem('tst_theme', t); }catch(e){}
+  document.querySelectorAll('.themebtn').forEach(b=>b.classList.toggle('on', b.dataset.t===t));
+}
+function toggleTheme(){
+  applyTheme(document.body.classList.contains('theme-light') ? 'dark' : 'light');
+}
+function initTheme(){
+  let t='dark';
+  try{ t = localStorage.getItem('tst_theme') || 'dark'; }catch(e){}
+  applyTheme(t);
+}
+function setDifficulty(d){
+  state.difficulty = d;
+  const std = $('diffStd'), hard = $('diffHard'), free = $('diffFree'), panel = $('diffPanel'), title = $('diffTitle');
+  if(std)  std.classList.toggle('on', d==='标准');
+  if(hard) hard.classList.toggle('on', d==='困难');
+  if(free) free.classList.toggle('on', d==='随心所欲');
+  if(panel) panel.style.display = (d==='标准') ? 'none' : 'block';
+  if(title) title.textContent = d==='困难' ? '⚙️ 难度调节（困难模式专属）' : '⚙️ 难度调节（随心所欲模式 · 范围更广）';
+  /* 不同模式滑块范围不同：困难 1.2~3 / 0.5~1 / 4~7；随心所欲 0.1~4 / 0.1~20 / 1~20 */
+  const freeMode = d==='随心所欲';
+  const cfg = freeMode
+    ? {stam:[0.1,4,0.1], mood:[0.1,4,0.1], inc:[0.1,20,0.1], slots:[1,20,1], cost:[0,2,0.05], wx:[3,20,1]}
+    : {stam:[1.2,3,0.1], mood:[1.2,3,0.1], inc:[0.5,1,0.05], slots:[4,7,1], cost:[0,2,0.05], wx:[3,20,1]};
+  const apply = (id, v)=>{ const el = $(id); if(el){ el.min = v[0]; el.max = v[1]; el.step = v[2]; } };
+  apply('dStam', cfg.stam); apply('dMood', cfg.mood); apply('dInc', cfg.inc); apply('dSlots', cfg.slots); apply('dCost', cfg.cost); apply('dWx', cfg.wx);
+  /* 把当前值夹进新范围并回写滑块 */
+  state.diff.stamMult   = Math.min(Math.max(state.diff.stamMult, cfg.stam[0]), cfg.stam[1]);
+  state.diff.moodMult   = Math.min(Math.max(state.diff.moodMult, cfg.mood[0]), cfg.mood[1]);
+  state.diff.incomeMult = Math.min(Math.max(state.diff.incomeMult, cfg.inc[0]),  cfg.inc[1]);
+  state.diff.slots      = Math.round(Math.min(Math.max(state.diff.slots, cfg.slots[0]), cfg.slots[1]));
+  state.diff.costGrow   = Math.min(Math.max(state.diff.costGrow||0, cfg.cost[0]), cfg.cost[1]);
+  state.diff.weatherDays= Math.round(Math.min(Math.max(state.diff.weatherDays||8, cfg.wx[0]), cfg.wx[1]));
+  $('dStam').value = state.diff.stamMult; $('dMood').value = state.diff.moodMult;
+  $('dInc').value = state.diff.incomeMult; $('dSlots').value = state.diff.slots; $('dCost').value = state.diff.costGrow; $('dWx').value = state.diff.weatherDays;
+  setDiff();
+}
+function setDiff(){
+  state.diff.stamMult = parseFloat($('dStam').value);
+  state.diff.moodMult = parseFloat($('dMood').value);
+  state.diff.incomeMult = parseFloat($('dInc').value);
+  state.diff.slots = parseInt($('dSlots').value, 10);
+  state.diff.costGrow = parseFloat($('dCost').value);
+  state.diff.weatherDays = parseInt($('dWx').value, 10);
+  const fmtV = v => v>=10 ? v.toFixed(0)+'x' : (v>=1 ? v.toFixed(1)+'x' : v.toFixed(2)+'x');
+  $('dStamV').textContent = fmtV(state.diff.stamMult);
+  $('dMoodV').textContent = fmtV(state.diff.moodMult);
+  $('dIncV').textContent  = fmtV(state.diff.incomeMult);
+  $('dSlotsV').textContent = state.diff.slots+' 个';
+  $('dCostV').textContent  = state.diff.costGrow.toFixed(2)+'x';
+  $('dWxV').textContent    = state.diff.weatherDays+' 天';
+}
+
+/* ================= 渲染 ================= */
+function renderHeader(){
+  const filled = state.slots.filter(s=>s).length;
+  const ready = filled===state.slotCount && !state.executing && !state.over;
+  const soloTxt = state.solo!=null ? ' · '+MEMBERS[state.solo].name : '';
+  const diffTxt = state.difficulty==='困难' ? ' · 困难' : (state.difficulty==='随心所欲' ? ' · 随心所欲' : '');
+  const totalTxt = state.totalDays===Infinity ? '∞' : state.totalDays;
+  const endlessSettle = state.totalDays===Infinity && state.day>5 && !state.over;   // 无尽模式 >5 天可手动结算
+  $('header').innerHTML = `
+    <div class="brand">🎤 时代少年团经纪人 <span class="modeTag">${state.mode} ${totalTxt}天${soloTxt}${diffTxt}</span></div>
+    <div class="hstat">📅 第 <b class="daynum">${state.day}</b> / ${totalTxt} 天</div>
+    <div class="daybar"><i style="width:${state.totalDays===Infinity?Math.min(state.day,100):state.day/state.totalDays*100}%"></i></div>
+    <div class="hstat">💰 ${fmtM(state.coins)}</div>
+    <div class="hstat">👥 ${fmtN(MEMBERS.reduce((s,m)=>s+m.fans,0))}</div>
+    <button class="hbtn clearbtn" onclick="clearSlots()">清空安排</button>
+    <button class="hbtn restbtn" onclick="quickRest()">😴 一键休息</button>
+    <button class="hbtn clearbtn" onclick="toggleTheme()">🌓 主题</button>
+    <button class="hbtn homebtn" onclick="backHome()">🏠 回到主页</button>
+    ${endlessSettle?`<button class="hbtn execReady" onclick="settleFinal()">🏁 结算本局</button>`:''}
+    <button class="hbtn ${ready?'execReady':''}" id="execBtn" onclick="executeDay()"
+      ${state.executing?'disabled':''}>${state.executing?'⏳ 行程执行中…':('▶ 执行本日行程（'+filled+'/'+state.slotCount+'）')}</button>`;
+}
+
+function renderMembers(){
+  const list = state.solo!=null ? [MEMBERS[state.solo]] : MEMBERS;
+  $('members').innerHTML = list.map((m,i)=>{
+    const idx = state.solo!=null ? state.solo : MEMBERS.indexOf(m);
+    const cnt = state.slots.reduce((n,s)=>s&&s.members.includes(idx)?n+1:n,0);
+    const grpCnt = state.slots.reduce((n,s)=>s&&s.members.includes(idx)&&ACTIVITIES.find(a=>a.id===s.actId).type==='group'?n+1:n,0);
+    const fatiguePct = grpCnt>=2 ? Math.round(Math.min((grpCnt-1)*25,150)) : 0;
+    return `<div class="mcard ${m.hospital?'gray':''}" onclick="state.lastMember=${idx};renderMembers();" title="${m.hospital?'🏥 住院中，今天只能安排休息':'点击记住该成员，安排个人行动时会默认选中'}">
+      ${m.hospital?`<span class="hospTag">🏥 住院</span>`:(state.solo!=null?`<span class="soloTag">🎯 特训中</span>`:(cnt>0?`<span class="cnt">今日 ${cnt} 档</span>`:''))}
+      ${m.stamina<15?'<span class="tired">🥵</span>':''}
+      <div class="avatar" style="background:linear-gradient(135deg,${m.color},#1a1a3a)">${m.emoji}</div>
+      <div class="mname">${m.name}${m.hospital?'（仅可休息）':''}</div>
+      <div class="stat"><span class="lb">体力⚡️</span><div class="bar"><i class="b-stam" style="width:${m.stamina}%"></i></div><span class="val">${m.stamina}</span></div>
+      <div class="stat"><span class="lb">心情😊</span><div class="bar"><i class="b-mood" style="width:${m.mood}%"></i></div><span class="val">${m.mood}</span></div>
+      <div class="stat"><span class="lb">实力🎯</span><div class="bar"><i class="b-skill" style="width:${m.skill}%"></i></div><span class="val">${m.skill}</span></div>
+      <div class="stat"><span class="lb">名气📈</span><div class="bar"><i class="b-fame" style="width:${m.fame}%"></i></div><span class="val">${m.fame}</span></div>
+      <div class="fans">❤️ ${fmtN(m.fans)} 粉丝</div>
+      <div class="mbonus">💎 吸金 ${Math.round(perfMult(m)*100)}% · 吸粉 ${Math.round(fanMult(m)*100)}%</div>
+      ${m.mood<30?`<div class="fatigue">${m.mood<=0?'💔 心情归零：吸金/吸粉固定 50%':'😞 低谷期：实力/名气表现 ×0.5'}</div>`:''}
+      ${grpCnt>=2?`<div class="fatigue">🔥 演出连排 ${grpCnt} 档 · 消耗+${fatiguePct}%</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function renderFlow(){
+  const nums=['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩','⑪','⑫','⑬','⑭','⑮','⑯','⑰','⑱','⑲','⑳'].slice(0,state.slotCount);
+  let html='';
+  state.slots.forEach((s,i)=>{
+    if(s){
+      const act = ACTIVITIES.find(a=>a.id===s.actId);
+      const exp = act.risky ? 1.075 : 1;      // 巡演期望 = 25%×1.5 + 25%×0.8 + 50%×1
+      const avs = s.members.map(mi=>`<span class="fava" style="background:linear-gradient(135deg,${MEMBERS[mi].color},#222)">${MEMBERS[mi].emoji}</span>`).join('');
+      html += `<div class="fslot filled" title="总成本 ${fmtM(actCostNow(act)*s.members.length)} · 预期收益约 ${fmtM(Math.round(s.members.reduce((sum,mi)=>sum+act.money*perfMult(MEMBERS[mi])*exp,0)))}（含加成${act.risky?'与巡演随机期望':''}）">
+        <span class="fnum">${nums[i]}</span>
+        <button class="fdel" onclick="removeSlot(${i})">✕</button>
+        <span class="femoji">${act.emoji}</span>
+        <span class="fname">${act.name}</span>
+        <span class="favs">${avs}</span>
+      </div>`;
+    } else {
+      html += `<div class="fslot empty ${state.target===i?'target':''}" onclick="setTarget(${i})" title="点击设为插入位置">
+        <span class="fnum">${nums[i]}</span><span class="fplus">＋</span><span class="fname">空档</span>
+      </div>`;
+    }
+    if(i<state.slotCount-1) html += `<span class="farrow">➜</span>`;
+  });
+  $('flow').innerHTML = html;
+  $('planInfo').innerHTML = `已排 ${state.slots.filter(s=>s).length} / ${state.slotCount} 档`;
+}
+
+/* 全稳定预估面板（加成 + 连排疲劳 + 宅家半恢复 + 巡演收益期望） */
+function renderPredict(){
+  const el=$('predict'), title=$('predictTitle');
+  const filled=state.slots.filter(s=>s).length;
+  if(filled<state.slotCount || state.over || state.executing || state.eventOpen){
+    el.style.display='none'; title.style.display='none'; return;
+  }
+  el.style.display='block'; title.style.display='flex';
+  const sim = MEMBERS.map(m=>({...m}));
+  let coins = state.coins;
+  const counts = new Array(7).fill(0);
+  state.slots.forEach(s=>{
+    const act=ACTIVITIES.find(a=>a.id===s.actId);
+    const exp = act.risky ? 1.075 : 1;
+    const eff = act.id==='mood' ? {...act.effects, stamina: 11-s.members.length, mood: Math.round(act.effects.mood/s.members.length)} : act.effects;  // 调整心情按人数均分
+    s.members.forEach(mi=>{
+      const p=sim[mi];
+      counts[mi]++;
+      const drainMult = drainMultOf(act, counts[mi]);
+      coins -= actCostNow(act);
+      if(act.id==='dance' || act.id==='vocal'){
+        applyAction(p, {...eff, skill:0}, 1, drainMult);
+        p.skill = clamp(Math.round(p.skill + act.effects.skill*buffMult('train')));
+      } else {
+        applyAction(p, eff, (act.type==='rest'?buffMult('rest'):1), drainMult);
+      }
+      const incM = state.difficulty!=='标准' ? state.diff.incomeMult : 1;
+      coins += Math.round(act.money*perfMult(p)*exp * incM * buffMult('income'));
+      p.fans = Math.max(0, Math.round(p.fans + (act.effects.fans||0)*fanMult(p)*exp * incM * buffMult('fans')));
+    });
+  });
+  const restEff = ACTIVITIES.find(a=>a.id==='rest').effects;
+  const scheduledIdx = new Set(state.slots.flatMap(s=>s.members));
+  sim.forEach((p,i)=>{ if(!scheduledIdx.has(i)){
+    p.stamina = clamp(p.stamina + Math.round(restEff.stamina*0.5));
+    p.mood    = clamp(p.mood    + Math.round(restEff.mood*0.5));
+  }});
+  const list = state.solo!=null ? [state.solo] : sim.map((_,i)=>i);
+  const cells = list.map(mi=>{
+    const p=sim[mi], o=MEMBERS[mi];
+    const d=k=>Math.round(p[k]-o[k]);
+    return `<div class="pcell">
+      <div class="pava" style="background:linear-gradient(135deg,${o.color},#222)">${o.emoji}</div>
+      <b>${o.name}</b>
+      <div class="prow"><span>体力</span><div class="ptrack"><i class="b-stam" style="width:${p.stamina}%"></i></div><em>${p.stamina}（${d('stamina')>0?'+':''}${d('stamina')}）</em></div>
+      <div class="prow"><span>心情</span><div class="ptrack"><i class="b-mood" style="width:${p.mood}%"></i></div><em>${p.mood}（${d('mood')>0?'+':''}${d('mood')}）</em></div>
+      <div class="prow"><span>实力</span><div class="ptrack"><i class="b-skill" style="width:${p.skill}%"></i></div><em>${p.skill}（${d('skill')>0?'+':''}${d('skill')}）</em></div>
+      <div class="prow"><span>名气</span><div class="ptrack"><i class="b-fame" style="width:${p.fame}%"></i></div><em>${p.fame}（${d('fame')>0?'+':''}${d('fame')}）</em></div>
+      <div class="pfans">👥 ${fmtN(p.fans)}（${d('fans')>0?'+':''}${fmtN(d('fans'))}）</div>
+    </div>`;
+  }).join('');
+  el.innerHTML = `<div class="pcoins">💰 预计资金：${fmtM(coins)}　·　按「全稳定 + 加成 + 连排疲劳 + 宅家半恢复」推算</div><div class="pgrid">${cells}</div>`;
+}
+
+function renderActs(){
+  const card = a=>{
+    const off = state.coins < actCostNow(a);
+    const tag = a.max>1 ? `<span class="atag grp">👥 1~${a.max}人</span>` : (a.type==='rest'?`<span class="atag rest">😴 休息</span>`:`<span class="atag per">🙋 单人</span>`);
+    const eff = effHtml(a);
+    const moneyTxt = a.money>0 ? `<em class="up">💰+${fmtM(a.money)}/人</em>` : '';
+    return `<div class="acard ${off?'off':''}" onclick="openAddModal('${a.id}')" title="${a.desc}">
+      ${tag}<span class="acost">💰${fmtM(actCostNow(a))}/人</span>
+      <span class="aemoji">${a.emoji}</span>
+      <div class="aname">${a.name}</div>
+      <div class="adesc">${a.desc}</div>
+      <div class="aeff">${eff}${moneyTxt}</div>
+    </div>`;
+  };
+  $('acts').innerHTML = `
+    <div class="sec-title">🎪 演出类行动</div>
+    <div class="acts">${GRP.map(card).join('')}</div>
+    <div class="sec-title">🧘 训练</div>
+    <div class="acts">${TRAIN.map(card).join('')}</div>
+    <div class="sec-title">😴 休息</div>
+    <div class="acts">${REST.map(card).join('')}</div>`;
+}
+
+/* 活动效果 HTML：困难/随心所欲下体力/心情消耗显示倍率后的数值（v1.0.4） */
+function effHtml(a){
+  return Object.entries(a.effects).filter(([k,v])=>v!==0)
+    .map(([k,v])=>{
+      const icon={stamina:'⚡',mood:'😊',skill:'🎯',fame:'📈',fans:'👥'}[k];
+      let shown = v;
+      if(state.difficulty!=='标准' && (k==='stamina'||k==='mood') && v<0){
+        shown = Math.round(v * (k==='stamina'?state.diff.stamMult:state.diff.moodMult));
+      }
+      return `<em class="${v>0?'up':'down'}">${icon}${shown>0?'+':''}${shown}</em>`;
+    }).join('');
+}
+
+/* 投资市场 */
+function renderInvest(){
+  const totalValue = marketValue();
+  const html = INVEST_ASSETS.map(a=>{
+    const have = state.holdings[a.id]||0;
+    const ch = a.changePct||0;
+    const chCls = ch>0?'up':(ch<0?'down':'');
+    return `<div class="invcard">
+      <div class="inv-top">
+        <span class="inv-emoji">${a.emoji}</span>
+        <div class="inv-info"><b>${a.name}</b><small>${a.desc}</small></div>
+        <div class="inv-price">
+          <span>现价 <b>${fmtM(a.price)}</b></span>
+          <em class="${chCls}">今日 ${ch>=0?'+':''}${ch}%</em>
+        </div>
+      </div>
+      <div class="inv-op">
+        <span class="inv-hold">持有 ${have} 股 · 市值 ${fmtM(have*a.price)}</span>
+        <div class="inv-btns">
+          <button class="sell" onclick="investTrade('${a.id}',-5)">-5</button>
+          <button class="sell" onclick="investTrade('${a.id}',-1)">-1</button>
+          <button onclick="investTrade('${a.id}',1)">+1</button>
+          <button onclick="investTrade('${a.id}',5)">+5</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  $('invest').innerHTML = `
+    <div class="inv-summary">💰 可用资金 ${fmtM(state.coins)} · 📊 持仓市值 ${fmtM(totalValue)} · 总资产 ${fmtM(state.coins+totalValue)}</div>
+    <div class="inv-grid">${html}</div>
+    <div class="loanarea">
+      <div class="loaninfo">💳 当前欠款：<b style="color:${state.debt>0?'#ff6b6b':'#6bcb77'}">${state.debt>0?fmtM(state.debt)+(state.loanDue!=null?' · 到期 D'+state.loanDue:''):'无欠款'}</b></div>
+      <div class="loanbtns">
+        <button class="hbtn loanbtn" onclick="borrow(20000)">借2万</button>
+        <button class="hbtn loanbtn" onclick="borrow(50000)">借5万</button>
+        <button class="hbtn loanbtn" onclick="borrow(100000)">借10万</button>
+        <button class="hbtn repaybtn" onclick="repay(10000)">还1万</button>
+        <button class="hbtn repaybtn" onclick="repay(0)">全额还贷</button>
+      </div>
+    </div>`;
+}
+
+/* v1.0.5-fix1：状态效果文案（天气含状态名+效果，buff 直接效果+剩余天数） */
+function effTxt(e){
+  const v = e.value;
+  if(e.type==='mood')    return '每日心情'+(e.tick>0?'+':'')+e.tick;
+  if(e.type==='stamina') return '每日体力'+(e.tick>0?'+':'')+e.tick;
+  const f = x => { const s = String(x); return s.length<=3 ? s : x.toFixed(2); };
+  const label = {income:'演出赚钱', fans:'涨粉', cost:'活动成本', train:'训练效果', rest:'休息效果'}[e.type]||e.type;
+  return `${label}×${f(v)}`;
+}
+function weatherTxt(w){
+  return `${w.emoji} ${w.name}：${w.effects.map(effTxt).join('；')}`;
+}
+function renderStatus(){
+  const box = $('statusBox');
+  if(!box) return;
+  const tags = [];
+  if(state.weather) tags.push(`<span class="sttag">${state.weather.emoji} ${state.weather.name}（剩${state.weatherCountdown}天）：${state.weather.effects.map(effTxt).join('；')}</span>`);
+  /* v1.0.8：同名状态聚合成层数，格式：状态名（x层）（剩y天）：效果1；效果2（天气除外，所有状态可无限叠加） */
+  const agg = {};
+  state.buffs.forEach(b=>{
+    const key = b.name || b.label;
+    if(!agg[key]) agg[key] = [];
+    agg[key].push(b);
+  });
+  Object.entries(agg).forEach(([k, list])=>{
+    const days = Math.max(...list.map(b=>b.days));
+    const effs = [...new Set(list.map(b=>b.label))].join('；');
+    const bad = list.some(b=>(b.type==='cost' && b.value>1) || (b.type!=='cost' && b.value<1));
+    tags.push(`<span class="sttag ${bad?'bad':''}">${k}（${list.length}层）（剩${days}天）${effs===k?'':`：${effs}`}</span>`);
+  });
+  box.innerHTML = tags.length ? tags.join('') : '<span style="color:#667;font-size:12px">暂无效果</span>';
+}
+
+function renderAll(){ renderHeader(); renderMembers(); renderStatus(); renderFlow(); renderPredict(); renderActs(); renderInvest(); renderInfra(); }
+
+/* ================= 日志 ================= */
+function addLog(msg, cls='normal'){
+  const box = $('log');
+  const div = document.createElement('div');
+  div.className='lg '+cls;
+  div.innerHTML = `<span class="t">[D${state.day}]</span>${msg}`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+  if(box.children.length>150) box.removeChild(box.firstChild);
+}
+
+/* ================= 档期操作 ================= */
+function setTarget(i){
+  if(state.slots[i] || state.executing) return;
+  state.target = state.target===i ? null : i;
+  renderFlow();
+}
+function removeSlot(i){
+  if(state.executing) return;
+  state.slots.splice(i,1);      // v1.0.9：删除后后续档期自动前移补位
+  state.slots.push(null);       // 尾部补空位，保持档期总数不变
+  if(state.target===i) state.target=null;
+  else if(state.target!=null && state.target>i) state.target--;
+  addLog(`🗑️ 撤销了第 ${i+1} 档，后续档期已自动前移`,'warn');
+  renderAll();
+}
+function clearSlots(){
+  if(state.executing) return;
+  state.slots = Array(state.slotCount).fill(null); state.target=null;
+  addLog('🗑️ 已清空今日全部安排','warn');
+  renderAll();
+}
+function quickRest(){
+  if(state.executing) return;
+  const empty = state.slots.map((s,i)=>s?null:i).filter(i=>i!==null);
+  if(!empty.length){ addLog('⚠️ 今日档期已满','bad'); return; }
+  if(state.solo!=null){
+    empty.forEach(idx=>{ state.slots[idx]={actId:'rest', members:[state.solo]}; });
+  } else {
+    const order = MEMBERS.map((m,i)=>i).sort((x,y)=>MEMBERS[x].stamina-MEMBERS[y].stamina);
+    empty.forEach((idx,k)=>{ state.slots[idx]={actId:'rest', members:[order[k % order.length]]}; });  // 档位可能多于 7 人，按序循环分配
+  }
+  state.target=null;
+  addLog(`😴 一键休息：已为 ${empty.length} 个体力告急的档位安排休息`,'good');
+  renderAll();
+}
+
+/* ================= 成员选择弹窗 ================= */
+function openAddModal(actId){
+  if(state.over || state.executing) return;
+  const act = ACTIVITIES.find(a=>a.id===actId);
+  if(state.solo!=null){
+    if(act.id!=='rest' && MEMBERS[state.solo].hospital){
+      addLog(`🏥 ${MEMBERS[state.solo].name} 正在住院，今天只能安排休息！`,'bad'); return;
+    }
+    modal = {actId, picked:new Set([state.solo])};
+    confirmAdd();
+    return;
+  }
+  modal = {actId, picked:new Set()};
+  if(act.type!=='group' && state.lastMember!=null) modal.picked.add(state.lastMember);
+  renderModal();
+}
+function togglePick(i){
+  const act = ACTIVITIES.find(a=>a.id===modal.actId);
+  if(act.id!=='rest' && MEMBERS[i].hospital){
+    addLog(`🏥 ${MEMBERS[i].name} 正在住院，今天只能安排休息！`,'bad'); return;
+  }
+  const mx = act.max || 3;
+  if(mx===1){
+    modal.picked = new Set([i]);
+  } else {
+    if(modal.picked.has(i)){ modal.picked.delete(i); }
+    else {
+      if(modal.picked.size>=mx){ addLog(`⚠️ ${act.name} 最多 ${mx} 人同场`,'bad'); return; }
+      modal.picked.add(i);
+    }
+  }
+  updateModalPicks();     // v1.0.8：只更新选中状态，不再整弹窗重绘（不闪不跳）
+}
+/* v1.0.8：局部更新成员选择弹窗的选中状态 / 费用 / 预计收入 */
+function updateModalPicks(){
+  const act = ACTIVITIES.find(a=>a.id===modal.actId);
+  if(!act) return;
+  const mx = act.max || 3;
+  const full = mx>1 && modal.picked.size>=mx;
+  const total = actCostNow(act) * modal.picked.size;
+  MEMBERS.forEach((m,i)=>{
+    const chip = $('chip_'+i);
+    if(!chip) return;
+    const on = modal.picked.has(i);
+    const dim = (act.id!=='rest' && m.hospital) || (mx>1 && !on && full);
+    chip.className = 'chip '+(on?'on':'')+(dim?'dim':'')+(m.hospital?'gray':'');
+  });
+  const costEl = $('modalCost');
+  if(costEl) costEl.innerHTML = `已选 ${modal.picked.size} 人 · 总费用 <b style="color:${state.coins>=total?'#6bcb77':'#ff6b6b'}">${fmtM(total)}</b>${state.coins>=total?'':'（资金不足，请先借款）'}`;
+  const incEl = $('modalInc');
+  if(incEl) incEl.innerHTML = (act.money>0 && modal.picked.size)
+    ? `预计演出收入：+${fmtM([...modal.picked].reduce((s,i)=>s+Math.round(act.money*perfMult(MEMBERS[i])*(act.risky?1.075:1)),0))}`
+    : '';
+}
+function renderModal(){
+  const act = ACTIVITIES.find(a=>a.id===modal.actId);
+  const mx = act.max || 3;
+  const eff = effHtml(act);
+  const costLine = act.money>0?`<em class="up">💰 预期 +${fmtM(act.money)}/人</em>`:'<em>💰 无演出费</em>';
+  const full = mx>1 && modal.picked.size>=mx;
+  const chips = MEMBERS.map((m,i)=>{
+    const on = modal.picked.has(i);
+    const dim = (act.id!=='rest' && m.hospital) || (mx>1 && !on && full);
+    return `<div class="chip ${on?'on':''} ${dim?'dim':''} ${m.hospital?'gray':''}" id="chip_${i}" onclick="togglePick(${i})" title="${m.hospital?'🏥 住院中，今天只能安排休息':''}">
+      <div class="cava" style="background:linear-gradient(135deg,${m.color},#222)">${m.emoji}</div>
+      <div class="cn">${m.name}</div>
+    </div>`;
+  }).join('');
+  const total = actCostNow(act) * modal.picked.size;
+  let incLine='';
+  if(act.money>0){
+    incLine = `<div style="text-align:center;font-size:12px;color:#6bcb77;margin-top:8px" id="modalInc"></div>`;
+  }
+  const typeTxt = mx>1 ? `可多选成员（1~${mx} 人）` : '请选择 1 名成员';
+  $('modalRoot').innerHTML = `
+  <div class="overlay">
+    <div class="modal" style="position:relative">
+      <button class="cancel" onclick="closeModal()">✕</button>
+      <h2>${act.emoji} ${act.name}</h2>
+      <div class="sub">费用 ${fmtM(actCostNow(act))}/人 · ${typeTxt}</div>
+      <div class="minfo">${eff}${costLine}</div>
+      <div class="chips">${chips}</div>
+      <div style="text-align:center;font-size:13px;color:#9ab" id="modalCost">
+        已选 ${modal.picked.size} 人 · 总费用 <b style="color:${state.coins>=total?'#6bcb77':'#ff6b6b'}">${fmtM(total)}</b>
+        ${state.coins>=total?'':'（资金不足，请先借款）'}
+      </div>
+      ${incLine}
+      <button class="confirm" onclick="confirmAdd()">✔ 确认加入档期</button>
+    </div>
+  </div>`;
+  updateModalPicks();     // v1.0.8：初始同步（默认选中成员时）
+}
+function closeModal(){ $('modalRoot').innerHTML=''; }
+function confirmAdd(){
+  const act = ACTIVITIES.find(a=>a.id===modal.actId);
+  if(modal.picked.size===0){ addLog('⚠️ 请至少选择一名成员','bad'); return; }
+  const hosp = [...modal.picked].filter(i=>MEMBERS[i].hospital);
+  if(act.id!=='rest' && hosp.length){
+    addLog(`🏥 ${hosp.map(i=>MEMBERS[i].name).join('、')} 正在住院，今天只能安排休息！`,'bad'); return;
+  }
+  const total = actCostNow(act) * modal.picked.size;
+  if(state.coins < total){ addLog(`💰 资金不足（需 ${fmtM(total)}），请先借款或换更便宜的行动`,'bad'); return; }
+  let idx = state.target;
+  if(idx==null || state.slots[idx]) idx = state.slots.findIndex(s=>!s);
+  if(idx<0){ addLog(`⚠️ 今日 ${state.slotCount} 个档期已满，可撤销部分安排`,'bad'); return; }
+  state.slots[idx] = {actId:act.id, members:[...modal.picked].sort((a,b)=>a-b)};
+  addLog(`📌 档期${idx+1} ← ${act.emoji}${act.name}（${modal.picked.size}人参演）`,'normal');
+  const next = state.slots.findIndex((s,i)=>i>idx && !s);
+  state.target = next>=0?next:null;
+  closeModal(); renderAll();
+}
+
+/* ================= 资金 / 投资 ================= */
+function borrow(amt){
+  if(state.over || state.executing) return;
+  if(state.debt>0){ addLog('🏦 已有欠款，必须先还清才能再次借贷！（贷款分 2万/5万/10万 三档）','bad'); return; }
+  state.debt += amt; state.coins += amt;
+  state.loanDue = state.day + 5;
+  addLog(`🏦 借款 ${fmtM(amt)}，日息 5% · 必须还清后才能再借，第 ${state.loanDue} 天结算前未还清直接破产！`,'warn');
+  renderAll();
+}
+function repay(amt){
+  if(state.over || state.executing) return;
+  if(state.debt<=0){ addLog('✅ 暂无欠款','normal'); return; }
+  if(amt===0) amt = Math.min(state.coins, state.debt);
+  if(state.coins < amt || amt<=0){ addLog('💸 资金不足，无法还款','bad'); return; }
+  state.coins -= amt; state.debt -= amt;
+  if(state.debt<=0){ state.loanDue=null; addLog(`💳 已还清全部贷款！剩余资金 ${fmtM(state.coins)}`,'good'); }
+  else { addLog(`💳 还款 ${fmtM(amt)}，剩余欠款 ${fmtM(state.debt)}（到期 D${state.loanDue}）`,'good'); }
+  renderAll();
+}
+function investTrade(assetId, delta){
+  if(state.over || state.executing) return;
+  const a = INVEST_ASSETS.find(x=>x.id===assetId);
+  const qty = Math.abs(delta);
+  if(delta>0){
+    const cost = a.price*qty;
+    if(state.coins < cost){ addLog('💰 资金不足，无法买入','bad'); return; }
+    state.coins -= cost;
+    state.holdings[assetId] = (state.holdings[assetId]||0)+qty;
+    addLog(`📈 买入 ${a.emoji}${a.name} ${qty} 股（${fmtM(cost)}）`,'good');
+  } else {
+    const have = state.holdings[assetId]||0;
+    if(have <= 0){ addLog('⚠️ 没有持仓，无法卖出','bad'); return; }
+    const sell = Math.min(have, qty);       // 持仓不足时卖出全部（v1.0.2-fix1）
+    state.holdings[assetId] = have - sell;
+    state.coins += a.price*sell;
+    addLog(`📉 卖出 ${a.emoji}${a.name} ${sell} 股（+${fmtM(a.price*sell)}）`,'warn');
+  }
+  renderAll();
+}
+/* 每日股价波动（在 finalizeDay 结算后更新）v1.0.2-fix1：稳健稳赚1%/黄金看涨中波动/影视随热度/科技±10~20% */
+function updatePrices(){
+  const report=[];
+  INVEST_ASSETS.forEach(a=>{
+    let change;
+    const stockUp = state.stockUp>0;
+    if(stockUp) state.stockUp--;
+    if(a.id==='safe'){
+      change = 0.01;                                        // 稳健基金：每天稳赚 1%
+    } else if(a.id==='gold'){
+      change = 0.02 + (Math.random()*2-1)*a.vol;            // 黄金：总体看涨 + 中等波动
+    } else if(a.id==='movie'){
+      const avgFame = actives().reduce((s,m)=>s+m.fame,0)/activeN();
+      const heat = Math.max(0, Math.min(1, (avgFame-25)/60));   // 团体热度 0~1（名气 25→0, 85+→1）
+      if(Math.random() < 0.25 + heat*0.65){                 // 上涨概率 25% → 90%
+        change = Math.abs((Math.random()*2-1)*a.vol) + heat*0.08;
+      } else {
+        change = -(Math.random()*a.vol*0.8);
+      }
+    } else {                                                // tech：下跌 -8%~-16%，上涨 +10%~+20%
+      change = Math.random()<0.5 ? -(0.08 + Math.random()*0.08) : (0.10 + Math.random()*0.10);
+    }
+    if(stockUp && a.id!=='safe') change = Math.abs(change)*0.5;   // 明天股市必涨（涨幅减半）
+    const np = Math.max(10, Math.round(a.price*(1+change)));
+    a.prevPrice = a.price;
+    a.price = np;
+    a.changePct = Math.round((np/a.prevPrice-1)*100);
+    report.push(`${a.emoji}${a.name} ${a.changePct>=0?'+':''}${a.changePct}%`);
+  });
+  addLog(`📊 投资日报：${report.join('　')}`,'warn');
+}
+
+/* ================= 执行一天（带动画队列） ================= */
+function applyAction(m, eff, mult=1, drainMult=1){
+  const sd = eff.stamina||0, md = eff.mood||0;
+  const d = state.diff || {stamMult:1, moodMult:1};
+  const sMult = (state.difficulty!=='标准' && sd<0) ? d.stamMult : 1;
+  const mMood = (state.difficulty!=='标准' && md<0) ? d.moodMult : 1;
+  /* 计算结果一律取整，避免困难模式倍率产生小数 */
+  m.stamina = clamp(Math.round(m.stamina + (sd<0 ? sd*mult*drainMult*sMult : sd*mult)));
+  m.mood    = clamp(Math.round(m.mood    + (md<0 ? md*mult*drainMult*mMood : md*mult)));
+  m.skill   = clamp(Math.round(m.skill   + (eff.skill||0)*mult));
+  m.fame    = clamp(Math.round(m.fame    + (eff.fame||0)*mult));
+}
+
+function executeDay(){
+  if(state.over || state.executing) return;
+  if(state.slots.some(s=>!s)){ addLog('⚠️ 还有空档未安排，无法执行','bad'); return; }
+  state.executing = true;
+  renderAll();
+  showExecToast('行程执行中，成员们正在努力 💦');
+  // v1.0.1-fix2：点击执行后先滚动到日志区，再开始逐条结算
+  setTimeout(()=>{
+    const lb=$('log');
+    if(lb){
+      const top = lb.getBoundingClientRect().top + (window.pageYOffset||document.documentElement.scrollTop) - 70;
+      try{ window.scrollTo({top:Math.max(0,top), behavior:'smooth'}); }catch(e){ window.scrollTo(0, Math.max(0,top)); }
+      try{ lb.scrollIntoView({behavior:'smooth', block:'start'}); }catch(e){ lb.scrollIntoView(); }
+    }
+  }, 60);
+
+  const steps=[]; let t=0;
+  const add=(fn,d=280)=>{ steps.push([t,fn]); t+=d; };
+  const counts = new Array(7).fill(0);
+
+  add(()=>addLog(`━━━ 📅 第 ${state.day} 天 行程开始 ━━━`,'warn'),450);
+
+  state.slots.forEach((slot, si)=>{
+    const act = ACTIVITIES.find(a=>a.id===slot.actId);
+    const n = slot.members.length;
+    const cost = actCostNow(act)*n;
+    if(state.coins < cost){
+      const need = cost - state.coins + 500;
+      state.coins = 0; state.debt += need;
+      if(state.loanDue==null) state.loanDue = state.day+5;
+      add(()=>addLog(`⚠️ 档期${si+1}资金不足，被迫续贷 ${fmtM(need)}！欠款 ${fmtM(state.debt)}（到期 D${state.loanDue}）`,'bad'),320);
+    }
+    state.coins -= cost;
+    add(()=>addLog(`${act.emoji} 档期${si+1} · ${act.name}（${n}人参演 · 支出 ${fmtM(cost)}）`,'normal'),360);
+
+    slot.members.forEach(mi=>{
+      const m = MEMBERS[mi];
+      const isRest = act.type==='rest';
+      counts[mi]++;
+      const drainMult = drainMultOf(act, counts[mi]);   // 训练/休息恒为 1，团体演出连排递增
+      let income=0, fansGain=0, msg='', cls='normal', stamRec=0, moodRec=0, skillRec=0, crit=false;
+      const exhausted = !isRest && m.stamina<=0;
+      const incM = state.difficulty!=='标准' ? state.diff.incomeMult : 1;
+
+      if(act.id==='mood'){
+        // 调整心情：恢复心情 30 均分；体力按人数 +10/9/8/7/6（受休息 buff 加成）
+        const per = Math.round(act.effects.mood / n);
+        const stamPer = 11 - n;
+        const restM = buffMult('rest');
+        applyAction(m, {stamina:Math.round(stamPer*restM), mood:Math.round(per*restM)}, 1, 1);
+        stamRec = Math.round(stamPer*restM); moodRec = Math.round(per*restM);
+        msg = `✔️ 心情调整 +${moodRec} 体力 +${stamRec}`;
+      } else if(isRest){
+        crit = Math.random() < 0.15;
+        const mult = (crit ? 1.5 : 1) * buffMult('rest');
+        applyAction(m, act.effects, mult, 1);
+        stamRec = Math.round(act.effects.stamina*mult);
+        moodRec = Math.round(act.effects.mood*mult);
+        msg = crit ? '✨ 深度睡眠！体力暴击恢复' : '✔️ 安稳休息，恢复状态';
+        cls = crit ? 'good' : 'normal';
+        if(crit){
+          const st = rollStatus(0);                          // v1.0.8：一体两面状态
+          if(st) grantStatus(st);
+          add(()=>showCritPopup('😴 深度睡眠','体力恢复暴击 ×1.5！','good'),250);
+        }
+      } else if(act.id==='dance' || act.id==='vocal'){
+        // 训练类（v1.0.5）：稳定成长不判事故；舞蹈 25% ×1.5 暴击；受训练 buff 加成
+        const isDance = act.id==='dance';
+        crit = isDance ? Math.random() < 0.25 : false;
+        const mult = (crit ? 1.5 : 1) * buffMult('train');
+        const sk0 = m.skill;
+        applyAction(m, {...act.effects, skill:0}, 1, drainMult);
+        m.skill = clamp(Math.round(m.skill + act.effects.skill*mult));
+        skillRec = m.skill - sk0;   // 实际实力提升（含暴击/buff，clamp 后取实际差值）
+        msg = isDance ? (crit ? '✨ 舞蹈顿悟！实力暴击提升' : '✔️ 舞蹈训练') : (mult>1 ? '✨ 声乐顿悟！实力提升' : '✔️ 声乐训练');
+        cls = (crit || mult>1) ? 'good' : 'normal';
+        if(crit){
+          const st = rollStatus(1);                          // v1.0.8：一体两面状态
+          if(st) grantStatus(st);
+          add(()=>showCritPopup('💃 舞蹈顿悟','实力提升 ×1.5！','good'),250);
+        }
+      } else {
+        const roll = exhausted ? 0 : Math.random();
+        if(roll < 0.17){
+          const ev = rnd(ACCIDENTS);
+          cls='bad';
+          applyAction(m, ev.effects, 1, 1);
+          // v1.0.4：事故先按正常收益结算，再额外扣钱（收益倍率只作用于正常部分）
+          income = Math.round(act.money*perfMult(m)*incM) - ev.moneyLoss;
+          fansGain = Math.round((act.effects.fans||0)*fanMult(m)*incM) + (ev.effects.fans||0);
+          msg = `⚠️ ${ev.text}`;
+        } else if(roll < 0.38){
+          cls='good';
+          applyAction(m, act.effects, 1.7, drainMult);
+          income = Math.round(act.money*perfMult(m)*1.7*incM);
+          fansGain = Math.round((act.effects.fans||0)*fanMult(m)*incM) + Math.round(m.fans*0.03);
+          msg = `✨ ${rnd(CRIT_TEXTS)}`;
+          {
+            const st = rollStatus(2);                        // v1.0.8：一体两面状态
+            if(st) grantStatus(st);
+            add(()=>showCritPopup('✨ 演出大成功','表现超常！收益与吸粉 ×1.7','good'),250);
+          }
+        } else {
+          applyAction(m, act.effects, 1, drainMult);
+          income = Math.round(act.money*perfMult(m)*incM);
+          fansGain = Math.round((act.effects.fans||0)*fanMult(m)*incM);
+          msg = '✔️ 表现稳定';
+        }
+        /* 国际巡演：25%×1.5 / 25%×0.8 / 50%正常 */
+        if(act.risky && roll >= 0.17){
+          const rr = Math.random();
+          if(rr < 0.25){
+            income = Math.round(income*1.5); fansGain = Math.round(fansGain*1.5);
+            msg += ' 💥 巡演票房爆炸！收益与吸粉 ×1.5！'; cls = 'good';
+            {
+              const st = rollStatus(3);                      // v1.0.8：一体两面状态
+              if(st) grantStatus(st);
+              add(()=>showCritPopup('🎫 国际巡演暴击','收益与吸粉 ×1.5 大爆发！','good'),250);
+            }
+          } else if(rr < 0.5){
+            income = Math.round(income*0.8); fansGain = Math.round(fansGain*0.8);
+            msg += ' ⚠️ 票房不及预期 ×0.8'; cls = 'warn';
+          }
+        }
+      }
+      // v1.0.5：暂时性 buff（演出赚钱× / 涨粉×）最终乘算
+      income = Math.round(income * buffMult('income'));
+      fansGain = Math.round(fansGain * buffMult('fans'));
+      m.fans = Math.min(9999999, Math.max(0, m.fans + fansGain));
+      state.coins += income;
+      add(()=>{
+        const fatigueTxt = drainMult>1 && !isRest ? ` <span style="color:#ff8c42">[连轴消耗+${Math.round((drainMult-1)*100)}%]</span>` : '';
+        if(exhausted) addLog(`　${m.emoji} ${m.name} 体力透支倒地，被工作人员抬走…`,'bad');
+        if(isRest){
+          addLog(`　${m.emoji} ${m.name}：${msg}${act.id==='mood'?` <span style="color:#8af">(😊+${moodRec})</span>`:` <span style="color:#8af">(⚡+${stamRec} 😊+${moodRec})</span>`}`, cls);
+          floatText(act.id==='mood'?`💆 +${moodRec}😊`:`😴 +${stamRec}⚡`, crit?'good':'warn');
+        } else if(act.id==='dance' || act.id==='vocal'){
+          // 训练：显示实力提升，不显示收入（v1.0.5-fix2 修复 +0）
+          addLog(`　${m.emoji} ${m.name}：${msg}${fatigueTxt} <span style="color:#8af">(🎯+${skillRec})</span>`, cls);
+          floatText(`🎯+${skillRec}`, 'good');
+        } else {
+          addLog(`　${m.emoji} ${m.name}：${msg}${fatigueTxt} <span style="color:#8af">(${income>=0?'+':''}${fmtM(income)} ${fansGain!==0?('·粉'+(fansGain>0?'+':'')+fmtN(fansGain)):''})</span>`, cls);
+          floatText(`${m.emoji} ${income>=0?'+':''}${fmtM(income)}`, income>=0?'good':'bad');
+        }
+      },240);
+    });
+    /* v1.0.9：每档结算后实时刷新成员卡片与资金（事件取的是结算后最新数据） */
+    add(()=>{ renderMembers(); renderHeader(); }, 250);
+  });
+
+  // 无档期成员视为休息（0.5 倍恢复）
+  const restEff = ACTIVITIES.find(a=>a.id==='rest').effects;
+  const scheduledIdx = new Set(state.slots.flatMap(s=>s.members));
+  const idleMembers = actives().filter(m=>!scheduledIdx.has(MEMBERS.indexOf(m)));
+  if(idleMembers.length){
+    const idleInfo = idleMembers.map(m=>{
+      const stam = Math.round(restEff.stamina*0.5), mood = Math.round(restEff.mood*0.5);
+      m.stamina = clamp(m.stamina + stam);
+      m.mood    = clamp(m.mood    + mood);
+      return `${m.emoji} ${m.name} ⚡+${stam} 😊+${mood}`;
+    }).join('　');
+    add(()=>{ addLog(`🏠 今日无活动的成员视为休息（恢复体力 15、心情 8）：${idleInfo}`,'normal'); },340);
+  }
+
+  // 团队随机事件
+  if(Math.random()<0.45){
+    const ev = rnd(DAILY);
+    actives().forEach(m=>{
+      if(ev.fans) m.fans = Math.max(0, Math.round(m.fans + ev.fans/activeN()));
+      if(ev.mood) m.mood = clamp(m.mood + ev.mood);
+      if(ev.stamina) m.stamina = clamp(m.stamina + ev.stamina);
+    });
+    if(ev.money) state.coins += ev.money;
+    const evTxt = ev.text, evCls = ev.cls;
+    add(()=>{ addLog(`📣 团队事件：${evTxt}`, evCls); floatText(evTxt.split('，')[0], evCls==='good'?'good':'bad'); },360);
+  }
+
+  // 贷款利息
+  let interestInfo=null;
+  if(state.debt>0){
+    const interest = Math.ceil(state.debt*0.05);
+    if(state.coins >= interest){
+      state.coins -= interest;
+      interestInfo = {txt:`💳 偿还利息 ${fmtM(interest)}，剩余欠款 ${fmtM(state.debt)}（到期 D${state.loanDue}）`};
+    } else {
+      const need = interest - state.coins + 1000;
+      state.coins = 0; state.debt += need;
+      if(state.loanDue==null) state.loanDue = state.day+5;
+      interestInfo = {txt:`⚠️ 无力付息，被迫续贷 ${fmtM(need)}！欠款 ${fmtM(state.debt)}（到期 D${state.loanDue}）`, cls:'bad'};
+    }
+    add(()=>addLog(interestInfo.txt, interestInfo.cls||'warn'),340);
+  }
+
+  // 出院结算（昨日住院的今日康复）+ 今日住院判定（体力为 0 → 送医，花 5000 元）
+  const discharged = MEMBERS.filter(m=>m.hospital);
+  MEMBERS.forEach(m=>m.hospital=false);
+  if(discharged.length){
+    const names = discharged.map(m=>m.emoji+' '+m.name).join('、');
+    add(()=>addLog(`🏥 ${names} 康复出院，恢复工作`,'good'),300);
+  }
+  const hospitalList = [];
+  MEMBERS.forEach(m=>{ if(m.stamina<=0){ m.hospital=true; hospitalList.push(m); state.coins -= 5000; } });
+  if(hospitalList.length){
+    const names = hospitalList.map(m=>m.emoji+' '+m.name).join('、');
+    add(()=>addLog(`🚑 ${names} 体力透支被送医，各支付治疗费 5,000 元，明天只能安排休息`,'bad'),340);
+  }
+
+  // 心情低谷：实力/名气永久 -5（每次跌入低谷触发）
+  checkMoodPenalty();
+
+  /* v1.0.9：流动资金不足时自动卖出部分股票解围（卖出后仍不足才判定破产） */
+  if(state.coins<=0){
+    const sellable = INVEST_ASSETS.filter(a=>(state.holdings[a.id]||0)>0);
+    if(sellable.length){
+      sellable.sort((a,b)=>(state.holdings[b.id]||0)*b.price - (state.holdings[a.id]||0)*a.price);
+      let got = 0;
+      const need = 1 - state.coins;
+      for(const a of sellable){
+        if(got >= need) break;
+        const have = state.holdings[a.id]||0;
+        const sellShares = Math.min(have, Math.max(1, Math.ceil((need-got)/a.price)));
+        got += sellShares * a.price;
+        state.holdings[a.id] = have - sellShares;
+      }
+      state.coins += got;
+      add(()=>addLog(`📉 流动资金不足，自动卖出部分股票回笼 ${fmtM(got)} 解围`,'warn'),300);
+    }
+  }
+
+  // 破产判定：贷款逾期 / 资金归零（不再按欠款 30 万）
+  let ruinReason=null;
+  if(state.debt>0 && state.loanDue!=null && state.day>=state.loanDue){
+    ruinReason = {title:'💸 贷款逾期破产', sub:'贷款到期未还清，公司信用破产', txt:`欠款 ${fmtM(state.debt)} 未在期限内还清，贷款方直接冻结并清算了公司的全部资产。`};
+  } else if(state.coins<=0){
+    ruinReason = {title:'💥 资金归零破产', sub:'公司账户余额为 0，宣告破产', txt:'连一分钱都掏不出来了，成员们被拖欠工资，公司就地解散。'};
+  }
+  if(ruinReason){
+    const rr = ruinReason;
+    add(()=>{ hideExecToast(); state.executing=false; showRuin(rr.title, rr.sub, rr.txt); },200);
+  } else if(Math.random()<0.60 || state.noEvt>=3){   // v1.0.8：事件出现率提升至 60%（每 3 天保底）
+    add(()=>{ hideExecToast(); state.executing=false; renderAll(); openChoiceEvent(); },250);
+  } else {
+    add(()=>{ hideExecToast(); finalizeDay(); },250);
+  }
+
+  steps.forEach(([d,fn])=>setTimeout(fn,d));
+}
+
+function finalizeDay(){
+  state.executing = false;
+  state.day++;
+  state.noEvt++;
+  weatherTick();                       // v1.0.5-fix1：天气每日影响与周期刷新
+  tickBuffs();                       // v1.0.5：临时效果每日递减
+  state.slots = Array(state.slotCount).fill(null);
+  state.target = null;
+  if(state.day > state.totalDays){ settleFinal(); return; }
+  updatePrices();                 // ★ 每日股价波动
+  renderAll();
+  addLog(`🌅 第 ${state.day} 天开始，请安排今日 ${state.slotCount} 个档期～`,'normal');
+  setTimeout(()=>{
+    const lb=$('log');
+    if(lb){
+      const top = lb.getBoundingClientRect().top + (window.pageYOffset||document.documentElement.scrollTop) - 70;
+      try{ window.scrollTo({top:Math.max(0,top), behavior:'smooth'}); }catch(e){ window.scrollTo(0, Math.max(0,top)); }
+      try{ lb.scrollIntoView({behavior:'smooth', block:'start'}); }catch(e){ lb.scrollIntoView(); }
+    }
+  }, 200);
+}
+
+/* v1.0.2-fix1：最后一天自动清仓 + 还清贷款，再进入最终结算 */
+function settleFinal(){
+  let soldMoney = 0;
+  INVEST_ASSETS.forEach(a=>{
+    const have = state.holdings[a.id]||0;
+    if(have>0){ soldMoney += have*a.price; state.coins += have*a.price; state.holdings[a.id]=0; }
+  });
+  if(soldMoney>0) addLog(`📤 已自动卖出全部股票，回笼资金 ${fmtM(soldMoney)}`,'warn');
+  if(state.debt>0){
+    const pay = Math.min(state.coins, state.debt);
+    state.coins -= pay; state.debt -= pay;
+    if(state.debt<=0){ state.loanDue=null; addLog('💳 已自动还清全部贷款','good'); }
+    else addLog(`⚠️ 自动还款 ${fmtM(pay)} 后仍欠 ${fmtM(state.debt)}`,'bad');
+  }
+  showSettle();
+}
+
+/* v1.0.3：结算页难度摘要（全部默认值时显示「默认难度」） */
+function diffSummary(){
+  if(state.difficulty==='标准') return '标准模式';
+  const d = state.diff;
+  const def = {stamMult:1.5, moodMult:1.5, incomeMult:0.8, slots:5, costGrow:0.1, weatherDays:5};
+  const isDef = d.stamMult===def.stamMult && d.moodMult===def.moodMult && d.incomeMult===def.incomeMult && d.slots===def.slots && d.costGrow===def.costGrow && d.weatherDays===def.weatherDays;
+  if(isDef) return `${state.difficulty}模式（默认难度）`;
+  const f = v => v>=10 ? v.toFixed(0) : (v>=1 ? v.toFixed(1) : v.toFixed(2));
+  return `${state.difficulty}模式 · 体力×${f(d.stamMult)} 心情×${f(d.moodMult)} 收益×${f(d.incomeMult)} 档期${d.slots} 成本增长×${f(d.costGrow)} 天气${d.weatherDays}天`;
+}
+
+/* ================= 突发事件 ================= */
+function openChoiceEvent(){
+  state.eventOpen = true;
+  state.noEvt = 0;
+  currentEvent = rnd(CHOICE_EVENTS);
+  const ev = currentEvent;
+  $('modalRoot').innerHTML = `
+  <div class="overlay"><div class="modal">
+    <div class="evtitle">${ev.emoji} 突发事件 · ${ev.title}</div>
+    <div class="sub" style="line-height:1.9">${ev.desc}<br><span style="color:#a66cff">你的抉择将影响${state.solo!=null?'特训成员':'七人'}的状态与团队资源</span></div>
+    ${ev.options.map((o,i)=>`
+      <button class="opt" style="animation-delay:${i*0.13}s" onclick="chooseEvent(${i})">
+        <b>${o.label}</b>
+      </button>`).join('')}
+  </div></div>`;
+}
+function chooseEvent(i){
+  const ev = currentEvent;
+  const opt = ev.options[i];
+  const out = opt.outcomes ? rnd(opt.outcomes) : opt;
+  const fansD = Math.round((out.fans||0)/activeN());
+  actives().forEach(m=>{
+    m.fans = Math.max(0, m.fans + fansD);
+    m.mood=clamp(m.mood+(out.mood||0));
+    m.stamina=clamp(m.stamina+(out.stamina||0));
+    m.skill=clamp(m.skill+(out.skill||0));
+    m.fame=clamp(m.fame+(out.fame||0));
+  });
+  state.coins += (out.coins||0);
+  // 存档：记录本局遇到的事件与选择支（v1.0.7）
+  saveData.eventSeen[ev.title] = saveData.eventSeen[ev.title] || {chosen:[]};
+  if(!saveData.eventSeen[ev.title].chosen.includes(i)) saveData.eventSeen[ev.title].chosen.push(i);
+  saveGame();
+  if(out.buffs) out.buffs.forEach(b=>addBuff(b.type, b.value, b.days, b.label, undefined, false));   // v1.0.8：事件 buff 当天结算后才获得，次日才开始倒数
+  if(out.special) applySpecial(out.special);                                         // v1.0.5 特殊效果
+  // 经纪人评分：全程保密，仅结算揭晓（此处静默结算）
+  if(out.player) state.player = clamp(state.player + out.player, 0, 100);
+  checkMoodPenalty();   // 事件可能改变心情，检查低谷惩罚
+  addLog(`⚡ 突发事件「${ev.title}」→ 选择了「${opt.label}」`,'warn');
+  showEventResult(ev, opt, out);
+}
+function showEventResult(ev, opt, out){
+  const deltas=[];
+  if(out.fans)  deltas.push(['👥 粉丝', out.fans]);
+  if(out.coins) deltas.push(['💰 公司资金', out.coins]);
+  if(out.mood)  deltas.push(['😊 心情', out.mood]);
+  if(out.stamina) deltas.push(['⚡ 体力', out.stamina]);
+  if(out.skill) deltas.push(['🎯 实力', out.skill]);
+  if(out.fame)  deltas.push(['📈 名气', out.fame]);
+  if(out.buffs) deltas.push(['✨ 临时效果', out.buffs.map(b=>b.label+'（'+b.days+'天）').join('、')]);
+  if(out.special) deltas.push(['🌟 特殊效果', specialTxt(out.special)]);
+  const sum = (out.fans||0)+(out.coins||0)+(out.mood||0)+(out.stamina||0)+(out.skill||0)+(out.fame||0);  const lines = deltas.length ? deltas.map((d,i)=>
+    `<div class="rline ${d[1]>0?'up':'down'}" style="animation-delay:${i*0.12}s"><span>${d[0]}</span><b>${d[1]>0?'+':''}${d[1]}</b></div>`).join('')
+    : `<div class="rline" style="animation-delay:0s"><span>没有直接数值变化，但团队士气仍在暗流涌动…</span></div>`;
+  $('modalRoot').innerHTML = `
+  <div class="overlay"><div class="modal ${sum<0?'shake':''}">
+    <div class="evtitle">${ev.emoji} 事件结果</div>
+    <div class="sub">你选择了「${opt.label}」</div>
+    <div style="font-size:12px;color:#9ab;text-align:center;margin-bottom:8px">${opt.desc}</div>
+    ${lines}
+    <button class="confirm" onclick="closeResult()">知道了</button>
+  </div></div>`;
+  if(sum>0) burstConfetti(25);
+}
+function closeResult(){
+  state.eventOpen = false;
+  $('modalRoot').innerHTML='';
+  finalizeDay();
+}
+
+/* ================= 结局 ================= */
+function styleLabel(p){
+  if(p>=60) return '✅ 及格 · 职业经纪人（60 分为及格线）';
+  if(p>=40) return '⚠️ 不及格 · 有待成长';
+  return '❌ 严重不及格 · 圈内口碑堪忧';
+}
+/* v1.0.4：五维雷达图（canvas） */
+function drawRadar(id, ratios){
+  const cv = document.getElementById(id);
+  if(!cv || !cv.getContext) return;
+  const ctx = cv.getContext('2d');
+  const cx = cv.width/2, cy = cv.height/2, R = Math.min(cx,cy)-24;
+  const labels = ['名气','实力','状态','粉丝','财富'];
+  const light = document.body.classList.contains('theme-light');
+  const line = light ? '#8a92a8' : 'rgba(255,255,255,.35)';
+  const lab  = light ? '#39415a' : '#cde';
+  const n = labels.length;
+  ctx.clearRect(0,0,cv.width,cv.height);
+  for(let g=1; g<=4; g++){
+    const r = R*g/4;
+    ctx.beginPath();
+    for(let i=0;i<n;i++){
+      const a = -Math.PI/2 + i*2*Math.PI/n;
+      const x = cx + r*Math.cos(a), y = cy + r*Math.sin(a);
+      i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    }
+    ctx.closePath(); ctx.strokeStyle = line; ctx.lineWidth = 1; ctx.stroke();
+  }
+  for(let i=0;i<n;i++){
+    const a = -Math.PI/2 + i*2*Math.PI/n;
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+R*Math.cos(a), cy+R*Math.sin(a));
+    ctx.strokeStyle = line; ctx.stroke();
+  }
+  ctx.beginPath();
+  for(let i=0;i<n;i++){
+    const a = -Math.PI/2 + i*2*Math.PI/n;
+    const r = R * Math.max(0, Math.min(1, ratios[i]));
+    const x = cx + r*Math.cos(a), y = cy + r*Math.sin(a);
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  }
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(166,108,255,.32)'; ctx.fill();
+  ctx.strokeStyle = '#a66cff'; ctx.lineWidth = 2; ctx.stroke();
+  for(let i=0;i<n;i++){
+    const a = -Math.PI/2 + i*2*Math.PI/n;
+    const r = R * Math.max(0, Math.min(1, ratios[i]));
+    const x = cx + r*Math.cos(a), y = cy + r*Math.sin(a);
+    ctx.beginPath(); ctx.arc(x,y,3.5,0,2*Math.PI); ctx.fillStyle = '#a66cff'; ctx.fill();
+  }
+  ctx.fillStyle = lab; ctx.font = '12px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  for(let i=0;i<n;i++){
+    const a = -Math.PI/2 + i*2*Math.PI/n;
+    const x = cx + (R+16)*Math.cos(a), y = cy + (R+16)*Math.sin(a);
+    ctx.fillText(labels[i], x, y);
+  }
+}
+function showRuin(title, sub, txt){
+  state.over = true;
+  countSettle();                          // v1.0.8：破产也计入游戏次数
+  document.body.insertAdjacentHTML('beforeend', `
+  <div class="overlay"><div class="modal">
+    <div class="ruin">💥</div><h2>${title}</h2>
+    <div class="sub">${sub}</div>
+    <p style="color:#ff9;text-align:center;line-height:2">
+      ${txt}<br><br>
+      <span style="color:#9ab;font-size:13px">坚持了 ${state.day} 天 · 最终资金 ${fmtM(state.coins)} · 欠款 ${fmtM(state.debt)}</span>
+    </p>
+    <button class="restart" onclick="location.reload()">🔄 重新开始</button>
+    <div class="vtag">时代少年团 · 经纪人模拟器　v1.0.9</div>
+  </div></div>`);
+}
+/* 保存战绩：把结算面板截图保存为图片 */
+function saveRecord(){
+  const el = document.getElementById('settleModal');
+  if(!el){ alert('结算面板未找到'); return; }
+  if(typeof html2canvas === 'undefined'){ alert('截图功能需要联网加载 html2canvas 库，当前网络不可用时无法保存'); return; }
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent||'');
+  /* v1.0.9：iOS 在点击时（用户手势内）同步打开新窗口，避免异步后被浏览器拦截；
+     截图完成后把图片写入该窗口，长按即可保存到相册 */
+  let popup = null;
+  if(isIOS){
+    try{ popup = window.open('', '_blank'); }catch(e){ popup = null; }
+  }
+  const ov = el.closest ? el.closest('.overlay') : null;
+  const bs = el.querySelector ? el.querySelector('.bigscore') : null;
+  /* 临时修复：去掉 overlay 毛玻璃/半透明背景（防灰蒙）；大评分改实色（html2canvas 不支持 background-clip:text） */
+  const saved = [];
+  if(ov){ saved.push([ov,'backdropFilter',ov.style.backdropFilter],[ov,'background',ov.style.background]); ov.style.backdropFilter='none'; ov.style.background='transparent'; }
+  if(bs){ saved.push([bs,'color',bs.style.color],[bs,'webkitTextFillColor',bs.style.webkitTextFillColor],[bs,'backgroundImage',bs.style.backgroundImage],[bs,'animation',bs.style.animation],[bs,'transform',bs.style.transform],[bs,'fontSize',bs.style.fontSize]);
+    bs.style.color='#ffd93d'; bs.style.webkitTextFillColor='#ffd93d'; bs.style.backgroundImage='none';
+    bs.style.animation='none'; bs.style.transform='none'; bs.style.fontSize='56px'; }  // 禁用入场动画防 scale 中间态，强制大字号
+  saved.push([el,'animation',el.style.animation]); el.style.animation='none';   // 结算弹窗 pop 动画同样禁用
+  saved.push([el,'maxHeight',el.style.maxHeight],[el,'overflow',el.style.overflow]);
+  el.style.maxHeight='none'; el.style.overflow='visible';   // 长截图：展开全高，避免移动端截不全
+  const bg = document.body.classList.contains('theme-light') ? '#e6ebf7' : '#12122b';
+  const fullH = Math.max(el.scrollHeight||0, el.offsetHeight||0) + 40;
+  html2canvas(el,{backgroundColor:bg, scale:2, useCORS:true, height:fullH, windowHeight:fullH}).then(canvas=>{
+    saved.forEach(([e,k,v])=>{ e.style[k]=v; });
+    const fname = `时代少年团战绩_${state.mode}_${state.totalDays}天_${Date.now()}.png`;
+    if(isIOS){
+      /* iOS：写入已打开的新窗口，长按图片即可保存到相册（不依赖 Web Share） */
+      if(popup && popup.document){
+        try{
+          popup.document.write(`<title>长按图片保存战绩</title><body style="margin:0;background:#111;display:flex;align-items:center;justify-content:center;min-height:100vh"><img src="${canvas.toDataURL('image/png')}" style="width:100%;max-width:640px;display:block;height:auto"></body>`);
+          popup.document.title = '长按图片保存战绩';
+        }catch(e2){
+          try{ popup.close(); }catch(e3){}
+          popup = null;
+        }
+      }
+      if(!popup){
+        /* 新窗口被拦截：回退到直接下载（iOS 支持部分，至少尝试） */
+        try{
+          const a = document.createElement('a');
+          a.href = canvas.toDataURL('image/png'); a.download = fname;
+          document.body.appendChild(a); a.click(); a.remove();
+        }catch(e4){}
+        alert('已尝试保存战绩图片，如未弹出请长按屏幕保存');
+      }
+    } else {
+      const a=document.createElement('a');
+      a.download = fname;
+      a.href = canvas.toDataURL('image/png');
+      a.click();
+      alert('✅ 战绩已保存为图片！');
+    }
+  }).catch(()=>{
+    saved.forEach(([e,k,v])=>{ e.style[k]=v; });
+    if(popup){ try{ popup.close(); }catch(e){} }
+    alert('截图失败，请重试');
+  });
+}
+/* 回到主页：放弃本局并刷新 */
+function backHome(){
+  if(confirm('确定放弃本局游戏并回到主页吗？本局进度将丢失。')) location.reload();
+}
+
+function showSettle(){
+  state.over = true;
+  const list = actives();
+  const avg = f => list.reduce((s,m)=>s+f(m),0)/list.length;
+  const avgFame = avg(m=>m.fame), avgSkill = avg(m=>m.skill),
+        avgMood = avg(m=>m.mood), avgStam = avg(m=>m.stamina), avgState=(avgMood+avgStam)/2;
+  const totalFans = list.reduce((s,m)=>s+m.fans,0);
+  const mv = marketValue();
+  const net = state.coins - state.debt + mv;              // 净资产含投资市值
+
+  const dur = state.totalDays===Infinity ? state.day : state.totalDays;   // 无尽模式按实际运营天数评分
+  const fanMult2 = 1 + 9*(dur/30);
+  const wealthTarget = 1000000*(dur/30);   // v1.0.1：财富目标上调，金额评分更严格
+
+  const fameS   = avgFame * 0.30;
+  const skillS  = avgSkill * 0.20;
+  const stateS  = avgState * 0.10;
+  const fanS    = clamp(Math.log10(Math.max(totalFans,70000)/70000)/Math.log10(fanMult2),0,1)*20;
+  const wealthS = clamp((net+100000)/(wealthTarget+100000),0,1)*20;
+  const base    = fameS + skillS + stateS + fanS + wealthS;
+  const bonus   = (state.player - 60)/5;               // 60 分及格线：及格不扣分，越高加分越多
+  const total   = Math.round(clamp(base + bonus, 0, 100)*10)/10;
+  const rank = total>=90?['S级 · 传奇经纪人','👑'] : total>=75?['A级 · 金牌经纪人','🌟'] :
+               total>=60?['B级 · 合格经纪人','✅'] : total>=40?['C级 · 新晋经纪人','🐣'] : ['D级 · 被粉丝爆破的失业经纪人','💥'];
+  const rows = [
+    ['名气', fameS, 30], ['实力', skillS, 20], ['状态', stateS, 10], ['粉丝', fanS, 20], ['财富', wealthS, 20]
+  ].map(([k,v,mx])=>`
+    <div class="scoreline"><span class="lb">${k}</span>
+      <div class="bar"><i class="b-fame" style="width:${Math.min(100,v/mx*100)}%"></i></div>
+      <span class="pt">${v.toFixed(1)}/${mx}</span></div>`).join('');
+  const mini = list.map(m=>`
+    <div class="mini"><b>${m.emoji} ${m.name}</b>
+      <div><span>实力</span><span>${m.skill}</span></div>
+      <div><span>名气</span><span>${m.fame}</span></div>
+      <div><span>粉丝</span><span>${fmtN(m.fans)}</span></div>
+      <div><span>吸金加成</span><span>+${Math.round((perfMult(m)-1)*100)}%</span></div>
+    </div>`).join('');
+  document.body.insertAdjacentHTML('beforeend', `
+  <div class="overlay"><div class="modal" id="settleModal">
+    <h2>🏆 ${dur} 天养成结束！</h2>
+    <div class="sub">${state.mode}模式 · ${diffSummary()}${state.solo!=null?' · 特训成员 '+MEMBERS[state.solo].name:''}</div>
+    <div class="sub">时代少年团在你的运营下交出了答卷</div>
+    <div class="bigscore">${total}</div>
+    <div class="rank">${rank[1]} ${rank[0]}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:center;margin-top:10px">
+      <div style="flex:1 1 240px;min-width:240px">${rows}</div>
+      <div style="flex:1 1 240px;min-width:240px;display:flex;justify-content:center">
+        <canvas id="radarCv" width="240" height="240"></canvas>
+      </div>
+    </div>
+    <div style="text-align:center;font-size:13px;color:#c9a8ff;margin-top:10px">突发事件总分修正：<b style="color:#ffd93d">${bonus>=0?'+':''}${bonus.toFixed(1)}</b></div>
+    <div style="display:flex;justify-content:space-around;font-size:13px;margin-top:12px;color:#9ab;flex-wrap:wrap;gap:6px">
+      <span>💼 净资产 ${fmtM(net)}</span>
+      <span>👥 总粉丝 ${fmtN(totalFans)}</span><span>📈 平均名气 ${avgFame.toFixed(0)}</span>
+    </div>
+    <div class="sec-title">${state.solo!=null?'成员档案':'成员终局档案'}</div>
+    <div class="grid2">${mini}</div>
+    <div class="btnrow">
+      <button class="restart" onclick="location.reload()">🔄 再运营一季</button>
+      <button class="restart savebtn" onclick="saveRecord()">📸 保存我的战绩</button>
+    </div>
+    <div class="vtag">时代少年团 · 经纪人模拟器　v1.0.9</div>
+  </div></div>`);
+  burstConfetti(80);
+  drawRadar('radarCv', [fameS/30, skillS/20, stateS/10, fanS/20, wealthS/20]);
+  recordSettle(total, {fameS, skillS, stateS, fanS, wealthS}, dur);                    // v1.0.7：存档结算记录
+  saveGame();
+  renderSaveBox();
+  alert('💾 存档成功！');
+}
+
+/* ===== 存档系统（v1.0.7） ===== */
+const SAVE_KEY = 'tst_save_v1';
+const SAVE_HISTORY_MAX = 10;
+let saveData = loadGame();
+function defaultSave(){
+  return { count:0, modeStats:{}, soloCount:[0,0,0,0,0,0,0], history:[], eventSeen:{} };
+}
+function loadGame(){
+  try{
+    const s = localStorage.getItem(SAVE_KEY);
+    if(s){
+      const d = JSON.parse(s);
+      d.soloCount = d.soloCount||[0,0,0,0,0,0,0]; d.history = d.history||[]; d.eventSeen = d.eventSeen||{};
+      return d;
+    }
+  }catch(e){}
+  return defaultSave();
+}
+function saveGame(){
+  try{ localStorage.setItem(SAVE_KEY, JSON.stringify(saveData)); }catch(e){}
+}
+function isDefaultDiff(){
+  const d = state.diff;
+  return d.stamMult===1.5 && d.moodMult===1.5 && d.incomeMult===0.8 && d.slots===5 && d.costGrow===0.1 && d.weatherDays===5;
+}
+/* v1.0.8：完成结算或破产时才计入游戏次数（放弃本局不再 +1） */
+function countSettle(){
+  saveData.count++;
+  if(state.solo!=null) saveData.soloCount[state.solo]++;
+  saveGame();
+}
+function recordSettle(total, dims, dur){
+  countSettle();
+  if(state.difficulty==='标准'){
+    const s = saveData.modeStats['标准']||{n:0,sum:0};
+    s.n++; s.sum+=total; saveData.modeStats['标准']=s;
+  } else if(state.difficulty==='困难' && isDefaultDiff()){
+    const s = saveData.modeStats['困难默认']||{n:0,sum:0};
+    s.n++; s.sum+=total; saveData.modeStats['困难默认']=s;
+  }
+  saveData.history.unshift({
+    date: new Date().toLocaleString('zh-CN'),
+    mode: state.mode, difficulty: state.difficulty,
+    score: total, days: dur,        // v1.0.7-fix2：记录实际天数（不再比实际多 1）
+    solo: state.solo!=null ? MEMBERS[state.solo].name : null,
+    nonDefault: !(state.difficulty==='标准' || (state.difficulty==='困难' && isDefaultDiff())),   // v1.0.8：是否非默认难度
+    dims: dims || null    // v1.0.7-fix1：五维评分数据（回顾时画雷达图）
+  });
+  saveData.history = saveData.history.slice(0, SAVE_HISTORY_MAX);
+  saveGame();
+}
+function renderSaveBox(){
+  const box = $('saveBox');
+  if(!box) return;
+  box.style.display = 'block';
+  let favIdx = 0;
+  saveData.soloCount.forEach((n,i)=>{ if(n>saveData.soloCount[favIdx]) favIdx=i; });
+  const favTxt = saveData.soloCount.some(n=>n>0) ? MEMBERS[favIdx].name+'（'+saveData.soloCount[favIdx]+' 次）' : '暂无';
+  const avg = s => (s && s.n) ? (s.sum/s.n).toFixed(1) : '—';
+  const std = saveData.modeStats['标准'], hard = saveData.modeStats['困难默认'];
+  const hist = saveData.history.map((h,i)=>`<div class="hist-row" onclick="showHistory(${i})">🎮 ${h.date} · ${h.mode}${h.difficulty!=='标准'?'·'+h.difficulty:''} · ${h.score} 分（${h.days}天）</div>`).join('');
+  box.innerHTML = `
+    <b>💾 存档数据</b>
+    <div class="save-grid">
+      <div>🎮 游戏次数：<b>${saveData.count}</b></div>
+      <div>📊 标准模式均分：<b>${avg(std)}</b></div>
+      <div>📊 困难默认均分：<b>${avg(hard)}</b></div>
+      <div>❤️ 最爱成员：<b>${favTxt}</b></div>
+      <div>🔓 解锁事件：<b>${Object.keys(saveData.eventSeen).length} / ${CHOICE_EVENTS.length}</b></div>
+    </div>
+    <div class="hist-title">📜 最近 ${saveData.history.length} 局结算回顾（点击生成结算图）：</div>
+    ${hist || '<div style="color:#667;font-size:12px">暂无结算记录</div>'}
+    <div class="save-btns">
+      <button class="themebtn" onclick="openEncyc()">📖 查看图鉴</button>
+      <button class="themebtn" onclick="exportCode()">📋 导出存档编号</button>
+      <button class="themebtn" onclick="importCode()">📥 输入编号导入</button>
+      <button class="themebtn" onclick="exportSave()">📤 导出存档文件</button>
+      <button class="themebtn" onclick="importSave()">📥 导入存档文件</button>
+      <input type="file" id="importFile" accept=".json,.txt,application/json,text/plain" style="display:none" onchange="onImportFile(event)">
+    </div>
+    <div class="save-warn">⚠️ 存档保存在本浏览器（localStorage）中，切换浏览器或清除浏览器缓存会丢失数据。<br>📤 导出：桌面端直接下载 .json 文件；iOS 端自动复制文本，请粘贴到备忘录后「存储到文件」。<br>📥 导入：点击「导入存档」→ 选择之前保存的 .json / .txt 文件即可（iOS 同样支持）。导入会覆盖当前存档，建议先导出备份。</div>`;
+}
+function showHistory(i){
+  const h = saveData.history[i];
+  if(!h) return;
+  const home = $('home'); if(home) home.style.display='none';   // v1.0.7-fix1：避免被首页遮挡
+  const rank = h.score>=90?'S级 · 传奇经纪人':h.score>=75?'A级 · 金牌经纪人':h.score>=60?'B级 · 合格经纪人':h.score>=40?'C级 · 新晋经纪人':'D级';
+  /* 五维评分 + 雷达图（v1.0.7-fix1，旧存档无 dims 则省略） */
+  let fiveHtml = '';
+  if(h.dims){
+    const rows = [['名气',h.dims.fameS,30],['实力',h.dims.skillS,20],['状态',h.dims.stateS,10],['粉丝',h.dims.fanS,20],['财富',h.dims.wealthS,20]]
+      .map(([k,v,mx])=>`<div class="scoreline"><span class="lb">${k}</span><div class="bar"><i class="b-fame" style="width:${Math.min(100,v/mx*100)}%"></i></div><span class="pt">${v.toFixed(1)}/${mx}</span></div>`).join('');
+    fiveHtml = `<div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:center;margin-top:10px">
+      <div style="flex:1 1 200px;min-width:200px">${rows}</div>
+      <div style="flex:1 1 200px;min-width:200px;display:flex;justify-content:center"><canvas id="radarCv" width="200" height="200"></canvas></div>
+    </div>`;
+  }
+  $('modalRoot').innerHTML = `
+  <div class="overlay"><div class="modal" id="historyModal">
+    <button class="cancel" onclick="backToHome()">✕</button>
+    <h2>🎮 历史结算回顾</h2>
+    <div class="sub">${h.date} · ${h.mode}${h.difficulty!=='标准'?' · '+h.difficulty:''}${h.solo?' · 特训 '+h.solo:''}</div>
+    <div class="bigscore">${h.score}</div>
+    <div class="rank">${rank}</div>
+    ${h.nonDefault?'<div style="text-align:center;color:#ff8c42;font-size:12px;margin-top:6px">⚠️ 请注意：本局游戏并非在默认难度下进行。</div>':''}   <!-- v1.0.8：非默认难度提示 -->
+    ${fiveHtml}
+    <div style="text-align:center;color:#9ab;font-size:13px;margin-top:8px">运营 ${h.days} 天</div>
+    <div class="btnrow">
+      <button class="restart savebtn" onclick="saveHistoryImg()">📸 保存结算图</button>
+      <button class="restart" onclick="backToHome()">🏠 回到首页</button>
+    </div>
+  </div></div>`;
+  if(h.dims) drawRadar('radarCv', [h.dims.fameS/30, h.dims.skillS/20, h.dims.stateS/10, h.dims.fanS/20, h.dims.wealthS/20]);
+}
+function saveHistoryImg(){
+  const el = document.getElementById('historyModal');
+  if(!el) return;
+  if(typeof html2canvas === 'undefined'){ alert('截图功能需要联网加载 html2canvas 库'); return; }
+  const bs = el.querySelector('.bigscore');
+  const saved = [];
+  if(bs){ saved.push([bs,'color',bs.style.color],[bs,'webkitTextFillColor',bs.style.webkitTextFillColor],[bs,'backgroundImage',bs.style.backgroundImage],[bs,'animation',bs.style.animation],[bs,'transform',bs.style.transform],[bs,'fontSize',bs.style.fontSize]);
+    bs.style.color='#ffd93d'; bs.style.webkitTextFillColor='#ffd93d'; bs.style.backgroundImage='none'; bs.style.animation='none'; bs.style.transform='none'; bs.style.fontSize='56px'; }
+  saved.push([el,'animation',el.style.animation]); el.style.animation='none';
+  saved.push([el,'maxHeight',el.style.maxHeight],[el,'overflow',el.style.overflow]);
+  el.style.maxHeight='none'; el.style.overflow='visible';
+  const bg = document.body.classList.contains('theme-light') ? '#e6ebf7' : '#12122b';
+  const fullH = Math.max(el.scrollHeight||0, el.offsetHeight||0) + 40;
+  html2canvas(el,{backgroundColor:bg, scale:2, useCORS:true, height:fullH, windowHeight:fullH}).then(canvas=>{
+    saved.forEach(([e,k,v])=>{ e.style[k]=v; });
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent||'');
+    const fname = '历史结算_'+Date.now()+'.png';
+    if(isIOS && navigator.share && canvas.toBlob){
+      canvas.toBlob(blob=>{
+        try{
+          const file = new File([blob], fname, {type:'image/png'});
+          if(navigator.canShare && navigator.canShare({files:[file]})) navigator.share({files:[file], title:'历史结算'}).catch(()=>{});
+          else { const w=window.open('','_blank'); if(w){ w.document.write(`<img src="${canvas.toDataURL('image/png')}" style="width:100%;max-width:600px;display:block;margin:0 auto">`); w.document.title='长按图片保存'; } }
+        }catch(err){ alert('保存失败'); }
+      },'image/png');
+    } else {
+      const a=document.createElement('a'); a.download=fname; a.href=canvas.toDataURL('image/png'); a.click();
+      alert('✅ 结算图已保存！');
+    }
+  }).catch(()=>{ saved.forEach(([e,k,v])=>{ e.style[k]=v; }); alert('截图失败，请重试'); });
+}
+/* ===== 存档编号系统（v1.0.9：A 方案 = 编码+校验，无加密） ===== */
+const CODE_CHARS = '23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';   // 58 字符，去掉易混淆的 0/O/1/I/l
+const CODE_PREFIX = 'S';
+/* 非 BigInt 实现（兼容旧内核浏览器）：字节数组视为大端大整数，反复除 CODE_CHARS.length 取余 */
+function bytesToCode(bytes){
+  const base = CODE_CHARS.length;
+  const num = Array.from(bytes);
+  let res = '';
+  while(num.length > 1 || num[0] > 0){
+    let rem = 0;
+    for(let i=0;i<num.length;i++){
+      const cur = rem*256 + num[i];
+      num[i] = Math.floor(cur/base);
+      rem = cur % base;
+    }
+    while(num.length>1 && num[0]===0) num.shift();
+    res = CODE_CHARS[rem] + res;
+  }
+  return res || CODE_CHARS[0];
+}
+function codeToBytes(str){
+  const base = CODE_CHARS.length;
+  let num = [0];
+  for(const ch of str){
+    const v = CODE_CHARS.indexOf(ch);
+    if(v < 0) throw new Error('含非法字符');
+    let carry = v;
+    for(let i=num.length-1;i>=0;i--){
+      const cur = num[i]*base + carry;
+      num[i] = cur & 0xFF;
+      carry = Math.floor(cur/256);
+    }
+    while(carry > 0){ num.unshift(carry & 0xFF); carry = Math.floor(carry/256); }
+  }
+  return new Uint8Array(num);
+}
+function hashBytes(bytes){
+  let h = 5381;
+  for(const b of bytes) h = ((h << 5) + h + b) >>> 0;
+  return h;
+}
+function toCheck(h){ return bytesToCode(new Uint8Array([(h>>>24)&255,(h>>>16)&255,(h>>>8)&255,h&255])).padStart(6, CODE_CHARS[0]); }
+/* 紧凑化：事件图鉴键名换为数字索引、历史记录数组化、dims 保留 1 位小数 */
+function compactSave(d){
+  const c = { v:1, count:d.count, ms:d.modeStats, sc:d.soloCount, h:[], ev:{} };
+  d.history.forEach(h=>{
+    c.h.push([h.date, h.mode, h.difficulty, h.score, h.days, h.solo||'', h.nonDefault?1:0,
+      h.dims ? [Math.round(h.dims.fameS*10)/10, Math.round(h.dims.skillS*10)/10, Math.round(h.dims.stateS*10)/10, Math.round(h.dims.fanS*10)/10, Math.round(h.dims.wealthS*10)/10] : null]);
+  });
+  CHOICE_EVENTS.forEach((ev, idx)=>{ const s = d.eventSeen[ev.title]; if(s && Array.isArray(s.chosen)) c.ev[idx] = s.chosen; });
+  return JSON.stringify(c);
+}
+function unCompactSave(c){
+  const d = defaultSave();
+  d.count = typeof c.count==='number' ? c.count : 0;
+  d.modeStats = c.ms || {};
+  d.soloCount = c.sc || [0,0,0,0,0,0,0];
+  (c.h||[]).forEach(arr=>{
+    if(!Array.isArray(arr) || arr.length<5) return;
+    d.history.push({
+      date: String(arr[0]), mode: String(arr[1]), difficulty: String(arr[2]),
+      score: Number(arr[3]), days: Number(arr[4]),
+      solo: arr[5] || null, nonDefault: !!arr[6],
+      dims: Array.isArray(arr[7]) ? {fameS:arr[7][0], skillS:arr[7][1], stateS:arr[7][2], fanS:arr[7][3], wealthS:arr[7][4]} : null
+    });
+  });
+  d.history = d.history.slice(0, SAVE_HISTORY_MAX);
+  Object.entries(c.ev||{}).forEach(([idx, chosen])=>{
+    const ev = CHOICE_EVENTS[+idx];
+    if(ev && Array.isArray(chosen)) d.eventSeen[ev.title] = {chosen: chosen};
+  });
+  return d;
+}
+function encodeSaveCode(){
+  try{
+    const json = compactSave(saveData);
+    const bytes = new TextEncoder().encode(json);
+    return CODE_PREFIX + bytesToCode(bytes) + toCheck(hashBytes(bytes));
+  }catch(e){ return null; }
+}
+function decodeSaveCode(code){
+  const t = String(code||'').replace(/\s+/g,'');
+  if(!t.startsWith(CODE_PREFIX)) throw new Error('不是存档编号');
+  const body = t.slice(1);
+  /* v1.0.9-fix：校验段长度不固定（早期版本可能不足 6 位），从长到短遍历尝试，兼容所有已导出编号 */
+  for(let checkLen = Math.min(8, body.length-1); checkLen >= 2; checkLen--){
+    try{
+      const data = body.slice(0, -checkLen), check = body.slice(-checkLen);
+      if(!data) continue;
+      const bytes = codeToBytes(data);
+      const calc = toCheck(hashBytes(bytes));
+      /* 兼容早期无补位的校验段（可能不足 6 位）：去掉前导最小字符后再比较一次 */
+      const calcRaw = calc.replace(new RegExp('^' + CODE_CHARS[0] + '+'), '') || CODE_CHARS[0];
+      if(calc !== check && calcRaw !== check) continue;
+      const json = new TextDecoder().decode(bytes);
+      const c = JSON.parse(json);
+      if(!c || typeof c.count!=='number') throw new Error('数据格式错误');
+      return unCompactSave(c);
+    }catch(e){ /* 尝试下一个长度 */ }
+  }
+  throw new Error('校验不通过，可能复制不完整或被改动');
+}
+/* v1.0.9：编号弹窗打开时隐藏首页（modalRoot 在 home 之前，不隐藏会被全屏首页盖住），关闭时恢复 */
+function closeCodeModal(){
+  const h = $('home'); if(h) h.style.display='';
+  closeModal();
+}
+function exportCode(){
+  let code = null;
+  try{ code = encodeSaveCode(); }catch(e){ code = null; }
+  if(!code){ alert('⚠️ 编码失败：' + ((e && e.message) || '存档数据异常，请先「导出存档文件」备份')); return; }
+  const h = $('home'); if(h) h.style.display='none';
+  $('modalRoot').innerHTML = `
+  <div class="overlay"><div class="modal">
+    <button class="cancel" onclick="closeCodeModal()">✕</button>
+    <h2>📋 存档编号</h2>
+    <div class="sub">复制下方编号并保存（已忽略空格）。之后在任何设备「输入编号导入」即可还原完整存档（含全部历史）</div>
+    <textarea id="codeBox" readonly style="width:100%;height:180px;background:#0d0e1f;color:#8fe0a0;border:1px solid rgba(78,205,196,.4);border-radius:10px;padding:10px;font-size:11px;line-height:1.6;word-break:break-all;font-family:Consolas,monospace">${code}</textarea>
+    <div class="btnrow" style="margin-top:10px">
+      <button class="restart savebtn" onclick="copyCode()">📋 一键复制编号</button>
+      <button class="restart" onclick="closeCodeModal()">完成</button>
+    </div>
+  </div></div>`;
+}
+function copyCode(){
+  const ta = document.getElementById('codeBox');
+  if(!ta) return;
+  ta.focus(); ta.select();
+  let ok = false;
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(ta.value).then(()=>{ alert('✅ 编号已复制！请粘贴到备忘录/云笔记保存'); }).catch(()=>{ try{ ok = document.execCommand('copy'); }catch(e2){} if(ok) alert('✅ 编号已复制！请粘贴到备忘录/云笔记保存'); else alert('复制失败，请手动长按全选复制'); });
+      return;
+    }
+  }catch(e){}
+  try{ ok = document.execCommand('copy'); }catch(e){}
+  if(ok) alert('✅ 编号已复制！请粘贴到备忘录/云笔记保存');
+  else alert('复制失败，请手动长按全选复制');
+}
+function importCode(){
+  const h = $('home'); if(h) h.style.display='none';
+  $('modalRoot').innerHTML = `
+  <div class="overlay"><div class="modal">
+    <button class="cancel" onclick="closeCodeModal()">✕</button>
+    <h2>📥 输入存档编号</h2>
+    <div class="sub">粘贴之前导出的编号（自动忽略空格与换行）。导入会覆盖当前存档，建议先导出备份</div>
+    <textarea id="codeInput" placeholder="在此粘贴编号…" style="width:100%;height:150px;background:#0d0e1f;color:#cde;border:1px solid rgba(166,108,255,.4);border-radius:10px;padding:10px;font-size:11px;line-height:1.6;word-break:break-all;font-family:Consolas,monospace"></textarea>
+    <div class="btnrow" style="margin-top:10px">
+      <button class="restart savebtn" onclick="confirmCodeImport()">✅ 确认导入</button>
+      <button class="restart" onclick="closeCodeModal()">取消</button>
+    </div>
+  </div></div>`;
+}
+function confirmCodeImport(){
+  const ta = document.getElementById('codeInput');
+  if(!ta) return;
+  try{
+    const d = decodeSaveCode(ta.value);
+    saveData = d; saveGame();
+    closeCodeModal();
+    renderSaveBox();
+    alert('✅ 编号导入成功！存档已还原');
+  }catch(e){
+    alert('❌ 无效的存档编号（' + (e.message||'解析失败') + '），请检查是否复制完整');
+  }
+}
+
+function exportSave(){
+  const json = JSON.stringify(saveData);
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent||'');
+  if(isIOS){
+    const ta = document.createElement('textarea');
+    ta.value = json; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    let copied = false;
+    try{ copied = document.execCommand('copy'); }catch(e){}
+    ta.remove();
+    if(copied) alert('✅ 存档已复制到剪贴板（iOS 请粘贴到备忘录等应用保存）');
+    else alert('请手动复制下方存档文本：\n\n'+json);
+  } else {
+    const a = document.createElement('a');
+    a.download = '时代少年团_存档.json';
+    a.href = 'data:application/json;charset=utf-8,'+encodeURIComponent(json);
+    a.click();
+    alert('✅ 存档已导出！');
+  }
+}
+function importSave(){
+  const inp = $('importFile');
+  if(inp) inp.click();
+}
+function onImportFile(ev){
+  const f = ev.target.files[0];
+  if(!f) return;
+  const r = new FileReader();
+  r.onload = ()=>{
+    try{
+      const d = JSON.parse(r.result);
+      if(!d || typeof d.count!=='number') throw new Error('bad');
+      d.soloCount = d.soloCount||[0,0,0,0,0,0,0]; d.history=d.history||[]; d.eventSeen=d.eventSeen||{};
+      saveData = d; saveGame();
+      alert('✅ 存档导入成功！');
+      renderSaveBox();
+    }catch(e){ alert('❌ 存档文件无效'); }
+  };
+  r.readAsText(f);
+  ev.target.value='';
+}
+
+/* ===== 图鉴独立界面（v1.0.7-fix1） ===== */
+let encycOpen = new Set();   // v1.0.7-fix2：公告式折叠，可同时展开多个事件
+/* 选项数值摘要（不显示保密中的经纪人评分 player） */
+function optionDetail(o){
+  const parts=[];
+  if(o.coins)   parts.push('💰'+(o.coins>0?'+':'')+fmtM(o.coins));
+  if(o.fans)    parts.push('👥'+(o.fans>0?'+':'')+fmtN(o.fans));
+  if(o.mood)    parts.push('😊'+(o.mood>0?'+':'')+o.mood);
+  if(o.stamina) parts.push('⚡'+(o.stamina>0?'+':'')+o.stamina);
+  if(o.skill)   parts.push('🎯'+(o.skill>0?'+':'')+o.skill);
+  if(o.fame)    parts.push('📈'+(o.fame>0?'+':'')+o.fame);
+  if(o.buffs)   o.buffs.forEach(b=>parts.push('✨'+b.label));
+  if(o.special) parts.push('🌟'+specialTxt(o.special));
+  if(o.outcomes) parts.push('🎲 随机：'+o.outcomes.map(x=>`${x.label}（${optionDetail(x)}）`).join(' / '));
+  return parts.join(' ');
+}
+function toggleEncyc(i){
+  if(encycOpen.has(i)) encycOpen.delete(i); else encycOpen.add(i);
+  const body = $('encBody_'+i), arrow = $('encArrow_'+i);
+  if(body) body.style.display = encycOpen.has(i) ? 'block' : 'none';
+  if(arrow) arrow.textContent = encycOpen.has(i) ? '▲' : '▼';
+  // v1.0.7-fix2：只切换当前事件卡片的展开状态，不重渲染整个图鉴（不再闪烁、不再跳回顶部）
+}
+function openEncyc(){
+  const h = $('home'); if(h) h.style.display='none';
+  const total = CHOICE_EVENTS.length;
+  const seen = Object.keys(saveData.eventSeen).length;
+  const pct = Math.round(seen/total*100);
+  const items = CHOICE_EVENTS.map((ev, ei)=>{
+    const s = saveData.eventSeen[ev.title];
+    const open = encycOpen.has(ei);
+    const opts = s ? ev.options.map((o, oi)=>{
+      const chosen = s.chosen.includes(oi);
+      const detail = chosen ? optionDetail(o) : '';
+      return `<div class="enc-opt ${chosen?'chosen':'lock'}">${chosen?`✅ <b>${o.label}</b>${o.desc?`<span class="enc-desc">${o.desc}</span>`:''}${detail?`<span class="enc-num">${detail}</span>`:''}`:`🔒 ${o.label}`}</div>`;
+    }).join('') : '';
+    const head = s
+      ? `<div class="enc-head" onclick="toggleEncyc(${ei})">${ev.emoji} ${ev.title} <span id="encArrow_${ei}">${open?'▲':'▼'}</span></div>`
+      : `<div class="enc-head lock">？？？</div>`;
+    return `<div class="enc-card ${s?'':'locked'}">${head}${s?`<div class="enc-options" id="encBody_${ei}" style="display:${open?'block':'none'}">${opts}</div>`:''}</div>`;
+  }).join('');
+  $('modalRoot').innerHTML = `
+  <div class="overlay"><div class="modal enc-modal">
+    <h2>📖 事件图鉴</h2>
+    <div class="sub">收录全部突发事件：遇到才能查看，选过的选择支才能看到具体加成</div>
+    <div class="enc-progress"><div class="enc-bar"><i style="width:${pct}%"></i></div><span>已解锁 ${seen} / ${total}（${pct}%）</span></div>
+    <div class="enc-grid">${items}</div>
+    <div class="btnrow"><button class="restart" onclick="backToHome()">🏠 回到首页</button></div>
+  </div></div>`;
+}
+function backToHome(){
+  $('modalRoot').innerHTML='';
+  const h = $('home'); if(h) h.style.display='flex';
+  renderSaveBox();
+}
+
+/* 更新公告折叠 */
+function toggleUpd(){
+  const b = $('updBody'), a = $('updArrow');
+  if(!b) return;
+  const open = b.style.display !== 'none';
+  b.style.display = open ? 'none' : 'block';
+  if(a) a.textContent = open ? '▼' : '▲';
+}
+
+/* ================= 启动 ================= */
+function renderSoloPicks(){
+  $('soloPicks').innerHTML = MEMBERS.map((m,i)=>`
+    <button class="soloPick ${i===soloPick?'on':''}" onclick="soloPick=${i};renderSoloPicks()" title="${m.name}">${m.emoji}</button>`).join('');
+}
+
+function startGame(days, coins, mode){
+  state.totalDays = days; state.coins = coins; state.mode = mode;
+  state.day = 1; state.debt = 0; state.loanDue = null; state.over = false; state.player = 50;
+  state.slotCount = (state.solo!=null) ? 3 : (state.difficulty==='标准' ? 7 : state.diff.slots);
+  state.noEvt = 0; state.executing = false; state.eventOpen = false;
+  state.slots = Array(state.slotCount).fill(null); state.target = null;
+  state.holdings = {};
+  state.buffs = []; state.stockUp = 0; state.weather = null; state.weatherCountdown = 0;
+  state.infra = {studio:0, dorm:0, record:0, venue:0};
+  INVEST_ASSETS.forEach(a=>{ a.price = a.initPrice; a.prevPrice = a.initPrice; a.changePct = 0; });
+  MEMBERS.forEach(m=>{
+    m.stamina = 100; m.mood = 100; m.hospital = false; m.moodHit = false;
+    m.skill = clamp(m.baseSkill + (Math.floor(Math.random()*5)-2));            // 实力 -2 ~ +2
+    m.fame  = clamp(m.baseFame  + (Math.floor(Math.random()*3)-1));            // 名气 -1 ~ +1
+    m.fans  = Math.max(1000, Math.round(m.baseFans * (0.95 + Math.random()*0.10))); // 粉丝 95%~105%
+  });
+  const home = $('home'); if(home) home.remove();
+  $('log').innerHTML='';
+  addLog('🎉 欢迎成为时代少年团的经纪人！' ,'good');
+  addLog(`📖 ${state.solo!=null?'单人特训·'+MEMBERS[state.solo].name+'：每天 '+state.slotCount+' 个档位':'每天 '+state.slotCount+' 个档期'}：选行动 → 选成员 → 加入流程图，排满后出现🔮预估面板`,'normal');
+  addLog('😴 休息先恢复再结算（15%暴击1.5倍）；演出连排消耗递增、个人训练不递增；无档期成员自动休息（半恢复）','warn');
+  if(state.difficulty!=='标准') addLog(`🔥 ${state.difficulty}模式：体力消耗×${state.diff.stamMult.toFixed(1)} · 心情消耗×${state.diff.moodMult.toFixed(1)} · 收益×${state.diff.incomeMult>=1?state.diff.incomeMult.toFixed(1):state.diff.incomeMult.toFixed(2)} · 每天 ${state.diff.slots} 档`,'warn');
+  addLog('📈 投资市场不占档期，每日波动可随时买卖；收益随实力/名气成长','warn');
+  rollWeather(false);
+  renderAll();
+}
+
+function startSolo(days, coins, mode){
+  state.solo = soloPick;
+  state.slotCount = 3;
+  startGame(days, coins, mode);
+}
+
+renderSoloPicks();
+initTheme();
+setDifficulty('标准');
+renderSaveBox();
+
+addLog('🎉 欢迎！请从上方选择游戏模式开始运营～','good');
+renderAll();
+</script>
+</body>
+</html>
