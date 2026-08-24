@@ -14,3 +14,6 @@
 我  
 ***Deepseek-v4-flash-preview***  
 **Deepseek-v4-flash-0731**
+
+
+## 目前最新版本：1.0.10
