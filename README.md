@@ -8,6 +8,8 @@
 1.下载index.html。  
 2.双击打开。
 
+### 《TNTmanagerSimulator》如今已经上传GitHub Pages。输入网址：https://tyanbilibili.github.io/TNTmanagerSimulator/ 即可在线游玩！
+
 （ps：我发现iOS设备上能用的浏览器比较少，而QQ浏览器每次都会清除浏览器缓存导致每次都没法存档。没招了，不过我倒也不用iOS设备测试，就当没看到不修了😋）
 
 # 鸣谢
