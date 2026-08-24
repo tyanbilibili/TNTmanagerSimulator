@@ -269,6 +269,39 @@
   .updbox b{color:#a66cff;font-size:13px;}
   .upd-head{cursor:pointer;font-size:13.5px;color:#a66cff;font-weight:800;margin-bottom:2px;user-select:none;}
   .upd-head:hover{opacity:.8;}
+
+  /* ===== 新手教程（v1.0.10） ===== */
+  .tut-open{display:inline-block;cursor:pointer;font-size:12.5px;font-weight:700;color:#a66cff;background:rgba(166,108,255,.12);
+    border:1px solid rgba(166,108,255,.4);border-radius:99px;padding:5px 14px;margin:2px 0 10px;transition:all .18s;user-select:none;}
+  .tut-open:hover{background:rgba(166,108,255,.22);transform:scale(1.04);}
+  #tutRoot{position:fixed;inset:0;z-index:500;pointer-events:none;}
+  #tutRoot .tut-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+  #tutRoot .tut-card{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);width:min(560px,92vw);pointer-events:auto;
+    background:linear-gradient(160deg,#1c1a3d,#12122b);border:1px solid rgba(255,255,255,.18);border-radius:20px;padding:18px 20px 14px;
+    box-shadow:0 24px 70px rgba(0,0,0,.75);animation:pop .35s;}
+  #tutRoot .tut-step{color:#a66cff;font-size:11.5px;font-weight:800;letter-spacing:2px;margin-bottom:4px;}
+  #tutRoot .tut-title{font-size:17px;font-weight:900;color:#fff;margin-bottom:8px;line-height:1.4;}
+  #tutRoot .tut-body{font-size:13px;color:#d8d2f0;line-height:1.9;margin-bottom:12px;}
+  #tutRoot .tut-body b{color:#ffd93d;}
+  #tutRoot .tut-nav{display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap;}
+  #tutRoot .tut-dots{display:flex;gap:5px;align-items:center;flex:1;min-width:120px;}
+  #tutRoot .tut-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.22);}
+  #tutRoot .tut-dot.on{background:#ffd93d;transform:scale(1.25);}
+  #tutRoot .tut-btn{border:none;cursor:pointer;font-size:13px;font-weight:800;border-radius:11px;padding:9px 18px;transition:transform .15s;}
+  #tutRoot .tut-btn:hover{transform:scale(1.05);}
+  #tutRoot .tut-btn.ghost{background:rgba(255,255,255,.08);color:#c9c4e8;border:1px solid rgba(255,255,255,.14);}
+  #tutRoot .tut-btn.main{background:linear-gradient(90deg,#ffd93d,#ff8c42);color:#1a1a2e;}
+  #tutRoot .tut-hl{position:absolute;border:2px solid #ffd93d;border-radius:14px;box-shadow:0 0 0 3px rgba(255,217,61,.28),0 0 22px rgba(255,217,61,.5);
+    pointer-events:none;transition:all .25s;animation:tutPulse 1.6s ease-in-out infinite;z-index:501;}
+  #tutRoot .tut-tip{position:absolute;background:rgba(255,217,61,.95);color:#1a1a2e;font-size:11px;font-weight:800;padding:3px 9px;border-radius:8px;
+    pointer-events:none;z-index:502;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.4);}
+  @keyframes tutPulse{0%,100%{box-shadow:0 0 0 3px rgba(255,217,61,.28),0 0 18px rgba(255,217,61,.45);}50%{box-shadow:0 0 0 5px rgba(255,217,61,.45),0 0 30px rgba(255,217,61,.7);}}
+  body.theme-light #tutRoot .tut-card{background:linear-gradient(160deg,#ffffff,#e6ebf7);border-color:rgba(40,55,100,.2);}
+  body.theme-light #tutRoot .tut-title{color:#232a3e;}
+  body.theme-light #tutRoot .tut-body{color:#4a5578;}
+  body.theme-light #tutRoot .tut-body b{color:#8a6d00;}
+  body.theme-light #tutRoot .tut-btn.ghost{background:rgba(40,55,100,.1);color:#5a6480;border-color:rgba(40,55,100,.22);}
+  body.theme-light #tutRoot .tut-step{color:#7a5cff;}
   /* v1.0.7：存档与图鉴 */
   .savebox{background:rgba(78,205,196,.07);border:1px solid rgba(78,205,196,.35);border-radius:14px;padding:12px 16px;margin-bottom:14px;text-align:left;}
   .savebox>b{color:#4ecdc4;font-size:14px;display:block;margin-bottom:8px;}
@@ -506,7 +539,7 @@
 
   <div class="sec-title">📜 经纪人日志</div>
   <div class="logbox" id="log"></div>
-  <div class="footer">时代少年团 · 经纪人模拟器 —— 档期排得好，股票炒得妙 🎤　·　v1.0.9</div>
+  <div class="footer">时代少年团 · 经纪人模拟器 —— 档期排得好，股票炒得妙 🎤　·　v1.0.10</div>
 </div>
 
 <div id="modalRoot"></div>
@@ -593,10 +626,13 @@
       ④ 贷款三档、5 天还清，逾期或资金归零直接破产；体力归零会被送医。<br>
       ⑤ 突发事件、天气、临时效果都会影响养成，结局按五维评分（60 分及格）。<br>
       ⑥ 更多机制请在游玩中自行探索。<br>
+      <div style="text-align:center;margin-top:10px"><span class="tut-open" onclick="showTutorial()">❓ 新手教程</span></div>
     </div>
     <div class="updbox">
-      <div class="upd-head" onclick="toggleUpd()">📢 更新公告 · v1.0.9 <span id="updArrow">▼</span></div>
+      <div class="upd-head" onclick="toggleUpd()">📢 更新公告 · v1.0.10 <span id="updArrow">▼</span></div>
       <div id="updBody" style="display:none">
+      · 新增<b>手把手新手教程</b>：首次游玩（存档游戏次数为 0）会自动弹出，一步步带你完成最基础的运营操作，首页也能随时点「❓ 新手教程」重新查看；<br>
+      <b>—— v1.0.9 历史 ——</b><br>
       · 结算过程中<b>实时刷新</b>成员卡片与资金——突发事件的「全员取平均」「资金翻倍」等均基于当天结算后的最新数据；<br>
       · 修复：流动资金不足但持有股票时不再直接破产，<b>自动卖出部分股票解围</b>；<br>
       · 首页「更新公告」板块默认折叠；<br>
@@ -706,7 +742,7 @@
     </div>
     </div>
     <div class="savebox" id="saveBox" style="display:none"></div>
-    <div class="footer">时代少年团 · 经纪人模拟器　v1.0.9</div>
+    <div class="footer">时代少年团 · 经纪人模拟器　v1.0.10</div>
   </div>
 </div>
 
@@ -2397,6 +2433,7 @@ function openAddModal(actId){
   modal = {actId, picked:new Set()};
   if(act.type!=='group' && state.lastMember!=null) modal.picked.add(state.lastMember);
   renderModal();
+  tutProbe('openModal');   // v1.0.10：新手教程操作探测（弹窗打开后自动下一步）
 }
 function togglePick(i){
   const act = ACTIVITIES.find(a=>a.id===modal.actId);
@@ -2492,6 +2529,7 @@ function confirmAdd(){
   const next = state.slots.findIndex((s,i)=>i>idx && !s);
   state.target = next>=0?next:null;
   closeModal(); renderAll();
+  tutProbe('slotAdd');     // v1.0.10：新手教程操作探测（档期加入后自动下一步）
 }
 
 /* ================= 资金 / 投资 ================= */
@@ -2583,6 +2621,7 @@ function executeDay(){
   if(state.slots.some(s=>!s)){ addLog('⚠️ 还有空档未安排，无法执行','bad'); return; }
   state.executing = true;
   renderAll();
+  tutProbe('execDay');     // v1.0.10：新手教程操作探测（执行本日后自动下一步）
   showExecToast('行程执行中，成员们正在努力 💦');
   // v1.0.1-fix2：点击执行后先滚动到日志区，再开始逐条结算
   setTimeout(()=>{
@@ -2827,6 +2866,7 @@ function executeDay(){
 }
 
 function finalizeDay(){
+  tutProbe('dayDone');     // v1.0.10：新手教程操作探测（一天结算完成后自动下一步）
   state.executing = false;
   state.day++;
   state.noEvt++;
@@ -3013,8 +3053,10 @@ function showRuin(title, sub, txt){
       ${txt}<br><br>
       <span style="color:#9ab;font-size:13px">坚持了 ${state.day} 天 · 最终资金 ${fmtM(state.coins)} · 欠款 ${fmtM(state.debt)}</span>
     </p>
-    <button class="restart" onclick="location.reload()">🔄 重新开始</button>
-    <div class="vtag">时代少年团 · 经纪人模拟器　v1.0.9</div>
+    <div class="btnrow">
+      <button class="restart" onclick="location.reload()">🔄 重新开始</button>
+    </div>
+    <div class="vtag">时代少年团 · 经纪人模拟器　v1.0.10</div>
   </div></div>`);
 }
 /* 保存战绩：把结算面板截图保存为图片 */
@@ -3144,7 +3186,7 @@ function showSettle(){
       <button class="restart" onclick="location.reload()">🔄 再运营一季</button>
       <button class="restart savebtn" onclick="saveRecord()">📸 保存我的战绩</button>
     </div>
-    <div class="vtag">时代少年团 · 经纪人模拟器　v1.0.9</div>
+    <div class="vtag">时代少年团 · 经纪人模拟器　v1.0.10</div>
   </div></div>`);
   burstConfetti(80);
   drawRadar('radarCv', [fameS/30, skillS/20, stateS/10, fanS/20, wealthS/20]);
@@ -3604,6 +3646,7 @@ function startGame(days, coins, mode){
   addLog('📈 投资市场不占档期，每日波动可随时买卖；收益随实力/名气成长','warn');
   rollWeather(false);
   renderAll();
+  tutProbe('startGame');   // v1.0.10：新手教程操作探测（用户点击模式卡片后自动下一步）
 }
 
 function startSolo(days, coins, mode){
@@ -3619,6 +3662,155 @@ renderSaveBox();
 
 addLog('🎉 欢迎！请从上方选择游戏模式开始运营～','good');
 renderAll();
+
+/* ===== 新手教程（v1.0.10：存档游戏次数为 0 时自动弹出，手把手教学） ===== */
+const TUT_STEPS = [
+  { icon:'🎮', title:'欢迎来到时代少年团经纪人模拟器！', body:
+    `你是 7 位少年的经纪人。每天把<b>档期</b>排满、让成员成长，<b>30 天</b>结束时按 实力/名气/状态/粉丝/财富 五项评分，<b>60 分及格</b>。<br>本教程会一步一步带你完成第一次运营，跟着做就行～`,
+    targets:['#home .modal'], shade:0.4 },
+  { icon:'🚀', title:'第一步：选择模式', body:
+    `在首页上方选难度（新手建议「标准模式」），然后点击<b>「标准模式」卡片</b>上的「开始运营 →」按钮，进入游戏界面。<br>（点一下卡片试试，会自动进入下一步）`,
+    targets:['#home .hmode'], shade:0.6, probe:'startGame' },
+  { icon:'👥', title:'第二步：认识成员卡片', body:
+    `进入游戏后，上方是 <b>7 位成员的卡片</b>：❤️体力、😊心情、💪实力、⭐名气、👥粉丝。<br>体力或心情太低会影响发挥，记得安排<b>休息</b>恢复。`,
+    targets:['#members'], shade:0.6, enter:'toGame' },
+  { icon:'📋', title:'第三步：安排今日档期', body:
+    `每天有 <b>7 个档位</b>（上方「今日档期预览」）。<br>① 在「🗓️ 可选行动」里<b>点一个行动</b>（比如综艺录制📺）；<br>② 会弹出成员选择窗口；<br>③ 勾选成员 → 点「✔ 确认加入档期」。（点一个行动试试）`,
+    targets:['#acts'], shade:0.6, probe:'openModal' },
+  { icon:'✅', title:'第四步：在弹窗里选成员', body:
+    `成员选择窗口已打开：<br>① <b>勾选</b>想参加的成员（团体行动可 1~3 人）；<br>② 底部会实时显示<b>费用</b>；<br>③ 点「✔ 确认加入档期」，档期就排进上方流程图。`,
+    targets:['#modalRoot .modal'], shade:0.5, enter:'openModal', probe:'slotAdd' },
+  { icon:'🔮', title:'第五步：排满档位看预估', body:
+    `把当天所有档位<b>排满</b>后，会出现「🔮 全稳定预估面板」，提前预览今天预计的收益。<br>排满后顶部「▶ 执行本日行程」按钮会<b>亮起</b>。`,
+    targets:['#predictTitle','#execBtn'], shade:0.6, enter:'fillSlots', probe:'execDay' },
+  { icon:'⚡', title:'第六步：执行本日行程', body:
+    `点「▶ 执行本日行程」开始<b>结算这一天</b>：赚钱、涨粉、消耗体力心情，还可能触发<b>突发事件和天气</b>。<br>结算结果会一条条写进下方「经纪人日志」。（如果弹出突发事件窗口，先点选项处理它）`,
+    targets:['#execBtn','#log'], shade:0.6, enter:'execDay', probe:'dayDone' },
+  { icon:'📈', title:'第七步：投资市场（可选）', body:
+    `「📈 投资市场」<b>不占档期</b>，随时可以低买高卖赚外快；也可以升级「🏗️ 基建」提升全队收益。<br>资金紧张时还能<b>贷款</b>（5 天内还清）。`,
+    targets:['#invest'], shade:0.6 },
+  { icon:'🏁', title:'第八步：达成结局', body:
+    `天数走完会自动结算评分（60 分及格），可一键「📸 保存我的战绩」截图。<br>任何时候想重开，点左上角「🏠 回到主页」即可。<br>现在就去开始你的第一季吧！🎉`,
+    targets:[], shade:0.35 }
+];
+let tutStep = 0, tutActive = false, tutPending = false;
+function showTutorial(){
+  tutStep = 0; tutActive = true;
+  renderTutorial();
+  document.addEventListener('scroll', locateTut, true);   // capture：首页/弹窗容器内部滚动也能追踪
+  window.addEventListener('resize', locateTut);
+}
+function closeTutorial(){
+  tutActive = false;
+  const r = $('tutRoot'); if(r) r.remove();
+  document.removeEventListener('scroll', locateTut, true);
+  window.removeEventListener('resize', locateTut);
+}
+function renderTutorial(){
+  const t = TUT_STEPS[tutStep];
+  let root = $('tutRoot');
+  if(!root){ root = document.createElement('div'); root.id = 'tutRoot'; document.body.appendChild(root); }
+  const dots = TUT_STEPS.map((_,i)=>`<span class="tut-dot ${i===tutStep?'on':''}"></span>`).join('');
+  const isLast = tutStep === TUT_STEPS.length-1;
+  root.innerHTML = `
+    <svg class="tut-svg" id="tutSvg" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <mask id="tutMask" maskUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%">
+          <rect x="0" y="0" width="100%" height="100%" fill="white"/>
+          <g id="tutHoles"></g>
+        </mask>
+      </defs>
+      <rect id="tutShade" x="0" y="0" width="100%" height="100%" fill="rgba(5,6,18,.6)" mask="url(#tutMask)"/>
+    </svg>
+    <div class="tut-card">
+      <div class="tut-step">${t.icon} 第 ${tutStep+1} / ${TUT_STEPS.length} 步</div>
+      <div class="tut-title">${t.title}</div>
+      <div class="tut-body">${t.body}</div>
+      <div class="tut-nav">
+        <div class="tut-dots">${dots}</div>
+        <div style="display:flex;gap:8px">
+          <button class="tut-btn ghost" onclick="closeTutorial()">跳过</button>
+          ${tutStep>0?`<button class="tut-btn ghost" onclick="tutPrev()">上一步</button>`:''}
+          <button class="tut-btn main" onclick="${isLast?'closeTutorial()':'tutNext()'}">${isLast?'🎉 开始游戏':'下一步'}</button>
+        </div>
+      </div>
+    </div>`;
+  /* 进入本步：先执行演示动作（自动开始游戏/打开弹窗/排满档位），再滚动到目标 */
+  if(t.enter) tutEnter(t.enter);
+  const el0 = t.targets && t.targets.length ? document.querySelector(t.targets[0]) : null;
+  if(el0){ try{ el0.scrollIntoView({block:'center', behavior:'smooth'}); }catch(e){ el0.scrollIntoView(); } }
+  setTimeout(locateTut, 380);
+  setTimeout(locateTut, 900);
+}
+function tutEnter(name){
+  try{
+    if(name==='toGame'){
+      if($('home')) startGame(30, 80000, '标准');              // 跳过第 1 步选择：自动开一局标准模式
+    } else if(name==='openModal'){
+      if(!$('modalRoot').innerHTML.trim()) openAddModal('show');  // 跳过：自动打开「综艺录制」弹窗
+    } else if(name==='fillSlots'){
+      if($('modalRoot').innerHTML.trim()) closeModal();          // 若成员弹窗还开着，先关掉
+      if(state.slots.some(s=>!s)) quickRest();                 // 跳过：一键休息把剩余档位排满
+    } else if(name==='execDay'){
+      if(state.executing) return;
+      if(!state.slots.some(s=>!s)) executeDay();               // 跳过：档位已满则自动执行本日
+    }
+  }catch(e){}
+}
+function tutNext(){
+  if(tutStep<TUT_STEPS.length-1){ tutStep++; renderTutorial(); }
+}
+function tutPrev(){
+  if(tutStep>0){ tutStep--; renderTutorial(); }
+}
+/* 游戏操作完成后自动进入下一步（在游戏函数中调用） */
+function tutProbe(key){
+  if(!tutActive || tutPending) return;
+  const t = TUT_STEPS[tutStep];
+  if(t && t.probe===key){
+    tutPending = true;
+    setTimeout(()=>{ tutPending = false; if(tutStep<TUT_STEPS.length-1){ tutStep++; renderTutorial(); } }, 700);
+  }
+}
+function locateTut(){
+  const t = TUT_STEPS[tutStep];
+  const root = $('tutRoot'); if(!root) return;
+  root.querySelectorAll('.tut-hl, .tut-tip').forEach(e=>e.remove());
+  const holes = document.getElementById('tutHoles');
+  if(holes) holes.innerHTML = '';
+  const shade = document.getElementById('tutShade');
+  if(shade) shade.setAttribute('fill', 'rgba(5,6,18,'+((t.shade!=null)?t.shade:0.6)+')');
+  const svg = document.getElementById('tutSvg');
+  if(svg){ const w = window.innerWidth||document.documentElement.clientWidth||0, h = window.innerHeight||document.documentElement.clientHeight||0; svg.setAttribute('width', w); svg.setAttribute('height', h); }
+  (t.targets||[]).forEach((sel, idx)=>{
+    let el=null;
+    try{ el = document.querySelector(sel); }catch(e){}
+    if(!el) return;
+    const r = el.getBoundingClientRect();
+    if(!r.width && !r.height) return;
+    const pad = 6;
+    const hole = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    hole.setAttribute('x', r.left-pad); hole.setAttribute('y', r.top-pad);
+    hole.setAttribute('width', r.width+pad*2); hole.setAttribute('height', r.height+pad*2);
+    hole.setAttribute('rx', 12); hole.setAttribute('fill', 'black');
+    if(holes) holes.appendChild(hole);
+    const hl = document.createElement('div');
+    hl.className = 'tut-hl';
+    hl.style.left = (r.left-pad)+'px'; hl.style.top = (r.top-pad)+'px';
+    hl.style.width = (r.width+pad*2)+'px'; hl.style.height = (r.height+pad*2)+'px';
+    root.appendChild(hl);
+    if(idx===0){
+      const tip = document.createElement('div');
+      tip.className = 'tut-tip';
+      tip.textContent = '👆 看这里';
+      tip.style.left = r.left+'px';
+      tip.style.top = Math.max(2, r.top-30)+'px';
+      root.appendChild(tip);
+    }
+  });
+}
+/* 存档游戏次数为 0（从未完成过一局）时，自动弹出新手教程 */
+if(saveData.count===0) showTutorial();
 </script>
 </body>
 </html>
