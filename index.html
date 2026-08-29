@@ -238,15 +238,36 @@
   .cancel{position:absolute;top:12px;right:14px;border:none;background:rgba(255,255,255,.1);color:#fff;font-size:13px;width:28px;height:28px;border-radius:50%;cursor:pointer;}
 
   /* ===== 首页 ===== */
-  .home{max-width:820px;text-align:center;}
-  .htitle{font-size:44px;font-weight:900;letter-spacing:6px;line-height:1.3;
-    background:linear-gradient(90deg,#ffd93d,#ff6b6b,#a66cff,#4ecdc4);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:2px;}
+  /* v1.1.0：参照花样下棋首页——铺满视口、内容水平垂直居中、网格铺满 */
+  body.on-home{overflow:hidden;}                 /* 首页态：禁止 body 滚动，下层游戏界面不撑高 */
+  body.on-home .wrap{display:none;}              /* 首页态：游戏界面完全隐藏，不再占据布局 */
+  .overlay#home{display:flex;align-items:flex-start;justify-content:center;padding:20px 16px;overflow-y:auto;overflow-x:hidden;}
+  .modal.home{
+    background:transparent;border:none;border-radius:0;box-shadow:none;
+    max-width:none;width:min(1120px,100%);
+    max-height:none;height:auto;overflow:visible;padding:8px 4px;
+    margin:0 auto;display:flex;flex-direction:column;align-items:center;flex:none;
+  }
+  .modal.home .htitle{
+    font-size:clamp(34px,5vw,50px);
+    background:linear-gradient(90deg,#ffd93d,#ff6b6b,#a66cff,#4ecdc4);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    font-weight:900;letter-spacing:6px;line-height:1.3;margin-bottom:2px;
+  }
+  /* v1.1.0：标题超链接（彩蛋，点击跳转 GitHub）——360 X 老内核不兼容 hover 时重组 clip，改用不触发布局/渲染的下划线提示 */
+  .title-link{text-decoration:none;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;cursor:pointer;display:inline-block;transition:none;}
+  .title-link:hover{text-decoration:underline;text-underline-offset:6px;color:transparent;-webkit-text-fill-color:transparent;}
+  .home{max-width:100%;text-align:center;width:100%;}
+  .hmode{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:16px;width:100%;max-width:1080px;margin-left:auto;margin-right:auto;}
+  @media (max-width:1000px){.hmode{grid-template-columns:1fr 1fr;}}
+  @media (max-width:720px){.hmode{grid-template-columns:1fr;}.htitle{font-size:32px;}}
+  .home .footer{margin-top:14px;}
   .hsub{color:#9ab;font-size:14px;margin-bottom:14px;letter-spacing:2px;}
   .havas{display:flex;justify-content:center;gap:6px;margin-bottom:20px;flex-wrap:wrap;}
   .havas span{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;border:2px solid rgba(255,255,255,.25);box-shadow:0 4px 14px rgba(0,0,0,.4);animation:bob 2.4s ease-in-out infinite;}
   .havas span:nth-child(2){animation-delay:.2s}.havas span:nth-child(3){animation-delay:.4s}.havas span:nth-child(4){animation-delay:.6s}.havas span:nth-child(5){animation-delay:.8s}.havas span:nth-child(6){animation-delay:1s}.havas span:nth-child(7){animation-delay:1.2s}
   @keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
-  .hmode{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px;}
+  .hmode{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:16px;width:100%;max-width:1080px;margin-left:auto;margin-right:auto;}
   @media (max-width:1000px){.hmode{grid-template-columns:1fr 1fr;}}
   @media (max-width:720px){.hmode{grid-template-columns:1fr;}.htitle{font-size:32px;}}
   .modecard{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:20px 16px;cursor:pointer;transition:all .2s;}
@@ -276,9 +297,9 @@
   .tut-open:hover{background:rgba(166,108,255,.22);transform:scale(1.04);}
   #tutRoot{position:fixed;inset:0;z-index:500;pointer-events:none;}
   #tutRoot .tut-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
-  #tutRoot .tut-card{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);width:min(560px,92vw);pointer-events:auto;
+  #tutRoot .tut-card{position:absolute;left:50%;transform:translateX(-50%);width:min(560px,94vw);pointer-events:auto;
     background:linear-gradient(160deg,#1c1a3d,#12122b);border:1px solid rgba(255,255,255,.18);border-radius:20px;padding:18px 20px 14px;
-    box-shadow:0 24px 70px rgba(0,0,0,.75);animation:pop .35s;}
+    box-shadow:0 24px 70px rgba(0,0,0,.75);animation:pop .35s;max-height:44vh;overflow-y:auto;}
   #tutRoot .tut-step{color:#a66cff;font-size:11.5px;font-weight:800;letter-spacing:2px;margin-bottom:4px;}
   #tutRoot .tut-title{font-size:17px;font-weight:900;color:#fff;margin-bottom:8px;line-height:1.4;}
   #tutRoot .tut-body{font-size:13px;color:#d8d2f0;line-height:1.9;margin-bottom:12px;}
@@ -362,6 +383,9 @@
     padding:5px 14px;border-radius:10px;cursor:pointer;transition:all .15s;}
   .themebtn:hover{border-color:#ffd93d;background:rgba(255,217,61,.2);}
   .themebtn.on{border-color:#ffd93d;background:rgba(255,217,61,.25);color:#ffd93d;box-shadow:0 0 10px rgba(255,217,61,.3);}
+  /* v1.1.0：图鉴入口按钮加大 */
+  .bigencyc{font-size:16px;font-weight:800;padding:12px 40px;border-radius:14px;border:2px solid rgba(166,108,255,.55);background:rgba(166,108,255,.14);color:#d9c8ff;box-shadow:0 0 14px rgba(166,108,255,.3);}
+  .bigencyc:hover{background:rgba(166,108,255,.3);transform:scale(1.05);border-color:#a66cff;}
   .diffRow{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:14px;font-size:13px;color:#9ab;}
   .diffbtn{border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.07);color:#eef;font-size:13px;font-weight:800;
     padding:6px 18px;border-radius:10px;cursor:pointer;transition:all .15s;}
@@ -415,6 +439,7 @@
   body.theme-light .lg.warn{color:#c99700;}
   body.theme-light .lg .t{color:#8a92a8;}
   body.theme-light .modal{background:linear-gradient(160deg,#ffffff,#e6ebf7);border-color:rgba(40,55,100,.18);}
+  body.theme-light .modal.home{background:transparent;border:none;border-radius:0;box-shadow:none;}
   body.theme-light .modal .sub{color:#5a6480;}
   body.theme-light .scoreline .lb{color:#39415a;}
   body.theme-light .mini{background:rgba(40,55,100,.06);}
@@ -512,7 +537,7 @@
   body.theme-light .sttag.bad{color:#a03028;background:rgba(255,107,107,.12);border-color:rgba(216,67,58,.4);}
 </style>
 </head>
-<body>
+<body class="on-home">
 <div class="wrap">
   <header id="header"></header>
 
@@ -539,15 +564,16 @@
 
   <div class="sec-title">📜 经纪人日志</div>
   <div class="logbox" id="log"></div>
-  <div class="footer">时代少年团 · 经纪人模拟器 —— 档期排得好，股票炒得妙 🎤　·　v1.0.10</div>
+  <div class="footer">时代少年团 · 经纪人模拟器 —— 档期排得好，股票炒得妙 🎤　·　v1.1.0</div>
 </div>
 
 <div id="modalRoot"></div>
 
 <div class="overlay" id="home">
   <div class="modal home">
-    <div class="htitle">时代少年团</div>
+    <div class="htitle"><a href="https://github.com/tyanbilibili/TNTmanagerSimulator" target="_blank" rel="noopener" class="title-link" title="点击标题有惊喜！">时代少年团</a></div>
     <div class="hsub">经 纪 人 养 成 模 拟 器</div>
+    <div style="text-align:center;font-size:12px;color:#8a7ab8;margin-bottom:12px;opacity:.85">✨ 点击标题有惊喜！</div>
     <div class="havas">
       <span style="background:linear-gradient(135deg,#ff6b6b,#2a1a3a)">🎤</span>
       <span style="background:linear-gradient(135deg,#4ecdc4,#1a3a3a)">🎧</span>
@@ -629,8 +655,19 @@
       <div style="text-align:center;margin-top:10px"><span class="tut-open" onclick="showTutorial()">❓ 新手教程</span></div>
     </div>
     <div class="updbox">
-      <div class="upd-head" onclick="toggleUpd()">📢 更新公告 · v1.0.10 <span id="updArrow">▼</span></div>
+      <div class="upd-head" onclick="toggleUpd()">📢 更新公告 · v1.1.0 <span id="updArrow">▼</span></div>
       <div id="updBody" style="display:none">
+      · 随机事件 buff/debuff 倍率<b>更激进</b>：训练加成最高可达 <b>3 倍</b>（赚钱/涨粉/休息同理），并按事件性质区分<b>短效/长效</b>（效果越强持续越短）；<br>
+      · 新增强力但<b>带代价</b>的复杂事件（分成制收益、双代言、魔鬼教官、站姐内斗、暗雷条款等）；<br>
+      · 事件保底调整为<b>连续 2 天无事件则第 3 天必出现</b>；<br>
+      · 成员初始<b>实力/名气/粉丝全部随机</b>（实力 ±7、名气 ±5、粉丝 85%~115%），每局开局不同；<br>
+      · 首页改为<b>占满全屏</b>的居中布局（参考花样下棋），不再留有半边空白；<br>
+      · 手机端新手教程卡片<b>自动避让</b>要点的按钮，不再遮挡。<br>
+      · 结算日志成员行补上「钱」字标签（如「钱+20,573 ·粉+2,152」），金额一目了然；<br>
+      · 执行日程资金不足时自动借款<b>按 2万/5万/10万 档位取整</b>（缺 1 万也会借 2 万），不再只借零头；<br>
+      · 事件结果新增<b>玻璃碎裂特效</b>（参考花样下棋，碎片+裂纹+闪光），正向结果时播放；<br>
+      · 「查看图鉴」按钮移到<b>解锁事件与历史回顾之间</b>并加大，入口更醒目。<br>
+      <b>—— v1.0.10 历史 ——</b><br>
       · 新增<b>手把手新手教程</b>：首次游玩（存档游戏次数为 0）会自动弹出，一步步带你完成最基础的运营操作，首页也能随时点「❓ 新手教程」重新查看；<br>
       <b>—— v1.0.9 历史 ——</b><br>
       · 结算过程中<b>实时刷新</b>成员卡片与资金——突发事件的「全员取平均」「资金翻倍」等均基于当天结算后的最新数据；<br>
@@ -742,7 +779,7 @@
     </div>
     </div>
     <div class="savebox" id="saveBox" style="display:none"></div>
-    <div class="footer">时代少年团 · 经纪人模拟器　v1.0.10</div>
+    <div class="footer">时代少年团 · 经纪人模拟器　v1.1.0</div>
   </div>
 </div>
 
@@ -811,7 +848,7 @@ const CHOICE_EVENTS = [
       {label:'立刻报警并公开谴责', desc:'强硬果断，但粉丝圈会吵翻天，还要花诉讼费', fans:-15000, coins:-25000, player:+8, mood:-3},
       {label:'加派安保悄悄护送出机场', desc:'破财消灾，谁都不得罪，但钱包大出血', coins:-50000, player:0, stamina:-2},
       {label:'让成员冷脸快速离场', desc:'不花钱，但"黑脸照"全网疯传', fans:-40000, mood:-8, player:-5},
-      {label:'硬扛，让粉丝拍个够', desc:'不花钱但观感差', fans:-8000, buffs:[{type:'fans', value:0.85, days:3, label:'涨粉×0.85'}], player:-3}
+      {label:'硬扛，让粉丝拍个够', desc:'不花钱但观感差', fans:-8000, buffs:[{type:'fans', value:0.6, days:2, label:'涨粉×0.6'}], player:-3}
     ]
   },
   {
@@ -821,7 +858,7 @@ const CHOICE_EVENTS = [
       {label:'接下，全员加班直播', desc:'赚得多，但严重透支身体', coins:+50000, stamina:-25, mood:-12, player:-4},
       {label:'婉拒，坚持让成员休息', desc:'以人为本，但错失曝光，品牌方不悦', mood:+6, fame:-3, player:+6},
       {label:'只派状态最好的 3 人上播', desc:'折中方案，兼顾口碑与收入', coins:+45000, stamina:-8, mood:-2, player:+2},
-      {label:'只让一人上播', desc:'省力但品牌不满', coins:+15000, buffs:[{type:'income', value:0.9, days:2, label:'演出赚钱×0.9'}], mood:-2, player:-4}
+      {label:'只让一人上播', desc:'省力但品牌不满', coins:+15000, buffs:[{type:'income', value:0.7, days:3, label:'演出赚钱×0.7'}], mood:-2, player:-4}
     ]
   },
   {
@@ -871,7 +908,7 @@ const CHOICE_EVENTS = [
       {label:'报警辟谣并起诉营销号', desc:'砸钱打官司，杀鸡儆猴', coins:-60000, fans:-10000, mood:-3, player:+8},
       {label:'冷处理不回应', desc:'不花钱，但谣言越传越广', fans:-30000, mood:-8, player:-6},
       {label:'发声明+粉丝抽奖安抚', desc:'折中处理，挽回部分路人缘', coins:-30000, fans:+15000, mood:+3, player:+3},
-      {label:'拖延处理', desc:'谣言继续发酵', fans:-15000, buffs:[{type:'income', value:0.85, days:2, label:'演出赚钱×0.85'}], player:-5}
+      {label:'拖延处理', desc:'谣言继续发酵', fans:-15000, buffs:[{type:'income', value:0.6, days:2, label:'演出赚钱×0.6'}], player:-5}
     ]
   },
   {
@@ -960,7 +997,7 @@ const CHOICE_EVENTS = [
     options:[
       {label:'接下压轴', desc:'大场面大收入，体力告急', coins:+50000, fame:+4, stamina:-18, player:+4},
       {label:'只演下午场', desc:'强度低一些，钱也少一些', coins:+30000, fame:+2, stamina:-8, player:+2},
-      {label:'借机谈下一季专场', desc:'把合作谈深', coins:+20000, player:+5, buffs:[{type:'income', value:1.2, days:2, label:'演出赚钱×1.2'}]}
+      {label:'借机谈下一季专场', desc:'把合作谈深', coins:+20000, player:+5, buffs:[{type:'income', value:1.8, days:2, label:'演出赚钱×1.8'}]}
     ]
   },
   {
@@ -994,7 +1031,7 @@ const CHOICE_EVENTS = [
     desc:'大型主题乐园抛来年度代言，签约费很高，但要求全年多次站台。',
     options:[
       {label:'签一年', desc:'细水长流', coins:+50000, fame:+3, stamina:-6, player:+3},
-      {label:'签三年长约', desc:'锁死高额代言费', coins:+60000, fame:+5, stamina:-10, player:+5, buffs:[{type:'cost', value:0.8, days:5, label:'活动成本×0.8'}]},
+      {label:'签三年长约', desc:'锁死高额代言费', coins:+60000, fame:+5, stamina:-10, player:+5, buffs:[{type:'cost', value:0.5, days:4, label:'活动成本×0.5'}]},
       {label:'只接单次活动', desc:'灵活但钱少', coins:+20000, fame:+2, player:+1}
     ]
   },
@@ -1026,7 +1063,7 @@ const CHOICE_EVENTS = [
     options:[
       {label:'报案并升级安保', desc:'花钱买平安', coins:-30000, stamina:-3, player:+3},
       {label:'自认倒霉先凑合用', desc:'省下钱但士气低落', mood:-8, stamina:-5, player:-4},
-      {label:'借机换全套顶级设备', desc:'一步到位，还能宣传', coins:-30000, skill:+2, buffs:[{type:'train', value:1.3, days:3, label:'训练效果×1.3'}], player:+4}
+      {label:'借机换全套顶级设备', desc:'一步到位，还能宣传', coins:-30000, skill:+2, buffs:[{type:'train', value:2, days:3, label:'训练效果×2'}], player:+4}
     ]
   },
   {
@@ -1141,7 +1178,7 @@ const CHOICE_EVENTS = [
     options:[
       {label:'趁势放送更多日常', desc:'留住路人粉', fans:+20000, stamina:-6, player:+3},
       {label:'保持神秘', desc:'吊胃口，可能流失', fans:+6000, player:-1},
-      {label:'安排一次街头快闪', desc:'线下圈粉', fans:+25000, stamina:-10, player:+4, buffs:[{type:'fans', value:1.3, days:2, label:'涨粉×1.3'}]}
+      {label:'安排一次街头快闪', desc:'线下圈粉', fans:+25000, stamina:-10, player:+4, buffs:[{type:'fans', value:1.8, days:2, label:'涨粉×1.8'}]}
     ]
   },
   {
@@ -1251,7 +1288,7 @@ const CHOICE_EVENTS = [
     title:'大师课名额', emoji:'🎓',
     desc:'业内传奇编舞师来开三天大师课，名额有限，费用不低。',
     options:[
-      {label:'全员报名', desc:'投资未来', coins:-20000, skill:+3, stamina:-8, player:+4, buffs:[{type:'train', value:1.2, days:3, label:'训练效果×1.2'}]},
+      {label:'全员报名', desc:'投资未来', coins:-20000, skill:+3, stamina:-8, player:+4, buffs:[{type:'train', value:2, days:3, label:'训练效果×2'}]},
       {label:'只派 2 人参加', desc:'精打细算', coins:-12000, skill:+2, stamina:-4, player:+2},
       {label:'放弃，自己练', desc:'省钱但没长进', skill:-1, player:-2}
     ]
@@ -1286,7 +1323,7 @@ const CHOICE_EVENTS = [
     title:'练习室全面升级', emoji:'🛠️',
     desc:'老练习室地板开裂了，趁机大装修，还能装上新设备。',
     options:[
-      {label:'豪华装修', desc:'一步到位', coins:-25000, mood:+5, buffs:[{type:'train', value:1.4, days:4, label:'训练效果×1.4'}]},
+      {label:'豪华装修', desc:'一步到位', coins:-25000, mood:+5, buffs:[{type:'train', value:3, days:2, label:'训练效果×3'}]},
       {label:'简单翻新', desc:'能用就行', coins:-15000, mood:+2, player:+1},
       {label:'只换地板', desc:'最小投入', coins:-8000, stamina:-2, player:+1}
     ]
@@ -1295,7 +1332,7 @@ const CHOICE_EVENTS = [
     title:'知名制作人抛出橄榄枝', emoji:'🎧',
     desc:'拿过格莱美的制作人想给团体做一张专辑，档期和费用都很高。',
     options:[
-      {label:'合作一整张专辑', desc:'国际水准', coins:-30000, skill:+4, fame:+5, player:+5, buffs:[{type:'income', value:1.2, days:3, label:'演出赚钱×1.2'}]},
+      {label:'合作一整张专辑', desc:'国际水准', coins:-30000, skill:+4, fame:+5, player:+5, buffs:[{type:'income', value:1.8, days:2, label:'演出赚钱×1.8'}]},
       {label:'先合作一首单曲', desc:'试水', coins:-20000, skill:+2, fame:+3, player:+3},
       {label:'婉拒', desc:'控制预算', coins:+10000, player:-2}
     ]
@@ -1315,14 +1352,14 @@ const CHOICE_EVENTS = [
     options:[
       {label:'安排主力成员常驻', desc:'曝光换人气', fame:+6, coins:+40000, stamina:-15, player:+4},
       {label:'轮流常驻', desc:'雨露均沾', fame:+4, coins:+30000, stamina:-10, player:+3},
-      {label:'婉拒，专心音乐', desc:'保作品质量', skill:+2, fame:-2, player:+2, buffs:[{type:'train', value:1.3, days:2, label:'训练效果×1.3'}]}
+      {label:'婉拒，专心音乐', desc:'保作品质量', skill:+2, fame:-2, player:+2, buffs:[{type:'train', value:2, days:3, label:'训练效果×2'}]}
     ]
   },
   {
     title:'全网宣传期启动', emoji:'📣',
     desc:'新专辑进入宣传期，各平台流量倾斜，是圈粉黄金窗口。',
     options:[
-      {label:'加大投放', desc:'烧钱买曝光', coins:-20000, fame:+4, player:+3, buffs:[{type:'fans', value:1.5, days:3, label:'涨粉×1.5'}]},
+      {label:'加大投放', desc:'烧钱买曝光', coins:-20000, fame:+4, player:+3, buffs:[{type:'fans', value:2.2, days:2, label:'涨粉×2.2'}]},
       {label:'精准投放', desc:'性价比优先', coins:-15000, fame:+3, player:+2},
       {label:'自然发酵', desc:'不花钱，看命', fame:+1, player:-1}
     ]
@@ -1331,11 +1368,11 @@ const CHOICE_EVENTS = [
     title:'合作场馆给出优惠', emoji:'🏢',
     desc:'长期合作的场馆主动降价，还愿意在空档期给团体免费用排练。',
     options:[
-      {label:'签下优惠套餐', desc:'锁定福利', coins:-6000, player:+2, buffs:[{type:'cost', value:0.75, days:4, label:'活动成本×0.75'}]},
+      {label:'签下优惠套餐', desc:'锁定福利', coins:-6000, player:+2, buffs:[{type:'cost', value:0.5, days:4, label:'活动成本×0.5'}]},
       {label:'只谈单次优惠', desc:'灵活', coins:-5000, player:+1},
       {label:'再压价', desc:'贪心可能谈崩',
         outcomes:[
-          {label:'谈到更低', coins:-8000, player:+3, buffs:[{type:'cost', value:0.7, days:4, label:'活动成本×0.7'}]},
+          {label:'谈到更低', coins:-8000, player:+3, buffs:[{type:'cost', value:0.5, days:4, label:'活动成本×0.5'}]},
           {label:'对方不干了', player:-2}
         ]}
     ]
@@ -1344,7 +1381,7 @@ const CHOICE_EVENTS = [
     title:'营养师随行建议', emoji:'🥗',
     desc:'营养师评估后建议调整饮食，能明显改善成员的体力和状态。',
     options:[
-      {label:'全员定制营养餐', desc:'健康投资', coins:-12000, stamina:+8, mood:+3, player:+3, buffs:[{type:'rest', value:1.3, days:3, label:'休息效果×1.3'}]},
+      {label:'全员定制营养餐', desc:'健康投资', coins:-12000, stamina:+8, mood:+3, player:+3, buffs:[{type:'rest', value:2, days:2, label:'休息效果×2'}]},
       {label:'只给重点成员配', desc:'小范围试水', coins:-8000, stamina:+4, player:+2},
       {label:'不信这套', desc:'省下钱', coins:+5000, stamina:-3, player:-2}
     ]
@@ -1353,7 +1390,7 @@ const CHOICE_EVENTS = [
     title:'健身教练特训营', emoji:'🏋️',
     desc:'健身教练提议带全员练一个月体能，能明显提升舞台耐力。',
     options:[
-      {label:'全员参训', desc:'痛并快乐着', coins:-10000, stamina:+10, player:+3, buffs:[{type:'train', value:1.25, days:4, label:'训练效果×1.25'}]},
+      {label:'全员参训', desc:'痛并快乐着', coins:-10000, stamina:+10, player:+3, buffs:[{type:'train', value:2, days:3, label:'训练效果×2'}]},
       {label:'派 3 人先练', desc:'试试效果', coins:-7000, stamina:+5, player:+2},
       {label:'不参加', desc:'保持现状', stamina:-2, player:-2}
     ]
@@ -1362,7 +1399,7 @@ const CHOICE_EVENTS = [
     title:'品牌热度周期到来', emoji:'📈',
     desc:'多品牌同时进入推广期，广告投放预算充足，正是接单好时候。',
     options:[
-      {label:'趁机多接广告', desc:'赚一波', coins:+40000, stamina:-8, player:+3, buffs:[{type:'income', value:1.15, days:3, label:'演出赚钱×1.15'}]},
+      {label:'趁机多接广告', desc:'赚一波', coins:+40000, stamina:-8, player:+3, buffs:[{type:'income', value:1.5, days:3, label:'演出赚钱×1.5'}]},
       {label:'选择性接精品', desc:'挑好的', coins:+25000, fame:+3, player:+2},
       {label:'不追热度', desc:'错过行情', player:-3}
     ]
@@ -1446,7 +1483,7 @@ const CHOICE_EVENTS = [
     title:'圈内前辈突然提携', emoji:'🤝',
     desc:'圈内德高望重的前辈公开夸赞团体"未来可期"，还主动邀约合作。',
     options:[
-      {label:'接住人脉', desc:'多多走动', fame:+4, coins:-5000, player:+4, buffs:[{type:'income', value:1.1, days:3, label:'演出赚钱×1.1'}]},
+      {label:'接住人脉', desc:'多多走动', fame:+4, coins:-5000, player:+4, buffs:[{type:'income', value:1.5, days:3, label:'演出赚钱×1.5'}]},
       {label:'发帖感谢', desc:'体面回应', fame:+3, player:+2},
       {label:'低调不回应', desc:'怕被说蹭热度', fame:+1, player:-2}
     ]
@@ -1464,7 +1501,7 @@ const CHOICE_EVENTS = [
     title:'一次实力跃升的集训', emoji:'🧗',
     desc:'公司决定安排一次封闭式集训，冲刺下个月的考核。',
     options:[
-      {label:'高强度集训', desc:'实力飞跃', special:'skillBoost', stamina:-15, player:+3, buffs:[{type:'train', value:1.2, days:2, label:'训练效果×1.2'}]},
+      {label:'高强度集训', desc:'实力飞跃', special:'skillBoost', stamina:-15, player:+3, buffs:[{type:'train', value:2, days:3, label:'训练效果×2'}]},
       {label:'中等强度', desc:'稳扎稳打', skill:+3, stamina:-8, player:+2},
       {label:'不集训', desc:'保持状态', stamina:-3, player:-2}
     ]
@@ -1474,7 +1511,7 @@ const CHOICE_EVENTS = [
     desc:'恶意剪辑视频被推上热门，评论区和私信开始沦陷，舆情持续升温。',
     options:[
       {label:'砸钱请公关团队', desc:'花钱灭火', coins:-30000, fans:-5000, player:+4},
-      {label:'硬扛，等热度过去', desc:'省下公关费但损失收益', buffs:[{type:'fans', value:0.8, days:3, label:'涨粉×0.8'}], fans:-10000, player:-4},
+      {label:'硬扛，等热度过去', desc:'省下公关费但损失收益', buffs:[{type:'fans', value:0.6, days:2, label:'涨粉×0.6'}], fans:-10000, player:-4},
       {label:'反手起诉造谣者', desc:'赌一把',
         outcomes:[
           {label:'胜诉，口碑逆转', fans:+15000, player:+6},
@@ -1486,17 +1523,17 @@ const CHOICE_EVENTS = [
     title:'行业淡季来袭', emoji:'📉',
     desc:'演出市场进入淡季，通告明显减少，各家都在抢有限的资源。',
     options:[
-      {label:'加大营销投入', desc:'淡季抢市场', coins:-20000, buffs:[{type:'income', value:1.1, days:3, label:'演出赚钱×1.1'}], player:+3},
-      {label:'硬扛过去', desc:'收益缩水', buffs:[{type:'income', value:0.85, days:4, label:'演出赚钱×0.85'}], player:-2},
-      {label:'转型线上内容', desc:'换个赛道', coins:-10000, fans:+8000, buffs:[{type:'income', value:0.9, days:3, label:'演出赚钱×0.9'}]}
+      {label:'加大营销投入', desc:'淡季抢市场', coins:-20000, buffs:[{type:'income', value:1.5, days:3, label:'演出赚钱×1.5'}], player:+3},
+      {label:'硬扛过去', desc:'收益缩水', buffs:[{type:'income', value:0.6, days:2, label:'演出赚钱×0.6'}], player:-2},
+      {label:'转型线上内容', desc:'换个赛道', coins:-10000, fans:+8000, buffs:[{type:'income', value:0.7, days:3, label:'演出赚钱×0.7'}]}
     ]
   },
   {
     title:'排练场馆维修', emoji:'🏗️',
     desc:'常去的排练场馆要封闭维修一个月，找新场地的成本不低。',
     options:[
-      {label:'花钱租专业新场地', desc:'贵但舒心', coins:-15000, buffs:[{type:'train', value:1.15, days:3, label:'训练效果×1.15'}], player:+2},
-      {label:'挤在旧场地凑合', desc:'省钱但效率低', buffs:[{type:'cost', value:1.2, days:3, label:'活动成本×1.2'}], mood:-5, player:-3},
+      {label:'花钱租专业新场地', desc:'贵但舒心', coins:-15000, buffs:[{type:'train', value:1.5, days:4, label:'训练效果×1.5'}], player:+2},
+      {label:'挤在旧场地凑合', desc:'省钱但效率低', buffs:[{type:'cost', value:1.3, days:3, label:'活动成本×1.3'}], mood:-5, player:-3},
       {label:'延期排练', desc:'拖到场馆修好', stamina:-8, coins:-30000, skill:-1, player:-3}
     ]
   },
@@ -1504,8 +1541,8 @@ const CHOICE_EVENTS = [
     title:'成员状态集体下滑', emoji:'📉',
     desc:'连续高强度工作后，全员体力和心情都在下滑，效率肉眼可见变差。',
     options:[
-      {label:'花钱调理身体', desc:'请理疗师+营养餐', coins:-12000, buffs:[{type:'rest', value:1.15, days:3, label:'休息效果×1.15'}], stamina:+5, player:+3},
-      {label:'硬扛', desc:'状态会更差', buffs:[{type:'rest', value:0.85, days:3, label:'休息效果×0.85'}], mood:-5, player:-3},
+      {label:'花钱调理身体', desc:'请理疗师+营养餐', coins:-12000, buffs:[{type:'rest', value:1.4, days:3, label:'休息效果×1.4'}], stamina:+5, player:+3},
+      {label:'硬扛', desc:'状态会更差', buffs:[{type:'rest', value:0.6, days:2, label:'休息效果×0.6'}], mood:-5, player:-3},
       {label:'全员放假两天', desc:'破财买休整', coins:-20000, stamina:+15, mood:+8, player:+4}
     ]
   },
@@ -1514,11 +1551,11 @@ const CHOICE_EVENTS = [
     desc:'大演出的审批材料被退回，缺一个文件，不补就赶不上档期。',
     options:[
       {label:'花钱加急办理', desc:'用钱买时间', coins:-20000, player:+2},
-      {label:'等正常流程', desc:'可能错过演出', buffs:[{type:'income', value:0.8, days:2, label:'演出赚钱×0.8'}], player:-3},
+      {label:'等正常流程', desc:'可能错过演出', buffs:[{type:'income', value:0.6, days:2, label:'演出赚钱×0.6'}], player:-3},
       {label:'托关系找熟人', desc:'欠人情',
         outcomes:[
           {label:'顺利办下', player:+3},
-          {label:'人情不够硬', coins:-10000, buffs:[{type:'income', value:0.85, days:2, label:'演出赚钱×0.85'}], player:-2}
+          {label:'人情不够硬', coins:-10000, buffs:[{type:'income', value:0.6, days:2, label:'演出赚钱×0.6'}], player:-2}
         ]}
     ]
   },
@@ -1526,8 +1563,8 @@ const CHOICE_EVENTS = [
     title:'竞品组团发新歌', emoji:'🎼',
     desc:'对家团体赶在新歌发布前官宣了同风格专辑，正面撞车。',
     options:[
-      {label:'砸钱打歌宣传', desc:'正面硬刚', coins:-25000, buffs:[{type:'fans', value:1.2, days:3, label:'涨粉×1.2'}], player:+3},
-      {label:'硬扛，正常发布', desc:'可能被分流', buffs:[{type:'fans', value:0.8, days:4, label:'涨粉×0.8'}], player:-3},
+      {label:'砸钱打歌宣传', desc:'正面硬刚', coins:-25000, buffs:[{type:'fans', value:1.8, days:2, label:'涨粉×1.8'}], player:+3},
+      {label:'硬扛，正常发布', desc:'可能被分流', buffs:[{type:'fans', value:0.6, days:2, label:'涨粉×0.6'}], player:-3},
       {label:'蹭对方热度炒话题', desc:'剑走偏锋',
         outcomes:[
           {label:'话题出圈', fans:+15000, player:+4},
@@ -1540,7 +1577,7 @@ const CHOICE_EVENTS = [
     desc:'几家营销号联动发稿，预测团体"流量见顶"，唱衰文章满天飞。',
     options:[
       {label:'买正面通稿对冲', desc:'用钱洗舆论', coins:-15000, player:+3},
-      {label:'硬扛，用成绩说话', desc:'真相最有力', buffs:[{type:'income', value:0.9, days:3, label:'演出赚钱×0.9'}], fans:-8000, player:+1},
+      {label:'硬扛，用成绩说话', desc:'真相最有力', buffs:[{type:'income', value:0.7, days:3, label:'演出赚钱×0.7'}], fans:-8000, player:+1},
       {label:'反向营销自嘲', desc:'黑红也是红',
         outcomes:[
           {label:'自嘲出圈', fans:+12000, player:+4},
@@ -1552,19 +1589,19 @@ const CHOICE_EVENTS = [
     title:'排练场地被占', emoji:'🚧',
     desc:'预定的排练室被别的团队加价抢走，今晚的训练没地方去。',
     options:[
-      {label:'临时租高价场地', desc:'破费但训练不断', coins:-10000, buffs:[{type:'train', value:1.1, days:2, label:'训练效果×1.1'}]},
-      {label:'硬扛，改到天台练', desc:'艰苦但省心', buffs:[{type:'train', value:0.85, days:3, label:'训练效果×0.85'}], stamina:-6, player:-2},
-      {label:'线上视频训练', desc:'效率打折', buffs:[{type:'train', value:0.9, days:2, label:'训练效果×0.9'}]}
+      {label:'临时租高价场地', desc:'破费但训练不断', coins:-10000, buffs:[{type:'train', value:1.5, days:4, label:'训练效果×1.5'}]},
+      {label:'硬扛，改到天台练', desc:'艰苦但省心', buffs:[{type:'train', value:0.5, days:2, label:'训练效果×0.5'}], stamina:-6, player:-2},
+      {label:'线上视频训练', desc:'效率打折', buffs:[{type:'train', value:0.6, days:3, label:'训练效果×0.6'}]}
     ]
   },
   {
     title:'神秘商人卖好运符', emoji:'🔮',
     desc:'一个神秘人拦下你，说他的"好运符"能让团体演出翻倍，开价不低。',
     options:[
-      {label:'买一个试试', desc:'先花钱后见效', coins:-15000, buffs:[{type:'income', value:1.15, days:3, label:'演出赚钱×1.15'}], player:-2},
+      {label:'买一个试试', desc:'先花钱后见效', coins:-15000, buffs:[{type:'income', value:1.5, days:3, label:'演出赚钱×1.5'}], player:-2},
       {label:'砍价再买', desc:'赌一把',
         outcomes:[
-          {label:'半价买到', coins:-8000, buffs:[{type:'income', value:1.15, days:3, label:'演出赚钱×1.15'}], player:-1},
+          {label:'半价买到', coins:-8000, buffs:[{type:'income', value:1.5, days:3, label:'演出赚钱×1.5'}], player:-1},
           {label:'对方不卖', player:0}
         ]},
       {label:'不理他', desc:'封建迷信', player:+1}
@@ -1574,8 +1611,8 @@ const CHOICE_EVENTS = [
     title:'朋友劝你投资新项目', emoji:'📊',
     desc:'圈内朋友拉你投资一个演唱会制作项目，回报高但周期长。',
     options:[
-      {label:'投大钱', desc:'高风险高回报', coins:-20000, buffs:[{type:'income', value:1.2, days:4, label:'演出赚钱×1.2'}], player:-1},
-      {label:'投小钱', desc:'意思意思', coins:-8000, buffs:[{type:'income', value:1.1, days:3, label:'演出赚钱×1.1'}]},
+      {label:'投大钱', desc:'高风险高回报', coins:-20000, buffs:[{type:'income', value:1.8, days:2, label:'演出赚钱×1.8'}], player:-1},
+      {label:'投小钱', desc:'意思意思', coins:-8000, buffs:[{type:'income', value:1.5, days:3, label:'演出赚钱×1.5'}]},
       {label:'不投', desc:'稳字当头', player:+1}
     ]
   },
@@ -1583,17 +1620,17 @@ const CHOICE_EVENTS = [
     title:'天气之子预兆', emoji:'🌦️',
     desc:'某成员突然很笃定地说"接下来训练会很顺"，还让全员一起冥想。',
     options:[
-      {label:'陪他冥想，心情先波动', desc:'先抑后扬', mood:-10, buffs:[{type:'rest', value:1.3, days:3, label:'休息效果×1.3'}], player:+2},
-      {label:'配合但不认真', desc:'半信半疑', mood:-3, buffs:[{type:'rest', value:1.1, days:2, label:'休息效果×1.1'}]},
-      {label:'别搞玄学', desc:'按部就班', buffs:[{type:'cost', value:1.1, days:2, label:'活动成本×1.1'}], player:-2}
+      {label:'陪他冥想，心情先波动', desc:'先抑后扬', mood:-10, buffs:[{type:'rest', value:2, days:2, label:'休息效果×2'}], player:+2},
+      {label:'配合但不认真', desc:'半信半疑', mood:-3, buffs:[{type:'rest', value:1.4, days:3, label:'休息效果×1.4'}]},
+      {label:'别搞玄学', desc:'按部就班', buffs:[{type:'cost', value:1.3, days:3, label:'活动成本×1.3'}], player:-2}
     ]
   },
   {
     title:'透支下月广告预算', emoji:'💳',
     desc:'财务建议预支下个月的广告预算补这个月的缺口，下月就得勒紧裤腰带。',
     options:[
-      {label:'预支', desc:'先花未来的钱', coins:+30000, buffs:[{type:'income', value:0.85, days:3, label:'演出赚钱×0.85'}], player:-3},
-      {label:'预支一半', desc:'折中', coins:+15000, buffs:[{type:'income', value:0.92, days:2, label:'演出赚钱×0.92'}], player:-2},
+      {label:'预支', desc:'先花未来的钱', coins:+30000, buffs:[{type:'income', value:0.6, days:2, label:'演出赚钱×0.6'}], player:-3},
+      {label:'预支一半', desc:'折中', coins:+15000, buffs:[{type:'income', value:0.7, days:3, label:'演出赚钱×0.7'}], player:-2},
       {label:'不预支', desc:'自己想办法', player:+2}
     ]
   },
@@ -1601,8 +1638,8 @@ const CHOICE_EVENTS = [
     title:'粉丝流失预警', emoji:'⚠️',
     desc:'数据后台显示近一周活跃粉丝明显减少，再不行动就要被"取关潮"了。',
     options:[
-      {label:'砸钱办回馈活动', desc:'花钱留人', coins:-20000, buffs:[{type:'fans', value:1.3, days:3, label:'涨粉×1.3'}], player:+3},
-      {label:'硬扛，等风头过去', desc:'流失会加剧', buffs:[{type:'fans', value:0.85, days:3, label:'涨粉×0.85'}], fans:-8000, player:-4},
+      {label:'砸钱办回馈活动', desc:'花钱留人', coins:-20000, buffs:[{type:'fans', value:1.8, days:2, label:'涨粉×1.8'}], player:+3},
+      {label:'硬扛，等风头过去', desc:'流失会加剧', buffs:[{type:'fans', value:0.6, days:2, label:'涨粉×0.6'}], fans:-8000, player:-4},
       {label:'紧急出新物料', desc:'低成本止损', coins:-10000, fans:+8000, player:+1}
     ]
   },
@@ -1610,8 +1647,8 @@ const CHOICE_EVENTS = [
     title:'全员海边拍片晒伤', emoji:'🥵',
     desc:'广告拍摄在海边暴晒一天，全员晒伤，又痒又痛，状态堪忧。',
     options:[
-      {label:'花钱做晒后护理', desc:'及时补救', coins:-8000, buffs:[{type:'rest', value:1.2, days:2, label:'休息效果×1.2'}], player:+2},
-      {label:'硬扛', desc:'又痒又累', stamina:-10, buffs:[{type:'rest', value:0.9, days:2, label:'休息效果×0.9'}], mood:-6, player:-3},
+      {label:'花钱做晒后护理', desc:'及时补救', coins:-8000, buffs:[{type:'rest', value:2, days:2, label:'休息效果×2'}], player:+2},
+      {label:'硬扛', desc:'又痒又累', stamina:-10, buffs:[{type:'rest', value:0.7, days:3, label:'休息效果×0.7'}], mood:-6, player:-3},
       {label:'停工休整一天', desc:'养伤为主', stamina:+10, coins:-15000, player:+2}
     ]
   },
@@ -1619,8 +1656,8 @@ const CHOICE_EVENTS = [
     title:'录音棚档期冲突', emoji:'🎚️',
     desc:'约好的录音棚被大牌明星临时续约，要么换棚要么等着。',
     options:[
-      {label:'花钱换高级棚', desc:'多花点但效率高', coins:-15000, buffs:[{type:'train', value:1.15, days:3, label:'训练效果×1.15'}], player:+1},
-      {label:'硬扛等空档', desc:'进度拖慢', buffs:[{type:'train', value:0.85, days:3, label:'训练效果×0.85'}], skill:-1, player:-3},
+      {label:'花钱换高级棚', desc:'多花点但效率高', coins:-15000, buffs:[{type:'train', value:1.5, days:4, label:'训练效果×1.5'}], player:+1},
+      {label:'硬扛等空档', desc:'进度拖慢', buffs:[{type:'train', value:0.5, days:2, label:'训练效果×0.5'}], skill:-1, player:-3},
       {label:'改期录制', desc:'档期全乱', coins:-10000, stamina:-5, player:-2}
     ]
   },
@@ -1628,7 +1665,7 @@ const CHOICE_EVENTS = [
     title:'低价商单找上门', emoji:'🏷️',
     desc:'一个口碑不太好的品牌想低价请团体带货，钱不少但可能伤名声。',
     options:[
-      {label:'接单，钱先赚了', desc:'透支口碑', coins:+20000, buffs:[{type:'income', value:0.9, days:3, label:'演出赚钱×0.9'}], fans:-8000, player:-4},
+      {label:'接单，钱先赚了', desc:'透支口碑', coins:+20000, buffs:[{type:'income', value:0.7, days:3, label:'演出赚钱×0.7'}], fans:-8000, player:-4},
       {label:'婉拒', desc:'保名声', player:+3},
       {label:'要求加价才接', desc:'赌品牌方急用',
         outcomes:[
@@ -1641,144 +1678,144 @@ const CHOICE_EVENTS = [
     title:'代言物料拍摄改期', emoji:'📅',
     desc:'品牌方临时把广告拍摄提前了两天，打乱了整周排练计划。',
     options:[
-      {label:'协调补拍，加钱保档', desc:'花钱买顺', coins:-10000, buffs:[{type:'income', value:1.15, days:3, label:'演出赚钱×1.15'}], player:+2},
-      {label:'硬挤出时间去拍', desc:'两边硬撑', stamina:-8, buffs:[{type:'cost', value:1.1, days:2, label:'活动成本×1.1'}], player:-2},
-      {label:'拒绝改期', desc:'守住原计划', buffs:[{type:'train', value:1.1, days:2, label:'训练效果×1.1'}], player:-1}
+      {label:'协调补拍，加钱保档', desc:'花钱买顺', coins:-10000, buffs:[{type:'income', value:1.5, days:3, label:'演出赚钱×1.5'}], player:+2},
+      {label:'硬挤出时间去拍', desc:'两边硬撑', stamina:-8, buffs:[{type:'cost', value:1.3, days:3, label:'活动成本×1.3'}], player:-2},
+      {label:'拒绝改期', desc:'守住原计划', buffs:[{type:'train', value:1.5, days:4, label:'训练效果×1.5'}], player:-1}
     ]
   },
   {
     title:'音乐节电子票平台崩了', emoji:'📱',
     desc:'音乐节开票瞬间售票平台全线崩溃，粉丝抢不到票在超话炸锅。',
     options:[
-      {label:'官方补偿延期购票', desc:'安抚粉丝', coins:-8000, buffs:[{type:'fans', value:1.15, days:3, label:'涨粉×1.15'}], player:+3},
-      {label:'等平台自己修复', desc:'被动挨骂', buffs:[{type:'income', value:0.9, days:2, label:'演出赚钱×0.9'}], fans:-5000, player:-3},
-      {label:'联合平台发声明', desc:'甩锅给平台', coins:-5000, buffs:[{type:'fans', value:1.05, days:2, label:'涨粉×1.05'}], player:-1}
+      {label:'官方补偿延期购票', desc:'安抚粉丝', coins:-8000, buffs:[{type:'fans', value:1.5, days:3, label:'涨粉×1.5'}], player:+3},
+      {label:'等平台自己修复', desc:'被动挨骂', buffs:[{type:'income', value:0.7, days:3, label:'演出赚钱×0.7'}], fans:-5000, player:-3},
+      {label:'联合平台发声明', desc:'甩锅给平台', coins:-5000, buffs:[{type:'fans', value:1.5, days:3, label:'涨粉×1.5'}], player:-1}
     ]
   },
   {
     title:'新专预告片爆火', emoji:'🎬',
     desc:'新专辑预告片发布三小时播放量破千万，全网都在讨论。',
     options:[
-      {label:'趁热追加宣发物料', desc:'接住这波流量', coins:-12000, buffs:[{type:'fans', value:1.2, days:3, label:'涨粉×1.2'}], player:+4},
-      {label:'追加一支拍摄花絮', desc:'低成本加料', coins:-5000, buffs:[{type:'fans', value:1.1, days:2, label:'涨粉×1.1'}], player:+2},
-      {label:'保持神秘不营业', desc:'吊胃口', buffs:[{type:'fans', value:0.9, days:2, label:'涨粉×0.9'}], player:-2}
+      {label:'趁热追加宣发物料', desc:'接住这波流量', coins:-12000, buffs:[{type:'fans', value:1.8, days:2, label:'涨粉×1.8'}], player:+4},
+      {label:'追加一支拍摄花絮', desc:'低成本加料', coins:-5000, buffs:[{type:'fans', value:1.5, days:3, label:'涨粉×1.5'}], player:+2},
+      {label:'保持神秘不营业', desc:'吊胃口', buffs:[{type:'fans', value:0.7, days:3, label:'涨粉×0.7'}], player:-2}
     ]
   },
   {
     title:'成员口播说错季节', emoji:'🗣️',
     desc:'推广口播里成员把"春季限定"说成了"冬季限定"，弹幕一片问号。',
     options:[
-      {label:'重录补拍', desc:'花小钱保口碑', coins:-6000, buffs:[{type:'income', value:1.1, days:2, label:'演出赚钱×1.1'}], player:+3},
-      {label:'自嘲玩梗回应', desc:'把失误变梗', buffs:[{type:'fans', value:1.1, days:2, label:'涨粉×1.1'}], player:+2},
-      {label:'冷处理', desc:'等热度过去', buffs:[{type:'income', value:0.9, days:2, label:'演出赚钱×0.9'}], player:-3}
+      {label:'重录补拍', desc:'花小钱保口碑', coins:-6000, buffs:[{type:'income', value:1.5, days:3, label:'演出赚钱×1.5'}], player:+3},
+      {label:'自嘲玩梗回应', desc:'把失误变梗', buffs:[{type:'fans', value:1.5, days:3, label:'涨粉×1.5'}], player:+2},
+      {label:'冷处理', desc:'等热度过去', buffs:[{type:'income', value:0.7, days:3, label:'演出赚钱×0.7'}], player:-3}
     ]
   },
   {
     title:'品牌方追加年度合作', emoji:'🤝',
     desc:'合作品牌对销量非常满意，提出追加一整年的深度合作。',
     options:[
-      {label:'签下年度长约', desc:'绑定长期收入', coins:+30000, buffs:[{type:'income', value:1.15, days:4, label:'演出赚钱×1.15'}], player:+4},
-      {label:'只接季度合作', desc:'留足自由度', coins:+15000, buffs:[{type:'income', value:1.08, days:2, label:'演出赚钱×1.08'}], player:+2},
-      {label:'婉拒，专注内容', desc:'不接商单', buffs:[{type:'train', value:1.15, days:3, label:'训练效果×1.15'}], player:+1}
+      {label:'签下年度长约', desc:'绑定长期收入', coins:+30000, buffs:[{type:'income', value:1.5, days:3, label:'演出赚钱×1.5'}], player:+4},
+      {label:'只接季度合作', desc:'留足自由度', coins:+15000, buffs:[{type:'income', value:1.5, days:3, label:'演出赚钱×1.5'}], player:+2},
+      {label:'婉拒，专注内容', desc:'不接商单', buffs:[{type:'train', value:1.5, days:4, label:'训练效果×1.5'}], player:+1}
     ]
   },
   {
     title:'排练时间被场馆压缩', emoji:'⏱️',
     desc:'场馆档期被更贵的演出抢走一半，排练时间只剩原来的一半。',
     options:[
-      {label:'加钱延租排练时间', desc:'花钱买时间', coins:-12000, buffs:[{type:'train', value:1.15, days:3, label:'训练效果×1.15'}], player:+2},
-      {label:'精简排练内容', desc:'挑重点练', buffs:[{type:'train', value:0.9, days:2, label:'训练效果×0.9'}], player:-2},
-      {label:'换到早间低价时段', desc:'早起苦练', stamina:-8, buffs:[{type:'train', value:1.08, days:2, label:'训练效果×1.08'}], player:+1}
+      {label:'加钱延租排练时间', desc:'花钱买时间', coins:-12000, buffs:[{type:'train', value:1.5, days:4, label:'训练效果×1.5'}], player:+2},
+      {label:'精简排练内容', desc:'挑重点练', buffs:[{type:'train', value:0.6, days:3, label:'训练效果×0.6'}], player:-2},
+      {label:'换到早间低价时段', desc:'早起苦练', stamina:-8, buffs:[{type:'train', value:1.5, days:4, label:'训练效果×1.5'}], player:+1}
     ]
   },
   {
     title:'师兄团邀约合体舞台', emoji:'🎤',
     desc:'人气师兄团主动邀约合体舞台，曝光巨大但要求配合排练。',
     options:[
-      {label:'接下合体舞台', desc:'借师兄的流量', buffs:[{type:'fans', value:1.2, days:3, label:'涨粉×1.2'}], stamina:-6, player:+3},
-      {label:'谈分成再合作', desc:'条件谈清楚', coins:+20000, buffs:[{type:'income', value:1.1, days:2, label:'演出赚钱×1.1'}], player:+2},
-      {label:'婉拒', desc:'专注自身', buffs:[{type:'train', value:1.1, days:2, label:'训练效果×1.1'}], player:-1}
+      {label:'接下合体舞台', desc:'借师兄的流量', buffs:[{type:'fans', value:1.8, days:2, label:'涨粉×1.8'}], stamina:-6, player:+3},
+      {label:'谈分成再合作', desc:'条件谈清楚', coins:+20000, buffs:[{type:'income', value:1.5, days:3, label:'演出赚钱×1.5'}], player:+2},
+      {label:'婉拒', desc:'专注自身', buffs:[{type:'train', value:1.5, days:4, label:'训练效果×1.5'}], player:-1}
     ]
   },
   {
     title:'舞担旧伤复发', emoji:'🩹',
     desc:'舞蹈担当旧伤复发，医生建议要么手术要么长期保守治疗。',
     options:[
-      {label:'手术彻底治疗', desc:'长痛不如短痛', coins:-20000, buffs:[{type:'train', value:1.2, days:4, label:'训练效果×1.2'}], stamina:-4, player:+5},
-      {label:'保守治疗', desc:'边治边练', buffs:[{type:'train', value:0.92, days:3, label:'训练效果×0.92'}], coins:-8000, player:+2},
-      {label:'硬扛着继续跳', desc:'风险很大', stamina:-12, buffs:[{type:'train', value:0.85, days:2, label:'训练效果×0.85'}], player:-5}
+      {label:'手术彻底治疗', desc:'长痛不如短痛', coins:-20000, buffs:[{type:'train', value:2, days:3, label:'训练效果×2'}], stamina:-4, player:+5},
+      {label:'保守治疗', desc:'边治边练', buffs:[{type:'train', value:0.6, days:3, label:'训练效果×0.6'}], coins:-8000, player:+2},
+      {label:'硬扛着继续跳', desc:'风险很大', stamina:-12, buffs:[{type:'train', value:0.5, days:2, label:'训练效果×0.5'}], player:-5}
     ]
   },
   {
     title:'海外打歌节目邀约', emoji:'🌏',
     desc:'海外一线打歌节目发来邀约，国际化曝光的机会。',
     options:[
-      {label:'全团赴海外打歌', desc:'国际舞台', coins:-15000, buffs:[{type:'fans', value:1.2, days:4, label:'涨粉×1.2'}], stamina:-6, player:+4},
-      {label:'只谈线上合作', desc:'成本可控', coins:+10000, buffs:[{type:'income', value:1.1, days:2, label:'演出赚钱×1.1'}], player:+1},
-      {label:'拒绝，专心国内', desc:'保守', buffs:[{type:'fans', value:0.92, days:2, label:'涨粉×0.92'}], player:-2}
+      {label:'全团赴海外打歌', desc:'国际舞台', coins:-15000, buffs:[{type:'fans', value:1.8, days:2, label:'涨粉×1.8'}], stamina:-6, player:+4},
+      {label:'只谈线上合作', desc:'成本可控', coins:+10000, buffs:[{type:'income', value:1.5, days:3, label:'演出赚钱×1.5'}], player:+1},
+      {label:'拒绝，专心国内', desc:'保守', buffs:[{type:'fans', value:0.7, days:3, label:'涨粉×0.7'}], player:-2}
     ]
   },
   {
     title:'机场VIP通道谈崩', emoji:'✈️',
     desc:'机场 VIP 通道续费谈判破裂，下周行程要从普通通道走。',
     options:[
-      {label:'加钱续VIP通道', desc:'花钱买清净', coins:-8000, buffs:[{type:'rest', value:1.15, days:3, label:'休息效果×1.15'}], player:+2},
-      {label:'走普通通道', desc:'被围堵又累', stamina:-6, buffs:[{type:'rest', value:0.9, days:2, label:'休息效果×0.9'}], player:-2},
-      {label:'找合作方分摊费用', desc:'拉赞助', coins:-3000, buffs:[{type:'rest', value:1.08, days:2, label:'休息效果×1.08'}], player:+1}
+      {label:'加钱续VIP通道', desc:'花钱买清净', coins:-8000, buffs:[{type:'rest', value:1.4, days:3, label:'休息效果×1.4'}], player:+2},
+      {label:'走普通通道', desc:'被围堵又累', stamina:-6, buffs:[{type:'rest', value:0.7, days:3, label:'休息效果×0.7'}], player:-2},
+      {label:'找合作方分摊费用', desc:'拉赞助', coins:-3000, buffs:[{type:'rest', value:1.4, days:3, label:'休息效果×1.4'}], player:+1}
     ]
   },
   {
     title:'粉丝自发放映会', emoji:'🎞️',
     desc:'粉丝自发组织线下观影会庆祝团体出道周年，规模还不小。',
     options:[
-      {label:'官方认领并赞助场地', desc:'花小钱办大事', coins:-8000, buffs:[{type:'fans', value:1.15, days:3, label:'涨粉×1.15'}], player:+4},
-      {label:'转发感谢粉丝', desc:'低成本示好', buffs:[{type:'fans', value:1.08, days:2, label:'涨粉×1.08'}], player:+2},
-      {label:'不回应', desc:'寒了粉丝的心', buffs:[{type:'fans', value:0.9, days:2, label:'涨粉×0.9'}], player:-3}
+      {label:'官方认领并赞助场地', desc:'花小钱办大事', coins:-8000, buffs:[{type:'fans', value:1.5, days:3, label:'涨粉×1.5'}], player:+4},
+      {label:'转发感谢粉丝', desc:'低成本示好', buffs:[{type:'fans', value:1.5, days:3, label:'涨粉×1.5'}], player:+2},
+      {label:'不回应', desc:'寒了粉丝的心', buffs:[{type:'fans', value:0.7, days:3, label:'涨粉×0.7'}], player:-3}
     ]
   },
   {
     title:'摄影师临时罢拍', emoji:'📸',
     desc:'约好的封面摄影师因档期纠纷临时罢拍，明天就要拍摄。',
     options:[
-      {label:'加钱安抚摄影师', desc:'破财消灾', coins:-10000, buffs:[{type:'income', value:1.1, days:2, label:'演出赚钱×1.1'}], player:+2},
-      {label:'紧急换摄影师', desc:'风格要重调', coins:-5000, buffs:[{type:'income', value:0.92, days:2, label:'演出赚钱×0.92'}], player:-1},
-      {label:'改期拍摄', desc:'拖延节奏', stamina:-4, buffs:[{type:'cost', value:1.1, days:2, label:'活动成本×1.1'}], player:-2}
+      {label:'加钱安抚摄影师', desc:'破财消灾', coins:-10000, buffs:[{type:'income', value:1.5, days:3, label:'演出赚钱×1.5'}], player:+2},
+      {label:'紧急换摄影师', desc:'风格要重调', coins:-5000, buffs:[{type:'income', value:0.7, days:3, label:'演出赚钱×0.7'}], player:-1},
+      {label:'改期拍摄', desc:'拖延节奏', stamina:-4, buffs:[{type:'cost', value:1.3, days:3, label:'活动成本×1.3'}], player:-2}
     ]
   },
   {
     title:'自制团综招商成功', emoji:'📺',
     desc:'自制团综方案打动了大赞助商，冠名费比预期高出一截。',
     options:[
-      {label:'扩大制作规模', desc:'钱都投回去', coins:-15000, buffs:[{type:'income', value:1.15, days:3, label:'演出赚钱×1.15'},{type:'fans', value:1.1, days:3, label:'涨粉×1.1'}], player:+4},
-      {label:'稳扎稳打拍完', desc:'落袋为安', coins:+30000, buffs:[{type:'fans', value:1.1, days:2, label:'涨粉×1.1'}], player:+2},
-      {label:'推迟到下一季', desc:'时机不等人', buffs:[{type:'income', value:0.9, days:2, label:'演出赚钱×0.9'}], player:-3}
+      {label:'扩大制作规模', desc:'钱都投回去', coins:-15000, buffs:[{type:'income', value:1.5, days:3, label:'演出赚钱×1.5'},{type:'fans', value:1.5, days:3, label:'涨粉×1.5'}], player:+4},
+      {label:'稳扎稳打拍完', desc:'落袋为安', coins:+30000, buffs:[{type:'fans', value:1.5, days:3, label:'涨粉×1.5'}], player:+2},
+      {label:'推迟到下一季', desc:'时机不等人', buffs:[{type:'income', value:0.7, days:3, label:'演出赚钱×0.7'}], player:-3}
     ]
   },
   {
     title:'金牌录音师被挖走', emoji:'🎚️',
     desc:'合作多年的金牌录音师被对家高薪挖走，新歌录制陷入僵局。',
     options:[
-      {label:'高价把人留回来', desc:'舍不得人才', coins:-20000, buffs:[{type:'train', value:1.15, days:3, label:'训练效果×1.15'}], player:+3},
-      {label:'启用新人录音师', desc:'给新人机会', buffs:[{type:'train', value:0.92, days:3, label:'训练效果×0.92'}], player:+1},
-      {label:'借设备自己录', desc:'省钱但费劲', coins:-5000, buffs:[{type:'train', value:1.08, days:2, label:'训练效果×1.08'}], stamina:-4, player:+1}
+      {label:'高价把人留回来', desc:'舍不得人才', coins:-20000, buffs:[{type:'train', value:1.5, days:4, label:'训练效果×1.5'}], player:+3},
+      {label:'启用新人录音师', desc:'给新人机会', buffs:[{type:'train', value:0.6, days:3, label:'训练效果×0.6'}], player:+1},
+      {label:'借设备自己录', desc:'省钱但费劲', coins:-5000, buffs:[{type:'train', value:1.5, days:4, label:'训练效果×1.5'}], stamina:-4, player:+1}
     ]
   },
   {
     title:'盲盒联名大卖', emoji:'🎁',
     desc:'与潮玩品牌的盲盒联名上线即售罄，二手市场溢价三倍。',
     options:[
-      {label:'加急补货再赚一波', desc:'趁热打铁', coins:+40000, buffs:[{type:'fans', value:1.1, days:2, label:'涨粉×1.1'}], player:+3},
+      {label:'加急补货再赚一波', desc:'趁热打铁', coins:+40000, buffs:[{type:'fans', value:1.5, days:3, label:'涨粉×1.5'}], player:+3},
       {label:'限量不补，保值炒作', desc:'饥饿营销', coins:+30000, fans:-3000, player:+2},
-      {label:'不加货不宣传', desc:'佛系运营', buffs:[{type:'income', value:0.95, days:2, label:'演出赚钱×0.95'}], player:-2}
+      {label:'不加货不宣传', desc:'佛系运营', buffs:[{type:'income', value:0.7, days:3, label:'演出赚钱×0.7'}], player:-2}
     ]
   },
   {
     title:'化妆师集体请辞', emoji:'💄',
     desc:'化妆团队因为加班太多集体递辞呈，明天还有红毯活动。',
     options:[
-      {label:'涨薪+加人手挽留', desc:'花钱保团队', coins:-15000, buffs:[{type:'rest', value:1.12, days:3, label:'休息效果×1.12'}], player:+3},
-      {label:'临时外包化妆', desc:'风格不稳', buffs:[{type:'rest', value:0.9, days:2, label:'休息效果×0.9'}], mood:-4, player:-2},
-      {label:'成员自己化妆', desc:'硬着头皮上', stamina:-6, buffs:[{type:'rest', value:0.85, days:2, label:'休息效果×0.85'}], player:-3}
+      {label:'涨薪+加人手挽留', desc:'花钱保团队', coins:-15000, buffs:[{type:'rest', value:1.4, days:3, label:'休息效果×1.4'}], player:+3},
+      {label:'临时外包化妆', desc:'风格不稳', buffs:[{type:'rest', value:0.7, days:3, label:'休息效果×0.7'}], mood:-4, player:-2},
+      {label:'成员自己化妆', desc:'硬着头皮上', stamina:-6, buffs:[{type:'rest', value:0.6, days:2, label:'休息效果×0.6'}], player:-3}
     ]
   },
   {
@@ -1786,7 +1823,7 @@ const CHOICE_EVENTS = [
     desc:'大型慈善晚会邀约义演，没有出场费但全网直播。',
     options:[
       {label:'免费义演', desc:'口碑拉满', fame:+4, stamina:-4, player:+5},
-      {label:'带新歌首唱参演', desc:'既公益又宣传', fame:+3, buffs:[{type:'fans', value:1.1, days:2, label:'涨粉×1.1'}], player:+4},
+      {label:'带新歌首唱参演', desc:'既公益又宣传', fame:+3, buffs:[{type:'fans', value:1.5, days:3, label:'涨粉×1.5'}], player:+4},
       {label:'婉拒', desc:'错失口碑', fame:-2, player:-2}
     ]
   },
@@ -1794,27 +1831,129 @@ const CHOICE_EVENTS = [
     title:'周边被仿冒', emoji:'🧸',
     desc:'市面上出现大量仿冒周边，质量粗糙还印着团名，粉丝误购后差评。',
     options:[
-      {label:'起诉+官方声明', desc:'维权到底', coins:-15000, buffs:[{type:'income', value:1.12, days:3, label:'演出赚钱×1.12'}], player:+3},
-      {label:'官方辟谣+辨别指南', desc:'低成本止损', coins:-5000, buffs:[{type:'fans', value:1.08, days:2, label:'涨粉×1.08'}], player:+2},
-      {label:'不管', desc:'差评继续发酵', buffs:[{type:'income', value:0.9, days:2, label:'演出赚钱×0.9'}], fans:-3000, player:-3}
+      {label:'起诉+官方声明', desc:'维权到底', coins:-15000, buffs:[{type:'income', value:1.5, days:3, label:'演出赚钱×1.5'}], player:+3},
+      {label:'官方辟谣+辨别指南', desc:'低成本止损', coins:-5000, buffs:[{type:'fans', value:1.5, days:3, label:'涨粉×1.5'}], player:+2},
+      {label:'不管', desc:'差评继续发酵', buffs:[{type:'income', value:0.7, days:3, label:'演出赚钱×0.7'}], fans:-3000, player:-3}
     ]
   },
   {
     title:'制作团队获国际大奖', emoji:'🏆',
     desc:'幕后制作团队凭借一支 MV 拿下国际视觉大奖，全网刷屏。',
     options:[
-      {label:'借势宣传制作实力', desc:'把荣誉变现', coins:-8000, buffs:[{type:'train', value:1.12, days:3, label:'训练效果×1.12'},{type:'fans', value:1.1, days:2, label:'涨粉×1.1'}], player:+4},
-      {label:'内部庆功', desc:'犒劳团队', coins:-10000, buffs:[{type:'train', value:1.08, days:2, label:'训练效果×1.08'}], mood:+5, player:+3},
-      {label:'低调处理', desc:'错过宣传窗口', buffs:[{type:'fans', value:0.95, days:2, label:'涨粉×0.95'}], player:-2}
+      {label:'借势宣传制作实力', desc:'把荣誉变现', coins:-8000, buffs:[{type:'train', value:1.5, days:4, label:'训练效果×1.5'},{type:'fans', value:1.5, days:3, label:'涨粉×1.5'}], player:+4},
+      {label:'内部庆功', desc:'犒劳团队', coins:-10000, buffs:[{type:'train', value:1.5, days:4, label:'训练效果×1.5'}], mood:+5, player:+3},
+      {label:'低调处理', desc:'错过宣传窗口', buffs:[{type:'fans', value:0.7, days:3, label:'涨粉×0.7'}], player:-2}
     ]
   },
   {
     title:'公司服务器被黑', emoji:'🖥️',
     desc:'官网凌晨遭黑客攻击，会员数据页面全部打不开，粉丝急了。',
     options:[
-      {label:'紧急修复+加强防护', desc:'花钱保安全', coins:-12000, buffs:[{type:'income', value:1.1, days:2, label:'演出赚钱×1.1'}], player:+3},
-      {label:'报案+备份恢复', desc:'按流程走', coins:-5000, buffs:[{type:'income', value:1.05, days:2, label:'演出赚钱×1.05'}], player:+1},
-      {label:'拖延修复', desc:'粉丝持续流失', buffs:[{type:'fans', value:0.88, days:2, label:'涨粉×0.88'}], player:-4}
+      {label:'紧急修复+加强防护', desc:'花钱保安全', coins:-12000, buffs:[{type:'income', value:1.5, days:3, label:'演出赚钱×1.5'}], player:+3},
+      {label:'报案+备份恢复', desc:'按流程走', coins:-5000, buffs:[{type:'income', value:1.5, days:3, label:'演出赚钱×1.5'}], player:+1},
+      {label:'拖延修复', desc:'粉丝持续流失', buffs:[{type:'fans', value:0.6, days:2, label:'涨粉×0.6'}], player:-4}
+    ]
+  },
+  {
+    title:'资本家的糖果陷阱', emoji:'🍬',
+    desc:'一位神秘投资人愿意一次性注资一大笔钱，条件是接下来几天的全部收益都要分他三成。贪还是不贪？',
+    options:[
+      {label:'签，先拿到钱再说', desc:'巨额现金，但收益大降', coins:+80000, buffs:[{type:'income', value:0.6, days:5, label:'演出赚钱×0.6'}], player:-2},
+      {label:'签，但要砍分成', desc:'少要点钱换小分成', coins:+30000, buffs:[{type:'income', value:0.7, days:3, label:'演出赚钱×0.7'}], player:+1},
+      {label:'婉拒', desc:'不贪这点钱', fame:+2, player:+3}
+    ]
+  },
+  {
+    title:'两面派的广告商', emoji:'🤡',
+    desc:'一家广告商给出诱人的演出赚钱加成，但要求你们同时接另一个低俗代言，可能败坏路人缘。',
+    options:[
+      {label:'双代言都接', desc:'钱多但掉粉', buffs:[{type:'income', value:2.0, days:2, label:'演出赚钱×2.0'}], fans:-15000, player:-2},
+      {label:'只接高端代言', desc:'保口碑', buffs:[{type:'income', value:1.5, days:3, label:'演出赚钱×1.5'}], player:+2},
+      {label:'都不接', desc:'清净', fame:+1, player:+1}
+    ]
+  },
+  {
+    title:'训练营魔鬼教官', emoji:'🥋',
+    desc:'一位退役传奇舞者空降当临时教官，训练效果惊人，但他脾气暴躁，成员情绪容易崩溃。',
+    options:[
+      {label:'全程跟练', desc:'实力暴涨但心情暴跌', buffs:[{type:'train', value:3.0, days:2, label:'训练效果×3.0'}], mood:-12, player:+2},
+      {label:'只上半天课', desc:'平衡', buffs:[{type:'train', value:2.0, days:3, label:'训练效果×2.0'}], mood:-5, player:+3},
+      {label:'婉拒魔鬼训练', desc:'怕成员受不了', stamina:+5, player:-1}
+    ]
+  },
+  {
+    title:'粉丝站姐内斗风波', emoji:'⚔️',
+    desc:'两个大粉应援站为争夺组织权吵翻天，放话要带走一半粉丝，除非官方出面调解。',
+    options:[
+      {label:'官方直播调解', desc:'花钱布置场地，化解矛盾', coins:-20000, buffs:[{type:'fans', value:2.2, days:2, label:'涨粉×2.2'}], player:+4},
+      {label:'发联合公告降温', desc:'低成本', buffs:[{type:'fans', value:1.5, days:3, label:'涨粉×1.5'}], player:+1},
+      {label:'不插手', desc:'任其发展', buffs:[{type:'fans', value:0.6, days:2, label:'涨粉×0.6'}], player:-4}
+    ]
+  },
+  {
+    title:'神秘的夜班通告', emoji:'🌙',
+    desc:'一个凌晨两点的神秘通告，报酬极其丰厚，但极伤身体，而且谁去谁倒霉。',
+    options:[
+      {label:'全团硬上', desc:'赚大钱，全员累瘫', coins:+50000, stamina:-25, mood:-15, player:-3},
+      {label:'只派体力最好的 3 人', desc:'折中', coins:+20000, stamina:-12, mood:-6, player:+1},
+      {label:'拒绝', desc:'好好睡觉', buffs:[{type:'rest', value:2.0, days:2, label:'休息效果×2.0'}], player:+2}
+    ]
+  },
+  {
+    title:'代言的暗雷条款', emoji:'💣',
+    desc:'合同里藏着一条"若成员人气下降需双倍赔偿"的条款，签字前你发现了它。',
+    options:[
+      {label:'重新谈判删掉条款', desc:'费时但安全', coins:-10000, buffs:[{type:'income', value:1.5, days:3, label:'演出赚钱×1.5'}], player:+3},
+      {label:'赌人气不会跌', desc:'风险自担', coins:+40000, buffs:[{type:'income', value:1.8, days:2, label:'演出赚钱×1.8'}], player:-3},
+      {label:'不签了', desc:'稳妥放弃', player:+1}
+    ]
+  },
+  {
+    title:'双刃剑的整容传闻', emoji:'🔪',
+    desc:'有营销号造谣成员整容，若强硬回怼会让事件发酵，若沉默则任人说三道四，两难。',
+    options:[
+      {label:'发律师函强硬辟谣', desc:'杀鸡儆猴', coins:-15000, buffs:[{type:'fans', value:1.5, days:3, label:'涨粉×1.5'}], player:+2},
+      {label:'晒体检报告自证', desc:'用证据说话', coins:-8000, buffs:[{type:'train', value:2.0, days:3, label:'训练效果×2.0'}], player:+3},
+      {label:'冷处理', desc:'任其发酵', buffs:[{type:'fans', value:0.6, days:2, label:'涨粉×0.6'}], player:-4}
+    ]
+  },
+  {
+    title:'高回报的夜场演出', emoji:'🌃',
+    desc:'一家顶级夜店开出天价请全员演出，但环境和口碑风险都不小，且收益和风险挂钩。',
+    options:[
+      {label:'接下豪赌', desc:'高风险高回报',
+        outcomes:[
+          {label:'观众爆满，大赚', coins:+60000, buffs:[{type:'fans', value:1.5, days:3, label:'涨粉×1.5'}], player:+4},
+          {label:'被指掉价，口碑受损', fans:-20000, buffs:[{type:'fans', value:0.6, days:2, label:'涨粉×0.6'}], player:-4}
+        ]},
+      {label:'只演半场降风险', desc:'稳健', coins:+15000, fame:+2, player:+1}
+    ]
+  },
+  {
+    title:'慈善晚会的陷阱', emoji:'🎗️',
+    desc:'慈善晚会邀约义演，但主办方希望你们"自愿"捐出三成收入，粉丝会盯着你们怎么选。',
+    options:[
+      {label:'义演并捐款', desc:'口碑拉满但破财', coins:-25000, buffs:[{type:'fans', value:2.0, days:2, label:'涨粉×2.0'}], player:+4},
+      {label:'只义演不捐款', desc:'省钱', buffs:[{type:'fans', value:1.5, days:3, label:'涨粉×1.5'}], player:0},
+      {label:'借机宣传新歌', desc:'口碑＋曝光', coins:-15000, buffs:[{type:'income', value:1.5, days:3, label:'演出赚钱×1.5'}], player:+2}
+    ]
+  },
+  {
+    title:'训练室的魔咒', emoji:'🔮',
+    desc:'有成员迷信训练室某个角落"风水不好"，最近训练总出岔子，你该怎么安抚？',
+    options:[
+      {label:'安排重新布置', desc:'花小钱换心安', coins:-8000, buffs:[{type:'train', value:1.5, days:4, label:'训练效果×1.5'}], player:+3},
+      {label:'请大师开光', desc:'心理安慰', coins:-20000, buffs:[{type:'train', value:3.0, days:2, label:'训练效果×3.0'}], player:-1},
+      {label:'斥责迷信', desc:'硬刚迷信', mood:-8, stamina:-5, player:-3}
+    ]
+  },
+  {
+    title:'迟到的超长假期', emoji:'🏝️',
+    desc:'一个被遗忘的法定年假突然兑现，7 名成员要么集体放假，要么折现成钱，你看着办。',
+    options:[
+      {label:'集体放假 3 天', desc:'身心俱疲需充电', stamina:+30, buffs:[{type:'rest', value:2.0, days:2, label:'休息效果×2.0'}], player:+4},
+      {label:'折现成奖金', desc:'钱落袋', coins:+40000, buffs:[{type:'income', value:1.5, days:3, label:'演出赚钱×1.5'}], player:+1},
+      {label:'取消假期拼命工作', desc:'榨干员工', stamina:-20, buffs:[{type:'income', value:2.0, days:2, label:'演出赚钱×2.0'}], mood:-10, player:-5}
     ]
   }
 ];
@@ -2066,6 +2205,57 @@ function burstConfetti(n=55){
     document.body.appendChild(c);
     setTimeout(()=>c.remove(),3600);
   }
+}
+function shatterFX(){
+  /* v1.1.0：事件结果「吃子」粒子散射特效（参照花样下棋 FX.burst ring 粒子，金色小粒子以不同速度向四周散射，不带文字） */
+  try{
+    const c = document.createElement('canvas');
+    c.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:360;';
+    c.width = window.innerWidth||document.documentElement.clientWidth;
+    c.height = window.innerHeight||document.documentElement.clientHeight;
+    document.body.appendChild(c);
+    const ctx = c.getContext('2d');
+    const W = c.width, H = c.height;
+    const cx = W/2, cy = H*0.4;
+    /* 吃子特效：多层 ring 粒子，各自不同速度散开 + 阻尼 + 由大变小，无重力 */
+    const layers = [
+      { count:36, color:[244,224,176], spd:5.0, spdVar:1.4, life:3.5, size:20, sizeEnd:5 },
+      { count:24, color:[231,201,110], spd:4.5, spdVar:1.2, life:4.0, size:24, sizeEnd:6 },
+      { count:14, color:[255,246,226], spd:4.8, spdVar:1.5, life:3.8, size:16, sizeEnd:4 }
+    ];
+    const parts = [];
+    layers.forEach(ly=>{
+      for(let i=0;i<ly.count;i++){
+        const ang = Math.random()*Math.PI*2;
+        const spd = (ly.spd + (Math.random()-0.5)*2*ly.spdVar) * 46;   // 像素/帧；不同速度散射
+        const totalLife = ly.life;
+        parts.push({ x:cx, y:cy, vx:Math.cos(ang)*spd, vy:Math.sin(ang)*spd, life:totalLife, maxLife:totalLife, size:ly.size, sizeEnd:ly.sizeEnd, color:ly.color, drag:0.985 });
+      }
+    });
+    const t0 = performance.now();
+    function frame(t){
+      const dt = Math.min(0.05, (t-t0)/1000);
+      ctx.clearRect(0,0,W,H);
+      for(let i=parts.length-1;i>=0;i--){
+        const p = parts[i];
+        p.life -= dt;
+        if(p.life<=0){ parts.splice(i,1); continue; }
+        p.vx *= Math.pow(p.drag, dt*60); p.vy *= Math.pow(p.drag, dt*60);
+        p.x += p.vx*dt; p.y += p.vy*dt;
+        const k = p.life/p.maxLife;
+        const r = p.sizeEnd + (p.size-p.sizeEnd)*k;
+        ctx.globalAlpha = Math.min(1, k*1.6);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, Math.max(0.5, r), 0, Math.PI*2);
+        ctx.fillStyle = 'rgba('+p.color[0]+','+p.color[1]+','+p.color[2]+',0.9)';
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      if(parts.length) requestAnimationFrame(frame);
+      else setTimeout(()=>c.remove(), 50);
+    }
+    requestAnimationFrame(frame);
+  }catch(e){}
 }
 function showExecToast(txt){
   const d=document.createElement('div');
@@ -2644,10 +2834,13 @@ function executeDay(){
     const n = slot.members.length;
     const cost = actCostNow(act)*n;
     if(state.coins < cost){
+      /* v1.1.0：自动借款遵守 2万/5万/10万 档位——按缺口向上取整到最小能覆盖的档位 */
       const need = cost - state.coins + 500;
-      state.coins = 0; state.debt += need;
+      const TIERS = [20000, 50000, 100000];
+      const loan = TIERS.find(t=>t>=need) || TIERS[TIERS.length-1];
+      state.coins = 0; state.debt += loan;
       if(state.loanDue==null) state.loanDue = state.day+5;
-      add(()=>addLog(`⚠️ 档期${si+1}资金不足，被迫续贷 ${fmtM(need)}！欠款 ${fmtM(state.debt)}（到期 D${state.loanDue}）`,'bad'),320);
+      add(()=>addLog(`⚠️ 档期${si+1}资金不足，被迫按档位续贷 ${fmtM(loan)}！欠款 ${fmtM(state.debt)}（到期 D${state.loanDue}）`,'bad'),320);
     }
     state.coins -= cost;
     add(()=>addLog(`${act.emoji} 档期${si+1} · ${act.name}（${n}人参演 · 支出 ${fmtM(cost)}）`,'normal'),360);
@@ -2758,7 +2951,7 @@ function executeDay(){
           addLog(`　${m.emoji} ${m.name}：${msg}${fatigueTxt} <span style="color:#8af">(🎯+${skillRec})</span>`, cls);
           floatText(`🎯+${skillRec}`, 'good');
         } else {
-          addLog(`　${m.emoji} ${m.name}：${msg}${fatigueTxt} <span style="color:#8af">(${income>=0?'+':''}${fmtM(income)} ${fansGain!==0?('·粉'+(fansGain>0?'+':'')+fmtN(fansGain)):''})</span>`, cls);
+          addLog(`　${m.emoji} ${m.name}：${msg}${fatigueTxt} <span style="color:#8af">(钱${income>=0?'+':''}${fmtM(income)} ${fansGain!==0?('·粉'+(fansGain>0?'+':'')+fmtN(fansGain)):''})</span>`, cls);
           floatText(`${m.emoji} ${income>=0?'+':''}${fmtM(income)}`, income>=0?'good':'bad');
         }
       },240);
@@ -2856,7 +3049,7 @@ function executeDay(){
   if(ruinReason){
     const rr = ruinReason;
     add(()=>{ hideExecToast(); state.executing=false; showRuin(rr.title, rr.sub, rr.txt); },200);
-  } else if(Math.random()<0.60 || state.noEvt>=3){   // v1.0.8：事件出现率提升至 60%（每 3 天保底）
+  } else if(Math.random()<0.60 || state.noEvt>=2){   // v1.1.0：连续 2 天没事件则第 3 天必出现
     add(()=>{ hideExecToast(); state.executing=false; renderAll(); openChoiceEvent(); },250);
   } else {
     add(()=>{ hideExecToast(); finalizeDay(); },250);
@@ -2978,7 +3171,7 @@ function showEventResult(ev, opt, out){
     ${lines}
     <button class="confirm" onclick="closeResult()">知道了</button>
   </div></div>`;
-  if(sum>0) burstConfetti(25);
+  if(sum>0){ burstConfetti(25); shatterFX(); }   // v1.1.0：正向事件结果播放玻璃碎裂特效
 }
 function closeResult(){
   state.eventOpen = false;
@@ -3056,7 +3249,7 @@ function showRuin(title, sub, txt){
     <div class="btnrow">
       <button class="restart" onclick="location.reload()">🔄 重新开始</button>
     </div>
-    <div class="vtag">时代少年团 · 经纪人模拟器　v1.0.10</div>
+    <div class="vtag">时代少年团 · 经纪人模拟器　v1.1.0</div>
   </div></div>`);
 }
 /* 保存战绩：把结算面板截图保存为图片 */
@@ -3186,7 +3379,7 @@ function showSettle(){
       <button class="restart" onclick="location.reload()">🔄 再运营一季</button>
       <button class="restart savebtn" onclick="saveRecord()">📸 保存我的战绩</button>
     </div>
-    <div class="vtag">时代少年团 · 经纪人模拟器　v1.0.10</div>
+    <div class="vtag">时代少年团 · 经纪人模拟器　v1.1.0</div>
   </div></div>`);
   burstConfetti(80);
   drawRadar('radarCv', [fameS/30, skillS/20, stateS/10, fanS/20, wealthS/20]);
@@ -3266,10 +3459,10 @@ function renderSaveBox(){
       <div>❤️ 最爱成员：<b>${favTxt}</b></div>
       <div>🔓 解锁事件：<b>${Object.keys(saveData.eventSeen).length} / ${CHOICE_EVENTS.length}</b></div>
     </div>
+    <div style="text-align:center;margin:10px 0"><button class="themebtn bigencyc" onclick="openEncyc()">📖 查看图鉴</button></div>
     <div class="hist-title">📜 最近 ${saveData.history.length} 局结算回顾（点击生成结算图）：</div>
     ${hist || '<div style="color:#667;font-size:12px">暂无结算记录</div>'}
     <div class="save-btns">
-      <button class="themebtn" onclick="openEncyc()">📖 查看图鉴</button>
       <button class="themebtn" onclick="exportCode()">📋 导出存档编号</button>
       <button class="themebtn" onclick="importCode()">📥 输入编号导入</button>
       <button class="themebtn" onclick="exportSave()">📤 导出存档文件</button>
@@ -3633,11 +3826,13 @@ function startGame(days, coins, mode){
   INVEST_ASSETS.forEach(a=>{ a.price = a.initPrice; a.prevPrice = a.initPrice; a.changePct = 0; });
   MEMBERS.forEach(m=>{
     m.stamina = 100; m.mood = 100; m.hospital = false; m.moodHit = false;
-    m.skill = clamp(m.baseSkill + (Math.floor(Math.random()*5)-2));            // 实力 -2 ~ +2
-    m.fame  = clamp(m.baseFame  + (Math.floor(Math.random()*3)-1));            // 名气 -1 ~ +1
-    m.fans  = Math.max(1000, Math.round(m.baseFans * (0.95 + Math.random()*0.10))); // 粉丝 95%~105%
+    /* v1.1.0：初始实力/名气显著随机，让每局开局都不一样 */
+    m.skill = clamp(m.baseSkill + (Math.floor(Math.random()*15)-7));            // 实力 -7 ~ +7
+    m.fame  = clamp(m.baseFame  + (Math.floor(Math.random()*11)-5));            // 名气 -5 ~ +5
+    m.fans  = Math.max(1000, Math.round(m.baseFans * (0.85 + Math.random()*0.30))); // 粉丝 85%~115%
   });
   const home = $('home'); if(home) home.remove();
+  document.body.classList.remove('on-home');   // v1.1.0：退出首页态，游戏界面恢复布局
   $('log').innerHTML='';
   addLog('🎉 欢迎成为时代少年团的经纪人！' ,'good');
   addLog(`📖 ${state.solo!=null?'单人特训·'+MEMBERS[state.solo].name+'：每天 '+state.slotCount+' 个档位':'每天 '+state.slotCount+' 个档期'}：选行动 → 选成员 → 加入流程图，排满后出现🔮预估面板`,'normal');
@@ -3722,7 +3917,7 @@ function renderTutorial(){
       </defs>
       <rect id="tutShade" x="0" y="0" width="100%" height="100%" fill="rgba(5,6,18,.6)" mask="url(#tutMask)"/>
     </svg>
-    <div class="tut-card">
+    <div class="tut-card" id="tutCard">
       <div class="tut-step">${t.icon} 第 ${tutStep+1} / ${TUT_STEPS.length} 步</div>
       <div class="tut-title">${t.title}</div>
       <div class="tut-body">${t.body}</div>
@@ -3782,12 +3977,14 @@ function locateTut(){
   if(shade) shade.setAttribute('fill', 'rgba(5,6,18,'+((t.shade!=null)?t.shade:0.6)+')');
   const svg = document.getElementById('tutSvg');
   if(svg){ const w = window.innerWidth||document.documentElement.clientWidth||0, h = window.innerHeight||document.documentElement.clientHeight||0; svg.setAttribute('width', w); svg.setAttribute('height', h); }
+  let firstRect = null;
   (t.targets||[]).forEach((sel, idx)=>{
     let el=null;
     try{ el = document.querySelector(sel); }catch(e){}
     if(!el) return;
     const r = el.getBoundingClientRect();
     if(!r.width && !r.height) return;
+    if(idx===0) firstRect = r;
     const pad = 6;
     const hole = document.createElementNS('http://www.w3.org/2000/svg','rect');
     hole.setAttribute('x', r.left-pad); hole.setAttribute('y', r.top-pad);
@@ -3808,6 +4005,19 @@ function locateTut(){
       root.appendChild(tip);
     }
   });
+  /* v1.1.0：教程卡片避让——目标在下方则卡片放顶部，目标在上方则卡片放底部，避免挡住要点按钮 */
+  const card = document.getElementById('tutCard');
+  if(card){
+    const vh = window.innerHeight||document.documentElement.clientHeight||800;
+    card.style.top = ''; card.style.bottom = '';
+    if(firstRect){
+      const mid = firstRect.top + firstRect.height/2;
+      if(mid > vh/2){ card.style.top = '12px'; card.style.bottom=''; }   // 目标在下半屏 → 卡片放顶部，不挡按钮
+      else { card.style.bottom = '12px'; card.style.top=''; }            // 目标在上半屏 → 卡片放底部
+    } else {
+      card.style.bottom = '12px';
+    }
+  }
 }
 /* 存档游戏次数为 0（从未完成过一局）时，自动弹出新手教程 */
 if(saveData.count===0) showTutorial();
